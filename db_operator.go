@@ -1,12 +1,11 @@
 package gorest
 
 import (
+	"bytes"
 	"database/sql"
-	_ "encoding/json"
 	"fmt"
 	"github.com/elgs/gosqljson"
-	_ "github.com/nu7hatch/gouuid"
-	_ "strings"
+	"github.com/nu7hatch/gouuid"
 )
 
 type DbOperator struct {
@@ -27,23 +26,37 @@ func (this *DbOperator) Load(id string) map[string]string {
 	}
 	return m[0]
 }
-func (this *DbOperator) List() []map[string]string {
+func (this *DbOperator) List(where string, order string) []map[string]string {
 	m := gosqljson.QueryDbToMap(this.Db, true,
 		fmt.Sprint("SELECT * FROM ", this.TableId))
 	return m
 }
-func (this *DbOperator) Create(map[string]interface{}) string {
+func (this *DbOperator) Create(data map[string]interface{}) interface{} {
 	dataInterceptor := GetDataInterceptor(this.TableId)
 	if dataInterceptor != nil {
-		dataInterceptor.BeforeCreate(this.Db, nil)
+		dataInterceptor.BeforeCreate(this.Db, data)
 	}
 	// Create the record
-	if dataInterceptor != nil {
-		dataInterceptor.AfterCreate(this.Db, nil)
+	if data["ID"] == nil {
+		id, _ := uuid.NewV4()
+		data["ID"] = id.String()
 	}
-	return ""
+	dataLen := len(data)
+	values := make([]interface{}, 0, dataLen)
+	var buffer bytes.Buffer
+	for k, v := range data {
+		buffer.WriteString(fmt.Sprint(k, "=?,"))
+		values = append(values, v)
+	}
+	sets := buffer.String()
+	sets = sets[0 : len(sets)-1]
+	gosqljson.ExecDb(this.Db, fmt.Sprint("INSERT INTO ", this.TableId, " SET ", sets), values...)
+	if dataInterceptor != nil {
+		dataInterceptor.AfterCreate(this.Db, data)
+	}
+	return data["ID"]
 }
-func (this *DbOperator) Update([]map[string]interface{}) {
+func (this *DbOperator) Update(data map[string]interface{}) {
 	dataInterceptor := GetDataInterceptor(this.TableId)
 	if dataInterceptor != nil {
 		dataInterceptor.BeforeUpdate(this.Db, nil, nil)
