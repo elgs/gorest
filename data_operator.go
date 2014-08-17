@@ -21,9 +21,12 @@ func (this *DefaultDataOperator) List() []map[string]string {
 func (this *DefaultDataOperator) Create(data map[string]interface{}) (id interface{}) {
 	return ""
 }
-func (this *DefaultDataOperator) Update(data map[string]interface{}) {
+func (this *DefaultDataOperator) Update(data map[string]interface{}) int64 {
+	return 0
 }
-func (this *DefaultDataOperator) Duplicate(id string) {
+func (this *DefaultDataOperator) Duplicate(id string) interface{} {
+	return nil
 }
-func (this *DefaultDataOperator) Delete(id string) {
+func (this *DefaultDataOperator) Delete(id string) int64 {
+	return 0
 }
