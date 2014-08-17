@@ -16,7 +16,10 @@ type DbOperator struct {
 func (this *DbOperator) Load(id string) map[string]string {
 	dataInterceptor := GetDataInterceptor(this.TableId)
 	if dataInterceptor != nil {
-		dataInterceptor.BeforeLoad(this.Db, this.TableId)
+		ctn := dataInterceptor.BeforeLoad(this.Db, this.TableId)
+		if !ctn {
+			return nil
+		}
 	}
 	// Load the record
 	m := gosqljson.QueryDbToMap(this.Db, true,
@@ -34,7 +37,10 @@ func (this *DbOperator) List(where string, order string) []map[string]string {
 func (this *DbOperator) Create(data map[string]interface{}) interface{} {
 	dataInterceptor := GetDataInterceptor(this.TableId)
 	if dataInterceptor != nil {
-		dataInterceptor.BeforeCreate(this.Db, data)
+		ctn := dataInterceptor.BeforeCreate(this.Db, data)
+		if !ctn {
+			return nil
+		}
 	}
 	// Create the record
 	if data["ID"] == nil {

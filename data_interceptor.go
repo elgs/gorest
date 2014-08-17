@@ -26,25 +26,25 @@ type DataInterceptor interface {
 type DefaultDataInterceptor struct{}
 
 func (this *DefaultDataInterceptor) BeforeLoad(ds interface{}, id string) bool {
-	return false
+	return true
 }
 func (this *DefaultDataInterceptor) AfterLoad(ds interface{}, data map[string]string) {
 }
 func (this *DefaultDataInterceptor) BeforeCreate(ds interface{}, data map[string]interface{}) bool {
-	return false
+	return true
 }
 func (this *DefaultDataInterceptor) AfterCreate(ds interface{}, data map[string]interface{}) {}
 func (this *DefaultDataInterceptor) BeforeUpdate(ds interface{}, oldData map[string]interface{}, data map[string]interface{}) bool {
-	return false
+	return true
 }
 func (this *DefaultDataInterceptor) AfterUpdate(ds interface{}, oldData map[string]interface{}, data map[string]interface{}) {
 }
 func (this *DefaultDataInterceptor) BeforeDuplicate(ds interface{}, oldData map[string]interface{}, data map[string]interface{}) bool {
-	return false
+	return true
 }
 func (this *DefaultDataInterceptor) AfterDuplicate(ds interface{}, oldData map[string]interface{}, data map[string]interface{}) {
 }
 func (this *DefaultDataInterceptor) BeforeDelete(ds interface{}, id string) bool {
-	return false
+	return true
 }
 func (this *DefaultDataInterceptor) AfterDelete(ds interface{}, id string) {}
