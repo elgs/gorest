@@ -105,10 +105,33 @@ func (this *DbOperator) Duplicate(id string) interface{} {
 		}
 	}
 	// Duplicate the record
+	data := gosqljson.QueryDbToMap(this.Db, false,
+		fmt.Sprint("SELECT * FROM ", this.TableId, " WHERE ID=?"), id)
+	if data == nil || len(data) != 1 {
+		return nil
+	}
+	newId, _ := uuid.NewV4()
+	newData := make(map[string]interface{}, len(data[0]))
+	for k, v := range data[0] {
+		newData[fmt.Sprint(k)] = v
+	}
+	newData["ID"] = newId.String()
+
+	newDataLen := len(newData)
+	newValues := make([]interface{}, 0, newDataLen)
+	var buffer bytes.Buffer
+	for k, v := range newData {
+		buffer.WriteString(fmt.Sprint(k, "=?,"))
+		newValues = append(newValues, v)
+	}
+	sets := buffer.String()
+	sets = sets[0 : len(sets)-1]
+	gosqljson.ExecDb(this.Db, fmt.Sprint("INSERT INTO ", this.TableId, " SET ", sets), newValues...)
+
 	if dataInterceptor != nil {
 		dataInterceptor.AfterDuplicate(this.Db, nil, nil)
 	}
-	return nil
+	return newId
 }
 func (this *DbOperator) Delete(id string) int64 {
 	dataInterceptor := GetDataInterceptor(this.TableId)
@@ -119,8 +142,12 @@ func (this *DbOperator) Delete(id string) int64 {
 		}
 	}
 	// Delete the record
+	rowsAffected, err := gosqljson.ExecDb(this.Db, fmt.Sprint("DELETE FROM ", this.TableId, " WHERE ID=?"), id)
+	if err != nil {
+		fmt.Println(err)
+	}
 	if dataInterceptor != nil {
 		dataInterceptor.AfterDelete(this.Db, this.TableId)
 	}
-	return 0
+	return rowsAffected
 }
