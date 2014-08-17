@@ -1,4 +1,4 @@
-package main
+package gorest
 
 import (
 	"database/sql"

@@ -1,4 +1,4 @@
-package main
+package gorest
 
 type DataOperator interface {
 	Load(id string) map[string]string

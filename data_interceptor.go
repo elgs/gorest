@@ -1,4 +1,4 @@
-package main
+package gorest
 
 var dataInterceptorRegistry = make(map[string]DataInterceptor)
 
@@ -48,7 +48,3 @@ func (this *DefaultDataInterceptor) BeforeDelete(id string) bool {
 	return false
 }
 func (this *DefaultDataInterceptor) AfterDelete(id string) {}
-
-type MyDataInterceptor struct {
-	*DefaultDataInterceptor
-}
