@@ -11,40 +11,40 @@ func GetDataInterceptor(id string) DataInterceptor {
 }
 
 type DataInterceptor interface {
-	BeforeLoad(id string) bool
-	AfterLoad(data map[string]string)
-	BeforeCreate(data map[string]interface{}) bool
-	AfterCreate(data map[string]interface{})
-	BeforeUpdate(oldData map[string]interface{}, data map[string]interface{}) bool
-	AfterUpdate(oldData map[string]interface{}, data map[string]interface{})
-	BeforeDuplicate(oldData map[string]interface{}, data map[string]interface{}) bool
-	AfterDuplicate(oldData map[string]interface{}, data map[string]interface{})
-	BeforeDelete(id string) bool
-	AfterDelete(id string)
+	BeforeLoad(ds interface{}, id string) bool
+	AfterLoad(ds interface{}, data map[string]string)
+	BeforeCreate(ds interface{}, data map[string]interface{}) bool
+	AfterCreate(ds interface{}, data map[string]interface{})
+	BeforeUpdate(ds interface{}, oldData map[string]interface{}, data map[string]interface{}) bool
+	AfterUpdate(ds interface{}, oldData map[string]interface{}, data map[string]interface{})
+	BeforeDuplicate(ds interface{}, oldData map[string]interface{}, data map[string]interface{}) bool
+	AfterDuplicate(ds interface{}, oldData map[string]interface{}, data map[string]interface{})
+	BeforeDelete(ds interface{}, id string) bool
+	AfterDelete(ds interface{}, id string)
 }
 
 type DefaultDataInterceptor struct{}
 
-func (this *DefaultDataInterceptor) BeforeLoad(id string) bool {
+func (this *DefaultDataInterceptor) BeforeLoad(ds interface{}, id string) bool {
 	return false
 }
-func (this *DefaultDataInterceptor) AfterLoad(data map[string]string) {
+func (this *DefaultDataInterceptor) AfterLoad(ds interface{}, data map[string]string) {
 }
-func (this *DefaultDataInterceptor) BeforeCreate(data map[string]interface{}) bool {
+func (this *DefaultDataInterceptor) BeforeCreate(ds interface{}, data map[string]interface{}) bool {
 	return false
 }
-func (this *DefaultDataInterceptor) AfterCreate(data map[string]interface{}) {}
-func (this *DefaultDataInterceptor) BeforeUpdate(oldData map[string]interface{}, data map[string]interface{}) bool {
+func (this *DefaultDataInterceptor) AfterCreate(ds interface{}, data map[string]interface{}) {}
+func (this *DefaultDataInterceptor) BeforeUpdate(ds interface{}, oldData map[string]interface{}, data map[string]interface{}) bool {
 	return false
 }
-func (this *DefaultDataInterceptor) AfterUpdate(oldData map[string]interface{}, data map[string]interface{}) {
+func (this *DefaultDataInterceptor) AfterUpdate(ds interface{}, oldData map[string]interface{}, data map[string]interface{}) {
 }
-func (this *DefaultDataInterceptor) BeforeDuplicate(oldData map[string]interface{}, data map[string]interface{}) bool {
+func (this *DefaultDataInterceptor) BeforeDuplicate(ds interface{}, oldData map[string]interface{}, data map[string]interface{}) bool {
 	return false
 }
-func (this *DefaultDataInterceptor) AfterDuplicate(oldData map[string]interface{}, data map[string]interface{}) {
+func (this *DefaultDataInterceptor) AfterDuplicate(ds interface{}, oldData map[string]interface{}, data map[string]interface{}) {
 }
-func (this *DefaultDataInterceptor) BeforeDelete(id string) bool {
+func (this *DefaultDataInterceptor) BeforeDelete(ds interface{}, id string) bool {
 	return false
 }
-func (this *DefaultDataInterceptor) AfterDelete(id string) {}
+func (this *DefaultDataInterceptor) AfterDelete(ds interface{}, id string) {}
