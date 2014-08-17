@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/elgs/gosqljson"
 	"github.com/nu7hatch/gouuid"
+	"strconv"
 )
 
 type DbOperator struct {
@@ -29,10 +30,17 @@ func (this *DbOperator) Load(id string) map[string]string {
 	}
 	return m[0]
 }
-func (this *DbOperator) List(where string, order string) []map[string]string {
+func (this *DbOperator) List(where string, order string, start int64, limit int64) ([]map[string]string, int64) {
 	m := gosqljson.QueryDbToMap(this.Db, true,
-		fmt.Sprint("SELECT * FROM ", this.TableId))
-	return m
+		fmt.Sprint("SELECT * FROM ", this.TableId,
+			" WHERE 1=1 ", where, " ", order, " LIMIT ?,?"), start, limit)
+	c := gosqljson.QueryDbToMap(this.Db, false,
+		fmt.Sprint("SELECT COUNT(*) AS CNT FROM ", this.TableId, " WHERE 1=1 ", where))
+	cnt, err := strconv.Atoi(c[0]["CNT"])
+	if err != nil {
+		fmt.Println(err)
+	}
+	return m, int64(cnt)
 }
 func (this *DbOperator) Create(data map[string]interface{}) interface{} {
 	dataInterceptor := GetDataInterceptor(this.TableId)
