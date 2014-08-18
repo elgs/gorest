@@ -28,7 +28,12 @@ func (this *DbOperator) Load(id string) map[string]string {
 	if dataInterceptor != nil {
 		dataInterceptor.AfterLoad(this.Db, m[0])
 	}
-	return m[0]
+	if m != nil && len(m) == 1 {
+		return m[0]
+	} else {
+		return make(map[string]string, 0)
+	}
+
 }
 func (this *DbOperator) List(where string, order string, start int64, limit int64) ([]map[string]string, int64) {
 	m := gosqljson.QueryDbToMap(this.Db, true,
