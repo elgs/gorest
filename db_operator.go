@@ -2,10 +2,10 @@ package gorest
 
 import (
 	"bytes"
+	"code.google.com/p/go-uuid/uuid"
 	"database/sql"
 	"fmt"
 	"github.com/elgs/gosqljson"
-	"github.com/nu7hatch/gouuid"
 	"strconv"
 )
 
@@ -52,8 +52,7 @@ func (this *DbOperator) Create(data map[string]interface{}) interface{} {
 	}
 	// Create the record
 	if data["ID"] == nil {
-		id, _ := uuid.NewV4()
-		data["ID"] = id.String()
+		data["ID"] = uuid.New()
 	}
 	dataLen := len(data)
 	values := make([]interface{}, 0, dataLen)
@@ -118,12 +117,12 @@ func (this *DbOperator) Duplicate(id string) interface{} {
 	if data == nil || len(data) != 1 {
 		return nil
 	}
-	newId, _ := uuid.NewV4()
 	newData := make(map[string]interface{}, len(data[0]))
 	for k, v := range data[0] {
 		newData[fmt.Sprint(k)] = v
 	}
-	newData["ID"] = newId.String()
+	newId := uuid.New()
+	newData["ID"] = newId
 
 	newDataLen := len(newData)
 	newValues := make([]interface{}, 0, newDataLen)
