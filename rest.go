@@ -84,7 +84,27 @@ func (this *Gorest) Serve() {
 			fmt.Fprintf(w, jsonString)
 		case "PUT":
 			// Update an existing record.
-			fmt.Println(r.Method, ": ", urlPath)
+			decoder := json.NewDecoder(r.Body)
+			var m map[string]interface{}
+			err := decoder.Decode(&m)
+			if err != nil {
+				fmt.Println(err)
+			}
+			mUpper := make(map[string]interface{})
+			for k, v := range m {
+				mUpper[strings.ToUpper(k)] = v
+			}
+			dbo, err := getDbo(this.Ds, tableId)
+			if err != nil {
+				fmt.Println(err)
+			}
+			data := dbo.Update(mUpper)
+			json, err := json.Marshal(data)
+			if err != nil {
+				fmt.Println(err)
+			}
+			jsonString := string(json)
+			fmt.Fprintf(w, jsonString)
 		case "DELETE":
 			// Remove the record.
 			dataId := restData[1]
