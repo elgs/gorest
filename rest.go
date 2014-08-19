@@ -29,21 +29,48 @@ func (this *Gorest) Serve() {
 		tableId := restData[0]
 		switch r.Method {
 		case "GET":
-			// Serve the resource.
-			dataId := restData[1]
+			if len(restData) == 1 ||
+				strings.HasPrefix(restData[1], "?") ||
+				len(restData[1]) == 0 {
+				//List records.
+				p := r.URL.Query()
+				t := p["total"]
+				includeTotal := false
+				if t != nil && len(t) > 0 && t[0] == "1" {
+					includeTotal = true
+				}
+				dbo, err := getDbo(this.Database, this.Ds, tableId)
+				if err != nil {
+					fmt.Println(err)
+				}
+				data, total := dbo.List("", "", 0, 25, includeTotal)
+				m := map[string]interface{}{
+					"data":  data,
+					"total": total,
+				}
+				json, err := json.Marshal(m)
+				if err != nil {
+					fmt.Println(err)
+				}
+				jsonString := string(json)
+				fmt.Fprintf(w, jsonString)
+			} else {
+				// Load record by id.
+				dataId := restData[1]
 
-			dbo, err := getDbo(this.Database, this.Ds, tableId)
-			if err != nil {
-				fmt.Println(err)
-			}
-			data := dbo.Load(dataId)
+				dbo, err := getDbo(this.Database, this.Ds, tableId)
+				if err != nil {
+					fmt.Println(err)
+				}
+				data := dbo.Load(dataId)
 
-			json, err := json.Marshal(data)
-			if err != nil {
-				fmt.Println(err)
+				json, err := json.Marshal(data)
+				if err != nil {
+					fmt.Println(err)
+				}
+				jsonString := string(json)
+				fmt.Fprintf(w, jsonString)
 			}
-			jsonString := string(json)
-			fmt.Fprintf(w, jsonString)
 		case "POST":
 			// Create the record.
 			decoder := json.NewDecoder(r.Body)

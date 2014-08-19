@@ -36,15 +36,21 @@ func (this *MySqlDataOperator) Load(id string) map[string]string {
 	}
 
 }
-func (this *MySqlDataOperator) List(where string, order string, start int64, limit int64) ([]map[string]string, int64) {
+func (this *MySqlDataOperator) List(where string, order string, start int64, limit int64, includeTotal bool) ([]map[string]string, int64) {
 	m, _ := gosqljson.QueryDbToMap(this.db, true,
 		fmt.Sprint("SELECT * FROM ", this.TableId,
 			" WHERE 1=1 ", where, " ", order, " LIMIT ?,?"), start, limit)
-	c, _ := gosqljson.QueryDbToMap(this.db, false,
-		fmt.Sprint("SELECT COUNT(*) AS CNT FROM ", this.TableId, " WHERE 1=1 ", where))
-	cnt, err := strconv.Atoi(c[0]["CNT"])
-	if err != nil {
-		fmt.Println(err)
+	cnt := -1
+	if includeTotal {
+		c, err := gosqljson.QueryDbToMap(this.db, false,
+			fmt.Sprint("SELECT COUNT(*) AS CNT FROM ", this.TableId, " WHERE 1=1 ", where))
+		if err != nil {
+			fmt.Println(err)
+		}
+		cnt, err = strconv.Atoi(c[0]["CNT"])
+		if err != nil {
+			fmt.Println(err)
+		}
 	}
 	return m, int64(cnt)
 }
