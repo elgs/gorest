@@ -42,7 +42,6 @@ ID	NAME		CREATE_TIME
 `curl http://localhost:8080/api/test.test`
 outputs:
 ```json
-$ curl http://localhost:8080/api/test.test
 {"data":[{"create_time":"2014-08-18 18:43:38","id":"0","name":"Alicia"},{"create_time":"2014-08-18 18:43:38","id":"1","name":"Brian"},{"create_time":"2014-08-18 18:43:38","id":"2","name":"Chloe"},{"create_time":"2014-08-18 18:43:38","id":"4","name":"Bianca"},{"create_time":"2014-08-18 18:43:38","id":"5","name":"Leo"},{"create_time":"2014-08-18 18:43:38","id":"6","name":"Joy"},{"create_time":"2014-08-18 18:43:38","id":"7","name":"Samuel"}],"total":-1}elgss-iMac:gorest
 ```
 
