@@ -16,13 +16,13 @@ type MySqlDataOperator struct {
 }
 
 func (this *MySqlDataOperator) Load(tableId string, id string) map[string]string {
-	dataInterceptor := GetDataInterceptor(tableId)
 	db, err := getConn(this.Ds)
 	defer db.Close()
 	if err != nil {
 		fmt.Println()
 		return nil
 	}
+	dataInterceptor := GetDataInterceptor(tableId)
 	if dataInterceptor != nil {
 		ctn := dataInterceptor.BeforeLoad(db, tableId)
 		if !ctn {
@@ -53,6 +53,13 @@ func (this *MySqlDataOperator) ListMap(tableId string, where string, order strin
 		fmt.Println()
 		return nil, -1
 	}
+	dataInterceptor := GetDataInterceptor(tableId)
+	if dataInterceptor != nil {
+		ctn := dataInterceptor.BeforeListMap(db, where, order, start, limit, includeTotal)
+		if !ctn {
+			return nil, -1
+		}
+	}
 	m, err := gosqljson.QueryDbToMap(db, true,
 		fmt.Sprint("SELECT * FROM ", tableId,
 			" WHERE 1=1 ", where, " ", order, " LIMIT ?,?"), start, limit)
@@ -74,6 +81,9 @@ func (this *MySqlDataOperator) ListMap(tableId string, where string, order strin
 			return nil, -1
 		}
 	}
+	if dataInterceptor != nil {
+		dataInterceptor.AfterListMap(db, m, int64(cnt))
+	}
 	return m, int64(cnt)
 }
 func (this *MySqlDataOperator) ListArray(tableId string, where string, order string, start int64, limit int64, includeTotal bool) ([][]string, int64) {
@@ -82,6 +92,13 @@ func (this *MySqlDataOperator) ListArray(tableId string, where string, order str
 	if err != nil {
 		fmt.Println()
 		return nil, -1
+	}
+	dataInterceptor := GetDataInterceptor(tableId)
+	if dataInterceptor != nil {
+		ctn := dataInterceptor.BeforeListArray(db, where, order, start, limit, includeTotal)
+		if !ctn {
+			return nil, -1
+		}
 	}
 	a, err := gosqljson.QueryDbToArray(db, true,
 		fmt.Sprint("SELECT * FROM ", tableId,
@@ -103,6 +120,9 @@ func (this *MySqlDataOperator) ListArray(tableId string, where string, order str
 			fmt.Println(err)
 			return nil, -1
 		}
+	}
+	if dataInterceptor != nil {
+		dataInterceptor.AfterListArray(db, a, int64(cnt))
 	}
 	return a, int64(cnt)
 }
@@ -247,7 +267,7 @@ func (this *MySqlDataOperator) Delete(tableId string, id string) int64 {
 	}
 	return rowsAffected
 }
-func (this *MySqlDataOperator) QueryMap(sqlSelect string, sqlSelectCount string, start int64, limit int64, includeTotal bool) ([]map[string]string, int64) {
+func (this *MySqlDataOperator) QueryMap(tableId string, sqlSelect string, sqlSelectCount string, start int64, limit int64, includeTotal bool) ([]map[string]string, int64) {
 	if !isSelect(sqlSelect) || !isSelect(sqlSelectCount) {
 		return nil, -1
 	}
@@ -256,6 +276,13 @@ func (this *MySqlDataOperator) QueryMap(sqlSelect string, sqlSelectCount string,
 	if err != nil {
 		fmt.Println()
 		return nil, -1
+	}
+	dataInterceptor := GetDataInterceptor(tableId)
+	if dataInterceptor != nil {
+		ctn := dataInterceptor.BeforeQueryMap(db, sqlSelect, sqlSelectCount, start, limit, includeTotal)
+		if !ctn {
+			return nil, -1
+		}
 	}
 	m, err := gosqljson.QueryDbToMap(db, true,
 		fmt.Sprint(sqlSelect, " LIMIT ?,?"), start, limit)
@@ -278,9 +305,12 @@ func (this *MySqlDataOperator) QueryMap(sqlSelect string, sqlSelectCount string,
 			return nil, -1
 		}
 	}
+	if dataInterceptor != nil {
+		dataInterceptor.AfterQueryMap(db, m, int64(cnt))
+	}
 	return m, int64(cnt)
 }
-func (this *MySqlDataOperator) QueryArray(sqlSelect string, sqlSelectCount string, start int64, limit int64, includeTotal bool) ([][]string, int64) {
+func (this *MySqlDataOperator) QueryArray(tableId string, sqlSelect string, sqlSelectCount string, start int64, limit int64, includeTotal bool) ([][]string, int64) {
 	if !isSelect(sqlSelect) || !isSelect(sqlSelectCount) {
 		return nil, -1
 	}
@@ -289,6 +319,13 @@ func (this *MySqlDataOperator) QueryArray(sqlSelect string, sqlSelectCount strin
 	if err != nil {
 		fmt.Println()
 		return nil, -1
+	}
+	dataInterceptor := GetDataInterceptor(tableId)
+	if dataInterceptor != nil {
+		ctn := dataInterceptor.BeforeQueryArray(db, sqlSelect, sqlSelectCount, start, limit, includeTotal)
+		if !ctn {
+			return nil, -1
+		}
 	}
 	a, err := gosqljson.QueryDbToArray(db, true,
 		fmt.Sprint(sqlSelect, " LIMIT ?,?"), start, limit)
@@ -310,6 +347,9 @@ func (this *MySqlDataOperator) QueryArray(sqlSelect string, sqlSelectCount strin
 			fmt.Println(err)
 			return nil, -1
 		}
+	}
+	if dataInterceptor != nil {
+		dataInterceptor.AfterQueryArray(db, a, int64(cnt))
 	}
 	return a, int64(cnt)
 }

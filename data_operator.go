@@ -8,8 +8,8 @@ type DataOperator interface {
 	Update(tableId string, data map[string]interface{}) int64
 	Duplicate(tableId string, id string) interface{}
 	Delete(tableId string, id string) int64
-	QueryMap(sqlSelect string, sqlSelectCount string, start int64, limit int64, includeTotal bool) ([]map[string]string, int64)
-	QueryArray(sqlSelect string, sqlSelectCount string, start int64, limit int64, includeTotal bool) ([][]string, int64)
+	QueryMap(tableId string, sqlSelect string, sqlSelectCount string, start int64, limit int64, includeTotal bool) ([]map[string]string, int64)
+	QueryArray(tableId string, sqlSelect string, sqlSelectCount string, start int64, limit int64, includeTotal bool) ([][]string, int64)
 }
 
 type DefaultDataOperator struct {
@@ -36,9 +36,9 @@ func (this *DefaultDataOperator) Duplicate(tableId string, id string) interface{
 func (this *DefaultDataOperator) Delete(tableId string, id string) int64 {
 	return 0
 }
-func (this *DefaultDataOperator) QueryMap(sqlSelect string, sqlSelectCount string, start int64, limit int64, includeTotal bool) ([]map[string]string, int64) {
+func (this *DefaultDataOperator) QueryMap(tableId string, sqlSelect string, sqlSelectCount string, start int64, limit int64, includeTotal bool) ([]map[string]string, int64) {
 	return nil, -1
 }
-func (this *DefaultDataOperator) QueryArray(sqlSelect string, sqlSelectCount string, start int64, limit int64, includeTotal bool) ([][]string, int64) {
+func (this *DefaultDataOperator) QueryArray(tableId string, sqlSelect string, sqlSelectCount string, start int64, limit int64, includeTotal bool) ([][]string, int64) {
 	return nil, -1
 }

@@ -21,14 +21,14 @@ type DataInterceptor interface {
 	AfterDuplicate(ds interface{}, oldData map[string]interface{}, data map[string]interface{})
 	BeforeDelete(ds interface{}, id string) bool
 	AfterDelete(ds interface{}, id string)
-	BeforeListMap(ds interface{}, data []map[string]string) bool
-	AfterListMap(ds interface{}, data []map[string]string)
-	BeforeListArray(ds interface{}, data [][]string) bool
-	AfterListArray(ds interface{}, data [][]string)
-	BeforeQuerytMap(ds interface{}, data []map[string]string) bool
-	AfterQueryMap(ds interface{}, data []map[string]string)
-	BeforeQueryArray(ds interface{}, data [][]string) bool
-	AfterQueryArray(ds interface{}, data [][]string)
+	BeforeListMap(ds interface{}, where string, order string, start int64, limit int64, includeTotal bool) bool
+	AfterListMap(ds interface{}, data []map[string]string, total int64)
+	BeforeListArray(ds interface{}, where string, order string, start int64, limit int64, includeTotal bool) bool
+	AfterListArray(ds interface{}, data [][]string, total int64)
+	BeforeQueryMap(ds interface{}, sqlSelect string, sqlSelectCount string, start int64, limit int64, includeTotal bool) bool
+	AfterQueryMap(ds interface{}, data []map[string]string, total int64)
+	BeforeQueryArray(ds interface{}, sqlSelect string, sqlSelectCount string, start int64, limit int64, includeTotal bool) bool
+	AfterQueryArray(ds interface{}, data [][]string, total int64)
 }
 
 type DefaultDataInterceptor struct{}
@@ -55,19 +55,21 @@ func (this *DefaultDataInterceptor) BeforeDelete(ds interface{}, id string) bool
 	return true
 }
 func (this *DefaultDataInterceptor) AfterDelete(ds interface{}, id string) {}
-func (this *DefaultDataInterceptor) BeforeListMap(ds interface{}, data []map[string]string) bool {
+func (this *DefaultDataInterceptor) BeforeListMap(ds interface{}, where string, order string, start int64, limit int64, includeTotal bool) bool {
 	return true
 }
-func (this *DefaultDataInterceptor) AfterListMap(ds interface{}, data []map[string]string) {}
-func (this *DefaultDataInterceptor) BeforeListArray(ds interface{}, data [][]string) bool {
+func (this *DefaultDataInterceptor) AfterListMap(ds interface{}, data []map[string]string, total int64) {
+}
+func (this *DefaultDataInterceptor) BeforeListArray(ds interface{}, where string, order string, start int64, limit int64, includeTotal bool) bool {
 	return true
 }
-func (this *DefaultDataInterceptor) AfterListArray(ds interface{}, data [][]string) {}
-func (this *DefaultDataInterceptor) BeforeQuerytMap(ds interface{}, data []map[string]string) bool {
+func (this *DefaultDataInterceptor) AfterListArray(ds interface{}, data [][]string, total int64) {}
+func (this *DefaultDataInterceptor) BeforeQueryMap(ds interface{}, sqlSelect string, sqlSelectCount string, start int64, limit int64, includeTotal bool) bool {
 	return true
 }
-func (this *DefaultDataInterceptor) AfterQueryMap(ds interface{}, data []map[string]string) {}
-func (this *DefaultDataInterceptor) BeforeQueryArray(ds interface{}, data [][]string) bool {
+func (this *DefaultDataInterceptor) AfterQueryMap(ds interface{}, data []map[string]string, total int64) {
+}
+func (this *DefaultDataInterceptor) BeforeQueryArray(ds interface{}, sqlSelect string, sqlSelectCount string, start int64, limit int64, includeTotal bool) bool {
 	return true
 }
-func (this *DefaultDataInterceptor) AfterQueryArray(ds interface{}, data [][]string) {}
+func (this *DefaultDataInterceptor) AfterQueryArray(ds interface{}, data [][]string, total int64) {}
