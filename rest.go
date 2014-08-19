@@ -87,25 +87,69 @@ func (this *Gorest) Serve() {
 				fmt.Fprintf(w, jsonString)
 			}
 		case "POST":
-			// Create the record.
-			decoder := json.NewDecoder(r.Body)
-			var m map[string]interface{}
-			err := decoder.Decode(&m)
-			if err != nil {
-				fmt.Println(err)
+			if tableId == "_query" {
+				sqlSelect := r.FormValue("sql_select")
+				sqlSelectCount := r.FormValue("sql_select_count")
+				t := r.FormValue("total")
+				a := r.FormValue("array")
+				s := r.FormValue("start")
+				l := r.FormValue("limit")
+				includeTotal := false
+				array := false
+				if t == "1" {
+					includeTotal = true
+				}
+				if a == "1" {
+					array = true
+				}
+				start, err := strconv.ParseInt(s, 10, 0)
+				if err != nil {
+					start = 0
+				}
+				limit, err := strconv.ParseInt(l, 10, 0)
+				if err != nil {
+					limit = 25
+				}
+				var data interface{}
+				var total int64 = -1
+				if array {
+					data, total = this.Dbo.QueryArray(tableId, sqlSelect, sqlSelectCount, start, limit, includeTotal)
+				} else {
+					data, total = this.Dbo.QueryMap(tableId, sqlSelect, sqlSelectCount, start, limit, includeTotal)
+				}
+				m := map[string]interface{}{
+					"data":  data,
+					"total": total,
+				}
+				json, err := json.Marshal(m)
+				if err != nil {
+					http.Error(w, err.Error(), 500)
+					return
+				}
+				jsonString := string(json)
+				fmt.Fprintf(w, jsonString)
+			} else {
+				// Create the record.
+				decoder := json.NewDecoder(r.Body)
+				var m map[string]interface{}
+				err := decoder.Decode(&m)
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
+				mUpper := make(map[string]interface{})
+				for k, v := range m {
+					mUpper[strings.ToUpper(k)] = v
+				}
+				data := this.Dbo.Create(tableId, mUpper)
+				json, err := json.Marshal(data)
+				if err != nil {
+					http.Error(w, err.Error(), 500)
+					return
+				}
+				jsonString := string(json)
+				fmt.Fprintf(w, jsonString)
 			}
-			mUpper := make(map[string]interface{})
-			for k, v := range m {
-				mUpper[strings.ToUpper(k)] = v
-			}
-			data := this.Dbo.Create(tableId, mUpper)
-			json, err := json.Marshal(data)
-			if err != nil {
-				http.Error(w, err.Error(), 500)
-				return
-			}
-			jsonString := string(json)
-			fmt.Fprintf(w, jsonString)
 		case "COPY":
 			// Duplicate a new record.
 			dataId := restData[1]

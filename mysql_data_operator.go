@@ -355,7 +355,7 @@ func (this *MySqlDataOperator) QueryArray(tableId string, sqlSelect string, sqlS
 }
 
 func isSelect(sqlSelect string) bool {
-	return strings.HasPrefix(strings.ToUpper(sqlSelect), "SELET ")
+	return strings.HasPrefix(strings.ToUpper(sqlSelect), "SELECT ")
 }
 
 func getConn(ds string) (*sql.DB, error) {
