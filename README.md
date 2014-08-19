@@ -80,7 +80,7 @@ outputs(beautified manually):
 The default implementation of `MySqlDataOperator` assumes:
 
 1. all table names and field names are in upper case;
-2. each table has an field `ID` as the primary key;
+2. each table has a field `ID` as the primary key;
 3. the `ID` field is of char(36);
 
 These restrictions will likely be removed, or be made configurable in the 
