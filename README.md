@@ -15,7 +15,7 @@ import (
 )
 
 func main() {
-	ds := "user:pass@tcp(host:3306)/test.test?loc=Singapore"
+	ds := "user:pass@tcp(host:3306)/test.test"
 	dbo := &gorest.MySqlDataOperator{Ds: ds}
 	r := &gorest.Gorest{
 		Port:      8080,
