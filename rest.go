@@ -37,7 +37,7 @@ func (this *Gorest) Serve() {
 				if t != nil && len(t) > 0 && t[0] == "1" {
 					includeTotal = true
 				}
-				dbo := getDbo(this.Ds, tableId)
+				dbo := &MySqlDataOperator{Ds: this.Ds, TableId: tableId}
 				data, total := dbo.List("", "", 0, 25, includeTotal)
 				m := map[string]interface{}{
 					"data":  data,
@@ -53,7 +53,7 @@ func (this *Gorest) Serve() {
 				// Load record by id.
 				dataId := restData[1]
 
-				dbo := getDbo(this.Ds, tableId)
+				dbo := &MySqlDataOperator{Ds: this.Ds, TableId: tableId}
 				data := dbo.Load(dataId)
 
 				json, err := json.Marshal(data)
@@ -75,7 +75,7 @@ func (this *Gorest) Serve() {
 			for k, v := range m {
 				mUpper[strings.ToUpper(k)] = v
 			}
-			dbo := getDbo(this.Ds, tableId)
+			dbo := &MySqlDataOperator{Ds: this.Ds, TableId: tableId}
 			data := dbo.Create(mUpper)
 			json, err := json.Marshal(data)
 			if err != nil {
@@ -87,7 +87,7 @@ func (this *Gorest) Serve() {
 			// Duplicate a new record.
 			dataId := restData[1]
 
-			dbo := getDbo(this.Ds, tableId)
+			dbo := &MySqlDataOperator{Ds: this.Ds, TableId: tableId}
 			data := dbo.Duplicate(dataId)
 
 			json, err := json.Marshal(data)
@@ -108,7 +108,7 @@ func (this *Gorest) Serve() {
 			for k, v := range m {
 				mUpper[strings.ToUpper(k)] = v
 			}
-			dbo := getDbo(this.Ds, tableId)
+			dbo := &MySqlDataOperator{Ds: this.Ds, TableId: tableId}
 			data := dbo.Update(mUpper)
 			json, err := json.Marshal(data)
 			if err != nil {
@@ -120,7 +120,7 @@ func (this *Gorest) Serve() {
 			// Remove the record.
 			dataId := restData[1]
 
-			dbo := getDbo(this.Ds, tableId)
+			dbo := &MySqlDataOperator{Ds: this.Ds, TableId: tableId}
 			data := dbo.Delete(dataId)
 
 			json, err := json.Marshal(data)
@@ -136,8 +136,4 @@ func (this *Gorest) Serve() {
 
 	http.HandleFunc("/", handler)
 	http.ListenAndServe(fmt.Sprint(this.Host, ":", this.Port), nil)
-}
-
-func getDbo(ds string, tableId string) DataOperator {
-	return &MySqlDataOperator{Ds: ds, TableId: tableId}
 }
