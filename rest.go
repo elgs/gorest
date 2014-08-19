@@ -19,7 +19,7 @@ func (this *Gorest) Serve() {
 	handler := func(w http.ResponseWriter, r *http.Request) {
 		urlPath := r.URL.Path
 		urlPrefix := fmt.Sprint("/", this.UrlPrefix, "/")
-		if !strings.HasPrefix(urlPath, urlPath) || len(urlPrefix) >= len(urlPath) {
+		if !strings.HasPrefix(urlPath, urlPrefix) {
 			return
 		}
 		restUrl := urlPath[len(urlPrefix):]
