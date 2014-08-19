@@ -9,6 +9,7 @@ import (
 )
 
 type Gorest struct {
+	Database  string
 	Port      uint16
 	Host      string
 	UrlPrefix string
@@ -31,7 +32,7 @@ func (this *Gorest) Serve() {
 			// Serve the resource.
 			dataId := restData[1]
 
-			dbo, err := getDbo(this.Ds, tableId)
+			dbo, err := getDbo(this.Database, this.Ds, tableId)
 			if err != nil {
 				fmt.Println(err)
 			}
@@ -55,7 +56,7 @@ func (this *Gorest) Serve() {
 			for k, v := range m {
 				mUpper[strings.ToUpper(k)] = v
 			}
-			dbo, err := getDbo(this.Ds, tableId)
+			dbo, err := getDbo(this.Database, this.Ds, tableId)
 			if err != nil {
 				fmt.Println(err)
 			}
@@ -70,7 +71,7 @@ func (this *Gorest) Serve() {
 			// Duplicate a new record.
 			dataId := restData[1]
 
-			dbo, err := getDbo(this.Ds, tableId)
+			dbo, err := getDbo(this.Database, this.Ds, tableId)
 			if err != nil {
 				fmt.Println(err)
 			}
@@ -94,7 +95,7 @@ func (this *Gorest) Serve() {
 			for k, v := range m {
 				mUpper[strings.ToUpper(k)] = v
 			}
-			dbo, err := getDbo(this.Ds, tableId)
+			dbo, err := getDbo(this.Database, this.Ds, tableId)
 			if err != nil {
 				fmt.Println(err)
 			}
@@ -109,7 +110,7 @@ func (this *Gorest) Serve() {
 			// Remove the record.
 			dataId := restData[1]
 
-			dbo, err := getDbo(this.Ds, tableId)
+			dbo, err := getDbo(this.Database, this.Ds, tableId)
 			if err != nil {
 				fmt.Println(err)
 			}
@@ -130,13 +131,13 @@ func (this *Gorest) Serve() {
 	http.ListenAndServe(fmt.Sprint(this.Host, ":", this.Port), nil)
 }
 
-func getConn(ds string) (*sql.DB, error) {
-	db, err := sql.Open("mysql", ds)
+func getConn(database string, ds string) (*sql.DB, error) {
+	db, err := sql.Open(database, ds)
 	db.SetMaxIdleConns(10)
 	return db, err
 }
 
-func getDbo(ds string, tableId string) (DataOperator, error) {
-	db, err := getConn(ds)
-	return &MySqlDataOperator{TableId: tableId, Db: db}, err
+func getDbo(database string, ds string, tableId string) (DataOperator, error) {
+	db, err := getConn(database, ds)
+	return &MySqlDataOperator{TableId: tableId, db: db}, err
 }
