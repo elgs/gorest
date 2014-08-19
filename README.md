@@ -76,6 +76,23 @@ outputs(beautified manually):
 }
 ```
 
+#Caveat
+The default implementation of `MySqlDataOperator` assumes:
+1. all table names and field names are in upper case;
+2. each table has an field `ID` as the primary key;
+3. the `ID` field is of char(36);
+
+These restrictions will likely be removed, or be made configurable in the 
+future, by improvement or another implementation.
+
+The `DefaultDataInterceptor` is intended to be implemented to extend the 
+business logic of the applications. And the `DefaultDataOperator` is intended 
+to be implemented by database providers, in order to connect to other databases
+or other data sources.
+
+#API
+TODO
+
 #Sample Data Interceptor
 ```go
 package gorest
@@ -214,6 +231,3 @@ func (this *TDataInterceptor) AfterQueryArray(ds interface{}, data [][]string, t
 	}
 }
 ```
-
-#API
-TODO
