@@ -1,7 +1,6 @@
 package gorest
 
 import (
-	"database/sql"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -9,7 +8,6 @@ import (
 )
 
 type Gorest struct {
-	Database  string
 	Port      uint16
 	Host      string
 	UrlPrefix string
@@ -39,10 +37,7 @@ func (this *Gorest) Serve() {
 				if t != nil && len(t) > 0 && t[0] == "1" {
 					includeTotal = true
 				}
-				dbo, err := getDbo(this.Database, this.Ds, tableId)
-				if err != nil {
-					fmt.Println(err)
-				}
+				dbo := getDbo(this.Ds, tableId)
 				data, total := dbo.List("", "", 0, 25, includeTotal)
 				m := map[string]interface{}{
 					"data":  data,
@@ -58,10 +53,7 @@ func (this *Gorest) Serve() {
 				// Load record by id.
 				dataId := restData[1]
 
-				dbo, err := getDbo(this.Database, this.Ds, tableId)
-				if err != nil {
-					fmt.Println(err)
-				}
+				dbo := getDbo(this.Ds, tableId)
 				data := dbo.Load(dataId)
 
 				json, err := json.Marshal(data)
@@ -83,10 +75,7 @@ func (this *Gorest) Serve() {
 			for k, v := range m {
 				mUpper[strings.ToUpper(k)] = v
 			}
-			dbo, err := getDbo(this.Database, this.Ds, tableId)
-			if err != nil {
-				fmt.Println(err)
-			}
+			dbo := getDbo(this.Ds, tableId)
 			data := dbo.Create(mUpper)
 			json, err := json.Marshal(data)
 			if err != nil {
@@ -98,10 +87,7 @@ func (this *Gorest) Serve() {
 			// Duplicate a new record.
 			dataId := restData[1]
 
-			dbo, err := getDbo(this.Database, this.Ds, tableId)
-			if err != nil {
-				fmt.Println(err)
-			}
+			dbo := getDbo(this.Ds, tableId)
 			data := dbo.Duplicate(dataId)
 
 			json, err := json.Marshal(data)
@@ -122,10 +108,7 @@ func (this *Gorest) Serve() {
 			for k, v := range m {
 				mUpper[strings.ToUpper(k)] = v
 			}
-			dbo, err := getDbo(this.Database, this.Ds, tableId)
-			if err != nil {
-				fmt.Println(err)
-			}
+			dbo := getDbo(this.Ds, tableId)
 			data := dbo.Update(mUpper)
 			json, err := json.Marshal(data)
 			if err != nil {
@@ -137,10 +120,7 @@ func (this *Gorest) Serve() {
 			// Remove the record.
 			dataId := restData[1]
 
-			dbo, err := getDbo(this.Database, this.Ds, tableId)
-			if err != nil {
-				fmt.Println(err)
-			}
+			dbo := getDbo(this.Ds, tableId)
 			data := dbo.Delete(dataId)
 
 			json, err := json.Marshal(data)
@@ -158,13 +138,6 @@ func (this *Gorest) Serve() {
 	http.ListenAndServe(fmt.Sprint(this.Host, ":", this.Port), nil)
 }
 
-func getConn(database string, ds string) (*sql.DB, error) {
-	db, err := sql.Open(database, ds)
-	db.SetMaxIdleConns(10)
-	return db, err
-}
-
-func getDbo(database string, ds string, tableId string) (DataOperator, error) {
-	db, err := getConn(database, ds)
-	return &MySqlDataOperator{TableId: tableId, db: db}, err
+func getDbo(ds string, tableId string) DataOperator {
+	return &MySqlDataOperator{Ds: ds, TableId: tableId}
 }

@@ -12,22 +12,27 @@ import (
 type MySqlDataOperator struct {
 	*DefaultDataOperator
 	TableId string
-	db      *sql.DB
+	Ds      string
 }
 
 func (this *MySqlDataOperator) Load(id string) map[string]string {
 	dataInterceptor := GetDataInterceptor(this.TableId)
+	db, err := getConn(this.Ds)
+	defer db.Close()
+	if err != nil {
+		fmt.Println()
+	}
 	if dataInterceptor != nil {
-		ctn := dataInterceptor.BeforeLoad(this.db, this.TableId)
+		ctn := dataInterceptor.BeforeLoad(db, this.TableId)
 		if !ctn {
 			return nil
 		}
 	}
 	// Load the record
-	m, _ := gosqljson.QueryDbToMap(this.db, true,
+	m, _ := gosqljson.QueryDbToMap(db, true,
 		fmt.Sprint("SELECT * FROM ", this.TableId, " WHERE ID=?"), id)
 	if dataInterceptor != nil {
-		dataInterceptor.AfterLoad(this.db, m[0])
+		dataInterceptor.AfterLoad(db, m[0])
 	}
 	if m != nil && len(m) == 1 {
 		return m[0]
@@ -37,12 +42,17 @@ func (this *MySqlDataOperator) Load(id string) map[string]string {
 
 }
 func (this *MySqlDataOperator) List(where string, order string, start int64, limit int64, includeTotal bool) ([]map[string]string, int64) {
-	m, _ := gosqljson.QueryDbToMap(this.db, true,
+	db, err := getConn(this.Ds)
+	defer db.Close()
+	if err != nil {
+		fmt.Println()
+	}
+	m, _ := gosqljson.QueryDbToMap(db, true,
 		fmt.Sprint("SELECT * FROM ", this.TableId,
 			" WHERE 1=1 ", where, " ", order, " LIMIT ?,?"), start, limit)
 	cnt := -1
 	if includeTotal {
-		c, err := gosqljson.QueryDbToMap(this.db, false,
+		c, err := gosqljson.QueryDbToMap(db, false,
 			fmt.Sprint("SELECT COUNT(*) AS CNT FROM ", this.TableId, " WHERE 1=1 ", where))
 		if err != nil {
 			fmt.Println(err)
@@ -56,8 +66,13 @@ func (this *MySqlDataOperator) List(where string, order string, start int64, lim
 }
 func (this *MySqlDataOperator) Create(data map[string]interface{}) interface{} {
 	dataInterceptor := GetDataInterceptor(this.TableId)
+	db, err := getConn(this.Ds)
+	defer db.Close()
+	if err != nil {
+		fmt.Println()
+	}
 	if dataInterceptor != nil {
-		ctn := dataInterceptor.BeforeCreate(this.db, data)
+		ctn := dataInterceptor.BeforeCreate(db, data)
 		if !ctn {
 			return nil
 		}
@@ -75,16 +90,21 @@ func (this *MySqlDataOperator) Create(data map[string]interface{}) interface{} {
 	}
 	sets := buffer.String()
 	sets = sets[0 : len(sets)-1]
-	gosqljson.ExecDb(this.db, fmt.Sprint("INSERT INTO ", this.TableId, " SET ", sets), values...)
+	gosqljson.ExecDb(db, fmt.Sprint("INSERT INTO ", this.TableId, " SET ", sets), values...)
 	if dataInterceptor != nil {
-		dataInterceptor.AfterCreate(this.db, data)
+		dataInterceptor.AfterCreate(db, data)
 	}
 	return data["ID"]
 }
 func (this *MySqlDataOperator) Update(data map[string]interface{}) int64 {
 	dataInterceptor := GetDataInterceptor(this.TableId)
+	db, err := getConn(this.Ds)
+	defer db.Close()
+	if err != nil {
+		fmt.Println()
+	}
 	if dataInterceptor != nil {
-		ctn := dataInterceptor.BeforeUpdate(this.db, nil, nil)
+		ctn := dataInterceptor.BeforeUpdate(db, nil, nil)
 		if !ctn {
 			return 0
 		}
@@ -106,25 +126,30 @@ func (this *MySqlDataOperator) Update(data map[string]interface{}) int64 {
 	values = append(values, id)
 	sets := buffer.String()
 	sets = sets[0 : len(sets)-1]
-	rowsAffected, err := gosqljson.ExecDb(this.db, fmt.Sprint("UPDATE ", this.TableId, " SET ", sets, " WHERE ID=?"), values...)
+	rowsAffected, err := gosqljson.ExecDb(db, fmt.Sprint("UPDATE ", this.TableId, " SET ", sets, " WHERE ID=?"), values...)
 	if err != nil {
 		fmt.Println(err)
 	}
 	if dataInterceptor != nil {
-		dataInterceptor.AfterUpdate(this.db, nil, nil)
+		dataInterceptor.AfterUpdate(db, nil, nil)
 	}
 	return rowsAffected
 }
 func (this *MySqlDataOperator) Duplicate(id string) interface{} {
 	dataInterceptor := GetDataInterceptor(this.TableId)
+	db, err := getConn(this.Ds)
+	defer db.Close()
+	if err != nil {
+		fmt.Println()
+	}
 	if dataInterceptor != nil {
-		ctn := dataInterceptor.BeforeDuplicate(this.db, nil, nil)
+		ctn := dataInterceptor.BeforeDuplicate(db, nil, nil)
 		if !ctn {
 			return nil
 		}
 	}
 	// Duplicate the record
-	data, _ := gosqljson.QueryDbToMap(this.db, false,
+	data, _ := gosqljson.QueryDbToMap(db, false,
 		fmt.Sprint("SELECT * FROM ", this.TableId, " WHERE ID=?"), id)
 	if data == nil || len(data) != 1 {
 		return nil
@@ -145,28 +170,38 @@ func (this *MySqlDataOperator) Duplicate(id string) interface{} {
 	}
 	sets := buffer.String()
 	sets = sets[0 : len(sets)-1]
-	gosqljson.ExecDb(this.db, fmt.Sprint("INSERT INTO ", this.TableId, " SET ", sets), newValues...)
+	gosqljson.ExecDb(db, fmt.Sprint("INSERT INTO ", this.TableId, " SET ", sets), newValues...)
 
 	if dataInterceptor != nil {
-		dataInterceptor.AfterDuplicate(this.db, nil, nil)
+		dataInterceptor.AfterDuplicate(db, nil, nil)
 	}
 	return newId
 }
 func (this *MySqlDataOperator) Delete(id string) int64 {
 	dataInterceptor := GetDataInterceptor(this.TableId)
+	db, err := getConn(this.Ds)
+	defer db.Close()
+	if err != nil {
+		fmt.Println()
+	}
 	if dataInterceptor != nil {
-		ctn := dataInterceptor.BeforeDelete(this.db, this.TableId)
+		ctn := dataInterceptor.BeforeDelete(db, this.TableId)
 		if !ctn {
 			return 0
 		}
 	}
 	// Delete the record
-	rowsAffected, err := gosqljson.ExecDb(this.db, fmt.Sprint("DELETE FROM ", this.TableId, " WHERE ID=?"), id)
+	rowsAffected, err := gosqljson.ExecDb(db, fmt.Sprint("DELETE FROM ", this.TableId, " WHERE ID=?"), id)
 	if err != nil {
 		fmt.Println(err)
 	}
 	if dataInterceptor != nil {
-		dataInterceptor.AfterDelete(this.db, this.TableId)
+		dataInterceptor.AfterDelete(db, this.TableId)
 	}
 	return rowsAffected
+}
+func getConn(ds string) (*sql.DB, error) {
+	db, err := sql.Open("mysql", ds)
+	db.SetMaxIdleConns(10)
+	return db, err
 }
