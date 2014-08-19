@@ -35,7 +35,7 @@ func (this *Gorest) Serve() {
 				fmt.Println("sql.Open:", err)
 			}
 
-			dbo := &DbOperator{TableId: tableId, Db: db}
+			dbo := &MySqlDataOperator{TableId: tableId, Db: db}
 			data := dbo.Load(dataId)
 
 			json, err := json.Marshal(data)

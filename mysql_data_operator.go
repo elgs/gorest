@@ -9,12 +9,12 @@ import (
 	"strconv"
 )
 
-type DbOperator struct {
+type MySqlDataOperator struct {
 	TableId string
 	Db      *sql.DB
 }
 
-func (this *DbOperator) Load(id string) map[string]string {
+func (this *MySqlDataOperator) Load(id string) map[string]string {
 	dataInterceptor := GetDataInterceptor(this.TableId)
 	if dataInterceptor != nil {
 		ctn := dataInterceptor.BeforeLoad(this.Db, this.TableId)
@@ -35,7 +35,7 @@ func (this *DbOperator) Load(id string) map[string]string {
 	}
 
 }
-func (this *DbOperator) List(where string, order string, start int64, limit int64) ([]map[string]string, int64) {
+func (this *MySqlDataOperator) List(where string, order string, start int64, limit int64) ([]map[string]string, int64) {
 	m := gosqljson.QueryDbToMap(this.Db, true,
 		fmt.Sprint("SELECT * FROM ", this.TableId,
 			" WHERE 1=1 ", where, " ", order, " LIMIT ?,?"), start, limit)
@@ -47,7 +47,7 @@ func (this *DbOperator) List(where string, order string, start int64, limit int6
 	}
 	return m, int64(cnt)
 }
-func (this *DbOperator) Create(data map[string]interface{}) interface{} {
+func (this *MySqlDataOperator) Create(data map[string]interface{}) interface{} {
 	dataInterceptor := GetDataInterceptor(this.TableId)
 	if dataInterceptor != nil {
 		ctn := dataInterceptor.BeforeCreate(this.Db, data)
@@ -74,7 +74,7 @@ func (this *DbOperator) Create(data map[string]interface{}) interface{} {
 	}
 	return data["ID"]
 }
-func (this *DbOperator) Update(data map[string]interface{}) int64 {
+func (this *MySqlDataOperator) Update(data map[string]interface{}) int64 {
 	dataInterceptor := GetDataInterceptor(this.TableId)
 	if dataInterceptor != nil {
 		ctn := dataInterceptor.BeforeUpdate(this.Db, nil, nil)
@@ -108,7 +108,7 @@ func (this *DbOperator) Update(data map[string]interface{}) int64 {
 	}
 	return rowsAffected
 }
-func (this *DbOperator) Duplicate(id string) interface{} {
+func (this *MySqlDataOperator) Duplicate(id string) interface{} {
 	dataInterceptor := GetDataInterceptor(this.TableId)
 	if dataInterceptor != nil {
 		ctn := dataInterceptor.BeforeDuplicate(this.Db, nil, nil)
@@ -145,7 +145,7 @@ func (this *DbOperator) Duplicate(id string) interface{} {
 	}
 	return newId
 }
-func (this *DbOperator) Delete(id string) int64 {
+func (this *MySqlDataOperator) Delete(id string) int64 {
 	dataInterceptor := GetDataInterceptor(this.TableId)
 	if dataInterceptor != nil {
 		ctn := dataInterceptor.BeforeDelete(this.Db, this.TableId)
