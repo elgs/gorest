@@ -12,7 +12,7 @@ type Gorest struct {
 	Port      uint16
 	Host      string
 	UrlPrefix string
-	Ds        string
+	Dbo       DataOperator
 }
 
 func (this *Gorest) Serve() {
@@ -56,11 +56,10 @@ func (this *Gorest) Serve() {
 				}
 				var data interface{}
 				var total int64 = -1
-				dbo := &MySqlDataOperator{Ds: this.Ds, TableId: tableId}
 				if array {
-					data, total = dbo.ListArray(where, order, start, limit, includeTotal)
+					data, total = this.Dbo.ListArray(tableId, where, order, start, limit, includeTotal)
 				} else {
-					data, total = dbo.ListMap(where, order, start, limit, includeTotal)
+					data, total = this.Dbo.ListMap(tableId, where, order, start, limit, includeTotal)
 				}
 				m := map[string]interface{}{
 					"data":  data,
@@ -77,8 +76,7 @@ func (this *Gorest) Serve() {
 				// Load record by id.
 				dataId := restData[1]
 
-				dbo := &MySqlDataOperator{Ds: this.Ds, TableId: tableId}
-				data := dbo.Load(dataId)
+				data := this.Dbo.Load(tableId, dataId)
 
 				json, err := json.Marshal(data)
 				if err != nil {
@@ -100,8 +98,7 @@ func (this *Gorest) Serve() {
 			for k, v := range m {
 				mUpper[strings.ToUpper(k)] = v
 			}
-			dbo := &MySqlDataOperator{Ds: this.Ds, TableId: tableId}
-			data := dbo.Create(mUpper)
+			data := this.Dbo.Create(tableId, mUpper)
 			json, err := json.Marshal(data)
 			if err != nil {
 				http.Error(w, err.Error(), 500)
@@ -113,8 +110,7 @@ func (this *Gorest) Serve() {
 			// Duplicate a new record.
 			dataId := restData[1]
 
-			dbo := &MySqlDataOperator{Ds: this.Ds, TableId: tableId}
-			data := dbo.Duplicate(dataId)
+			data := this.Dbo.Duplicate(tableId, dataId)
 
 			json, err := json.Marshal(data)
 			if err != nil {
@@ -136,8 +132,7 @@ func (this *Gorest) Serve() {
 			for k, v := range m {
 				mUpper[strings.ToUpper(k)] = v
 			}
-			dbo := &MySqlDataOperator{Ds: this.Ds, TableId: tableId}
-			data := dbo.Update(mUpper)
+			data := this.Dbo.Update(tableId, mUpper)
 			json, err := json.Marshal(data)
 			if err != nil {
 				http.Error(w, err.Error(), 500)
@@ -149,8 +144,7 @@ func (this *Gorest) Serve() {
 			// Remove the record.
 			dataId := restData[1]
 
-			dbo := &MySqlDataOperator{Ds: this.Ds, TableId: tableId}
-			data := dbo.Delete(dataId)
+			data := this.Dbo.Delete(tableId, dataId)
 
 			json, err := json.Marshal(data)
 			if err != nil {

@@ -21,6 +21,14 @@ type DataInterceptor interface {
 	AfterDuplicate(ds interface{}, oldData map[string]interface{}, data map[string]interface{})
 	BeforeDelete(ds interface{}, id string) bool
 	AfterDelete(ds interface{}, id string)
+	BeforeListMap(ds interface{}, data []map[string]string) bool
+	AfterListMap(ds interface{}, data []map[string]string)
+	BeforeListArray(ds interface{}, data [][]string) bool
+	AfterListArray(ds interface{}, data [][]string)
+	BeforeQuerytMap(ds interface{}, data []map[string]string) bool
+	AfterQueryMap(ds interface{}, data []map[string]string)
+	BeforeQueryArray(ds interface{}, data [][]string) bool
+	AfterQueryArray(ds interface{}, data [][]string)
 }
 
 type DefaultDataInterceptor struct{}
@@ -28,8 +36,7 @@ type DefaultDataInterceptor struct{}
 func (this *DefaultDataInterceptor) BeforeLoad(ds interface{}, id string) bool {
 	return true
 }
-func (this *DefaultDataInterceptor) AfterLoad(ds interface{}, data map[string]string) {
-}
+func (this *DefaultDataInterceptor) AfterLoad(ds interface{}, data map[string]string) {}
 func (this *DefaultDataInterceptor) BeforeCreate(ds interface{}, data map[string]interface{}) bool {
 	return true
 }
@@ -48,3 +55,19 @@ func (this *DefaultDataInterceptor) BeforeDelete(ds interface{}, id string) bool
 	return true
 }
 func (this *DefaultDataInterceptor) AfterDelete(ds interface{}, id string) {}
+func (this *DefaultDataInterceptor) BeforeListMap(ds interface{}, data []map[string]string) bool {
+	return true
+}
+func (this *DefaultDataInterceptor) AfterListMap(ds interface{}, data []map[string]string) {}
+func (this *DefaultDataInterceptor) BeforeListArray(ds interface{}, data [][]string) bool {
+	return true
+}
+func (this *DefaultDataInterceptor) AfterListArray(ds interface{}, data [][]string) {}
+func (this *DefaultDataInterceptor) BeforeQuerytMap(ds interface{}, data []map[string]string) bool {
+	return true
+}
+func (this *DefaultDataInterceptor) AfterQueryMap(ds interface{}, data []map[string]string) {}
+func (this *DefaultDataInterceptor) BeforeQueryArray(ds interface{}, data [][]string) bool {
+	return true
+}
+func (this *DefaultDataInterceptor) AfterQueryArray(ds interface{}, data [][]string) {}
