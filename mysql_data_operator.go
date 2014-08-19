@@ -23,7 +23,7 @@ func (this *MySqlDataOperator) Load(id string) map[string]string {
 		}
 	}
 	// Load the record
-	m := gosqljson.QueryDbToMap(this.Db, true,
+	m, _ := gosqljson.QueryDbToMap(this.Db, true,
 		fmt.Sprint("SELECT * FROM ", this.TableId, " WHERE ID=?"), id)
 	if dataInterceptor != nil {
 		dataInterceptor.AfterLoad(this.Db, m[0])
@@ -36,10 +36,10 @@ func (this *MySqlDataOperator) Load(id string) map[string]string {
 
 }
 func (this *MySqlDataOperator) List(where string, order string, start int64, limit int64) ([]map[string]string, int64) {
-	m := gosqljson.QueryDbToMap(this.Db, true,
+	m, _ := gosqljson.QueryDbToMap(this.Db, true,
 		fmt.Sprint("SELECT * FROM ", this.TableId,
 			" WHERE 1=1 ", where, " ", order, " LIMIT ?,?"), start, limit)
-	c := gosqljson.QueryDbToMap(this.Db, false,
+	c, _ := gosqljson.QueryDbToMap(this.Db, false,
 		fmt.Sprint("SELECT COUNT(*) AS CNT FROM ", this.TableId, " WHERE 1=1 ", where))
 	cnt, err := strconv.Atoi(c[0]["CNT"])
 	if err != nil {
@@ -117,7 +117,7 @@ func (this *MySqlDataOperator) Duplicate(id string) interface{} {
 		}
 	}
 	// Duplicate the record
-	data := gosqljson.QueryDbToMap(this.Db, false,
+	data, _ := gosqljson.QueryDbToMap(this.Db, false,
 		fmt.Sprint("SELECT * FROM ", this.TableId, " WHERE ID=?"), id)
 	if data == nil || len(data) != 1 {
 		return nil
