@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
@@ -33,6 +34,10 @@ func (this *Gorest) Serve() {
 				//List records.
 				t := r.FormValue("total")
 				a := r.FormValue("array")
+				where := r.FormValue("where")
+				order := r.FormValue("order")
+				s := r.FormValue("start")
+				l := r.FormValue("limit")
 				includeTotal := false
 				array := false
 				if t == "1" {
@@ -41,13 +46,21 @@ func (this *Gorest) Serve() {
 				if a == "1" {
 					array = true
 				}
+				start, err := strconv.ParseInt(s, 10, 0)
+				if err != nil {
+					start = 0
+				}
+				limit, err := strconv.ParseInt(l, 10, 0)
+				if err != nil {
+					limit = 25
+				}
 				var data interface{}
 				var total int64 = -1
 				dbo := &MySqlDataOperator{Ds: this.Ds, TableId: tableId}
 				if array {
-					data, total = dbo.ListArray("", "", 0, 25, includeTotal)
+					data, total = dbo.ListArray(where, order, start, limit, includeTotal)
 				} else {
-					data, total = dbo.ListMap("", "", 0, 25, includeTotal)
+					data, total = dbo.ListMap(where, order, start, limit, includeTotal)
 				}
 				m := map[string]interface{}{
 					"data":  data,
