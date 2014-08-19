@@ -44,8 +44,44 @@ func (this *Gorest) Serve() {
 			jsonString := string(json)
 			fmt.Fprintf(w, jsonString)
 		case "POST":
-			// Create a new record.
-			fmt.Println(r.Method, ": ", urlPath)
+			// Create the record.
+			decoder := json.NewDecoder(r.Body)
+			var m map[string]interface{}
+			err := decoder.Decode(&m)
+			if err != nil {
+				fmt.Println(err)
+			}
+			mUpper := make(map[string]interface{})
+			for k, v := range m {
+				mUpper[strings.ToUpper(k)] = v
+			}
+			dbo, err := getDbo(this.Ds, tableId)
+			if err != nil {
+				fmt.Println(err)
+			}
+			data := dbo.Create(mUpper)
+			json, err := json.Marshal(data)
+			if err != nil {
+				fmt.Println(err)
+			}
+			jsonString := string(json)
+			fmt.Fprintf(w, jsonString)
+		case "COPY":
+			// Duplicate a new record.
+			dataId := restData[1]
+
+			dbo, err := getDbo(this.Ds, tableId)
+			if err != nil {
+				fmt.Println(err)
+			}
+			data := dbo.Duplicate(dataId)
+
+			json, err := json.Marshal(data)
+			if err != nil {
+				fmt.Println(err)
+			}
+			jsonString := string(json)
+			fmt.Fprintf(w, jsonString)
 		case "PUT":
 			// Update an existing record.
 			fmt.Println(r.Method, ": ", urlPath)
@@ -68,7 +104,6 @@ func (this *Gorest) Serve() {
 		default:
 			// Give an error message.
 		}
-		//fmt.Fprintf(w, "Hello, %q", html.EscapeString(r.URL.Path))
 	}
 
 	http.HandleFunc("/", handler)
