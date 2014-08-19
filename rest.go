@@ -104,7 +104,8 @@ func (this *Gorest) Serve() {
 			data := dbo.Create(mUpper)
 			json, err := json.Marshal(data)
 			if err != nil {
-				fmt.Println(err)
+				http.Error(w, err.Error(), 500)
+				return
 			}
 			jsonString := string(json)
 			fmt.Fprintf(w, jsonString)
@@ -117,7 +118,8 @@ func (this *Gorest) Serve() {
 
 			json, err := json.Marshal(data)
 			if err != nil {
-				fmt.Println(err)
+				http.Error(w, err.Error(), 500)
+				return
 			}
 			jsonString := string(json)
 			fmt.Fprintf(w, jsonString)
@@ -127,7 +129,8 @@ func (this *Gorest) Serve() {
 			var m map[string]interface{}
 			err := decoder.Decode(&m)
 			if err != nil {
-				fmt.Println(err)
+				http.Error(w, err.Error(), 500)
+				return
 			}
 			mUpper := make(map[string]interface{})
 			for k, v := range m {
@@ -137,7 +140,8 @@ func (this *Gorest) Serve() {
 			data := dbo.Update(mUpper)
 			json, err := json.Marshal(data)
 			if err != nil {
-				fmt.Println(err)
+				http.Error(w, err.Error(), 500)
+				return
 			}
 			jsonString := string(json)
 			fmt.Fprintf(w, jsonString)
@@ -150,7 +154,8 @@ func (this *Gorest) Serve() {
 
 			json, err := json.Marshal(data)
 			if err != nil {
-				fmt.Println(err)
+				http.Error(w, err.Error(), 500)
+				return
 			}
 			jsonString := string(json)
 			fmt.Fprintf(w, jsonString)
