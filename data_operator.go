@@ -2,7 +2,8 @@ package gorest
 
 type DataOperator interface {
 	Load(id string) map[string]string
-	List(where string, order string, start int64, limit int64, includeTotal bool) ([]map[string]string, int64)
+	ListMap(where string, order string, start int64, limit int64, includeTotal bool) ([]map[string]string, int64)
+	ListArray(where string, order string, start int64, limit int64, includeTotal bool) ([][]string, int64)
 	Create(data map[string]interface{}) interface{}
 	Update(data map[string]interface{}) int64
 	Duplicate(id string) interface{}
@@ -15,7 +16,10 @@ type DefaultDataOperator struct {
 func (this *DefaultDataOperator) Load(id string) map[string]string {
 	return nil
 }
-func (this *DefaultDataOperator) List(where string, order string, start int64, limit int64, includeTotal bool) []map[string]string {
+func (this *DefaultDataOperator) ListMap(where string, order string, start int64, limit int64, includeTotal bool) []map[string]string {
+	return nil
+}
+func (this *DefaultDataOperator) ListArray(where string, order string, start int64, limit int64, includeTotal bool) [][]string {
 	return nil
 }
 func (this *DefaultDataOperator) Create(data map[string]interface{}) (id interface{}) {

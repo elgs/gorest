@@ -31,21 +31,32 @@ func (this *Gorest) Serve() {
 				strings.HasPrefix(restData[1], "?") ||
 				len(restData[1]) == 0 {
 				//List records.
-				p := r.URL.Query()
-				t := p["total"]
+				t := r.FormValue("total")
+				a := r.FormValue("array")
 				includeTotal := false
-				if t != nil && len(t) > 0 && t[0] == "1" {
+				array := false
+				if t == "1" {
 					includeTotal = true
 				}
+				if a == "1" {
+					array = true
+				}
+				var data interface{}
+				var total int64 = -1
 				dbo := &MySqlDataOperator{Ds: this.Ds, TableId: tableId}
-				data, total := dbo.List("", "", 0, 25, includeTotal)
+				if array {
+					data, total = dbo.ListArray("", "", 0, 25, includeTotal)
+				} else {
+					data, total = dbo.ListMap("", "", 0, 25, includeTotal)
+				}
 				m := map[string]interface{}{
 					"data":  data,
 					"total": total,
 				}
 				json, err := json.Marshal(m)
 				if err != nil {
-					fmt.Println(err)
+					http.Error(w, err.Error(), 500)
+					return
 				}
 				jsonString := string(json)
 				fmt.Fprintf(w, jsonString)
@@ -58,7 +69,8 @@ func (this *Gorest) Serve() {
 
 				json, err := json.Marshal(data)
 				if err != nil {
-					fmt.Println(err)
+					http.Error(w, err.Error(), 500)
+					return
 				}
 				jsonString := string(json)
 				fmt.Fprintf(w, jsonString)

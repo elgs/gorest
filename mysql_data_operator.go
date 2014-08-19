@@ -41,7 +41,7 @@ func (this *MySqlDataOperator) Load(id string) map[string]string {
 	}
 
 }
-func (this *MySqlDataOperator) List(where string, order string, start int64, limit int64, includeTotal bool) ([]map[string]string, int64) {
+func (this *MySqlDataOperator) ListMap(where string, order string, start int64, limit int64, includeTotal bool) ([]map[string]string, int64) {
 	db, err := getConn(this.Ds)
 	defer db.Close()
 	if err != nil {
@@ -63,6 +63,29 @@ func (this *MySqlDataOperator) List(where string, order string, start int64, lim
 		}
 	}
 	return m, int64(cnt)
+}
+func (this *MySqlDataOperator) ListArray(where string, order string, start int64, limit int64, includeTotal bool) ([][]string, int64) {
+	db, err := getConn(this.Ds)
+	defer db.Close()
+	if err != nil {
+		fmt.Println()
+	}
+	a, _ := gosqljson.QueryDbToArray(db, true,
+		fmt.Sprint("SELECT * FROM ", this.TableId,
+			" WHERE 1=1 ", where, " ", order, " LIMIT ?,?"), start, limit)
+	cnt := -1
+	if includeTotal {
+		c, err := gosqljson.QueryDbToMap(db, false,
+			fmt.Sprint("SELECT COUNT(*) AS CNT FROM ", this.TableId, " WHERE 1=1 ", where))
+		if err != nil {
+			fmt.Println(err)
+		}
+		cnt, err = strconv.Atoi(c[0]["CNT"])
+		if err != nil {
+			fmt.Println(err)
+		}
+	}
+	return a, int64(cnt)
 }
 func (this *MySqlDataOperator) Create(data map[string]interface{}) interface{} {
 	dataInterceptor := GetDataInterceptor(this.TableId)
