@@ -10,6 +10,7 @@ import (
 )
 
 type MySqlDataOperator struct {
+	*DefaultDataOperator
 	TableId string
 	Db      *sql.DB
 }

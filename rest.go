@@ -17,6 +17,7 @@ type Gorest struct {
 
 func (this *Gorest) Serve() {
 	handler := func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
 		urlPath := r.URL.Path
 		urlPrefix := fmt.Sprint("/", this.UrlPrefix, "/")
 		if !strings.HasPrefix(urlPath, urlPrefix) {
@@ -29,13 +30,11 @@ func (this *Gorest) Serve() {
 		case "GET":
 			// Serve the resource.
 			dataId := restData[1]
-			db, err := sql.Open("mysql", this.Ds)
-			defer db.Close()
-			if err != nil {
-				fmt.Println("sql.Open:", err)
-			}
 
-			dbo := &MySqlDataOperator{TableId: tableId, Db: db}
+			dbo, err := getDbo(this.Ds, tableId)
+			if err != nil {
+				fmt.Println(err)
+			}
 			data := dbo.Load(dataId)
 
 			json, err := json.Marshal(data)
@@ -52,7 +51,20 @@ func (this *Gorest) Serve() {
 			fmt.Println(r.Method, ": ", urlPath)
 		case "DELETE":
 			// Remove the record.
-			fmt.Println(r.Method, ": ", urlPath)
+			dataId := restData[1]
+
+			dbo, err := getDbo(this.Ds, tableId)
+			if err != nil {
+				fmt.Println(err)
+			}
+			data := dbo.Delete(dataId)
+
+			json, err := json.Marshal(data)
+			if err != nil {
+				fmt.Println(err)
+			}
+			jsonString := string(json)
+			fmt.Fprintf(w, jsonString)
 		default:
 			// Give an error message.
 		}
@@ -61,4 +73,15 @@ func (this *Gorest) Serve() {
 
 	http.HandleFunc("/", handler)
 	http.ListenAndServe(fmt.Sprint(this.Host, ":", this.Port), nil)
+}
+
+func getConn(ds string) (*sql.DB, error) {
+	db, err := sql.Open("mysql", ds)
+	db.SetMaxIdleConns(10)
+	return db, err
+}
+
+func getDbo(ds string, tableId string) (DataOperator, error) {
+	db, err := getConn(ds)
+	return &MySqlDataOperator{TableId: tableId, Db: db}, err
 }
