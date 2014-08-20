@@ -268,7 +268,10 @@ func (this *MySqlDataOperator) Delete(tableId string, id string) int64 {
 	return rowsAffected
 }
 func (this *MySqlDataOperator) QueryMap(tableId string, sqlSelect string, sqlSelectCount string, start int64, limit int64, includeTotal bool) ([]map[string]string, int64) {
-	if !isSelect(sqlSelect) || !isSelect(sqlSelectCount) {
+	if !isSelect(sqlSelect) {
+		return nil, -1
+	}
+	if includeTotal && !isSelect(sqlSelectCount) {
 		return nil, -1
 	}
 	db, err := getConn(this.Ds)
@@ -311,7 +314,10 @@ func (this *MySqlDataOperator) QueryMap(tableId string, sqlSelect string, sqlSel
 	return m, int64(cnt)
 }
 func (this *MySqlDataOperator) QueryArray(tableId string, sqlSelect string, sqlSelectCount string, start int64, limit int64, includeTotal bool) ([][]string, int64) {
-	if !isSelect(sqlSelect) || !isSelect(sqlSelectCount) {
+	if !isSelect(sqlSelect) {
+		return nil, -1
+	}
+	if includeTotal && !isSelect(sqlSelectCount) {
 		return nil, -1
 	}
 	db, err := getConn(this.Ds)
