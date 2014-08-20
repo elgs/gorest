@@ -12,18 +12,32 @@ package main
 
 import (
 	"github.com/elgs/gorest"
+	"fmt"
 )
 
 func main() {
-	ds := "user:pass@tcp(host:3306)/test.test"
+	ds := "user:pass@tcp(host:3306)/test"
 	dbo := &gorest.MySqlDataOperator{Ds: ds}
 	r := &gorest.Gorest{
-		Port:      8080,
+		EnableHttp: true,
+		HostHttp:   "0.0.0.0",
+		PortHttp:   8080,
+
+		EnableHttps:   true,
+		HostHttps:     "0.0.0.0",
+		PortHttps:     8433,
+		CertFileHttps: "cert.crt",
+		KeyFileHttps:  "private.key",
+
 		UrlPrefix: "api",
 		Dbo:       dbo}
 	r.Serve()
+	if r.EnableHttp || r.EnableHttps {
+		select {}
+	} else {
+		fmt.Println("Neither http nor https is listening, therefore I am quiting.")
+	}
 }
-
 ```
 where in the test.TEST table:
 ```
