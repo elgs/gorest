@@ -12,7 +12,6 @@ package main
 
 import (
 	"github.com/elgs/gorest"
-	"fmt"
 )
 
 func main() {
@@ -32,11 +31,6 @@ func main() {
 		UrlPrefix: "api",
 		Dbo:       dbo}
 	r.Serve()
-	if r.EnableHttp || r.EnableHttps {
-		select {}
-	} else {
-		fmt.Println("Neither http nor https is listening, therefore I am quiting.")
-	}
 }
 ```
 where in the test.TEST table:

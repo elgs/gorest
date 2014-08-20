@@ -223,4 +223,9 @@ func (this *Gorest) Serve() {
 			http.ListenAndServeTLS(fmt.Sprint(this.HostHttps, ":", this.PortHttps), this.CertFileHttps, this.KeyFileHttps, nil)
 		}()
 	}
+	if this.EnableHttp || this.EnableHttps {
+		select {}
+	} else {
+		fmt.Println("Neither http nor https is listening, therefore I am quiting.")
+	}
 }
