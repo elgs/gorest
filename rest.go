@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"runtime"
 	"strconv"
 	"strings"
 )
@@ -24,6 +25,7 @@ type Gorest struct {
 }
 
 func (this *Gorest) Serve() {
+	runtime.GOMAXPROCS(runtime.NumCPU())
 	handler := func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		urlPath := r.URL.Path
