@@ -25,7 +25,7 @@ func main() {
 }
 
 ```
-where in the test.test table:
+where in the test.TEST table:
 ```
 ID	NAME		CREATE_TIME
 
@@ -105,7 +105,7 @@ import (
 )
 
 func init() {
-	tableId := "test.test"
+	tableId := "test.TEST"
 	RegisterDataInterceptor(tableId, &TDataInterceptor{TableId: tableId})
 }
 

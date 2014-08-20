@@ -1,13 +1,17 @@
 package gorest
 
+import (
+	"strings"
+)
+
 var dataInterceptorRegistry = make(map[string]DataInterceptor)
 
 func RegisterDataInterceptor(id string, dataInterceptor DataInterceptor) {
-	dataInterceptorRegistry[id] = dataInterceptor
+	dataInterceptorRegistry[strings.ToUpper(id)] = dataInterceptor
 }
 
 func GetDataInterceptor(id string) DataInterceptor {
-	return dataInterceptorRegistry[id]
+	return dataInterceptorRegistry[strings.ToUpper(id)]
 }
 
 type DataInterceptor interface {
