@@ -7,7 +7,7 @@ import (
 )
 
 func init() {
-	tableId := "sam.MATERIAL_WAREHOUSE"
+	tableId := "test.TEST"
 	RegisterDataInterceptor(tableId, &TDataInterceptor{TableId: tableId})
 }
 
