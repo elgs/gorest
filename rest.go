@@ -9,8 +9,16 @@ import (
 )
 
 type Gorest struct {
-	Port      uint16
-	Host      string
+	EnableHttp bool
+	PortHttp   uint16
+	HostHttp   string
+
+	EnableHttps   bool
+	PortHttps     uint16
+	HostHttps     string
+	CertFileHttps string
+	KeyFileHttps  string
+
 	UrlPrefix string
 	Dbo       DataOperator
 }
@@ -201,7 +209,18 @@ func (this *Gorest) Serve() {
 			// Give an error message.
 		}
 	}
-
 	http.HandleFunc("/", handler)
-	http.ListenAndServe(fmt.Sprint(this.Host, ":", this.Port), nil)
+
+	if this.EnableHttp {
+		go func() {
+			fmt.Println(fmt.Sprint("Listening on http://", this.HostHttp, ":", this.PortHttp, "/", this.UrlPrefix))
+			http.ListenAndServe(fmt.Sprint(this.HostHttp, ":", this.PortHttp), nil)
+		}()
+	}
+	if this.EnableHttps {
+		go func() {
+			fmt.Println(fmt.Sprint("Listening on https://", this.HostHttps, ":", this.PortHttps, "/", this.UrlPrefix))
+			http.ListenAndServeTLS(fmt.Sprint(this.HostHttps, ":", this.PortHttps), this.CertFileHttps, this.KeyFileHttps, nil)
+		}()
+	}
 }
