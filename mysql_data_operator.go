@@ -24,6 +24,13 @@ func (this *MySqlDataOperator) Load(tableId string, id string) map[string]string
 		fmt.Println(err)
 		return ret
 	}
+
+	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
+		ctn := globalDataInterceptor.BeforeLoad(db, tableId)
+		if !ctn {
+			return ret
+		}
+	}
 	dataInterceptor := GetDataInterceptor(tableId)
 	if dataInterceptor != nil {
 		ctn := dataInterceptor.BeforeLoad(db, tableId)
@@ -31,6 +38,7 @@ func (this *MySqlDataOperator) Load(tableId string, id string) map[string]string
 			return ret
 		}
 	}
+
 	// Load the record
 	m, err := gosqljson.QueryDbToMap(db, true,
 		fmt.Sprint("SELECT * FROM ", tableId, " WHERE ID=?"), id)
@@ -38,9 +46,14 @@ func (this *MySqlDataOperator) Load(tableId string, id string) map[string]string
 		fmt.Println(err)
 		return ret
 	}
+
 	if dataInterceptor != nil {
 		dataInterceptor.AfterLoad(db, m[0])
 	}
+	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
+		globalDataInterceptor.AfterLoad(db, m[0])
+	}
+
 	if m != nil && len(m) == 1 {
 		return m[0]
 	} else {
@@ -58,6 +71,13 @@ func (this *MySqlDataOperator) ListMap(tableId string, where string, order strin
 		fmt.Println(err)
 		return ret, -1
 	}
+
+	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
+		ctn := globalDataInterceptor.BeforeListMap(db, where, order, start, limit, includeTotal)
+		if !ctn {
+			return ret, -1
+		}
+	}
 	dataInterceptor := GetDataInterceptor(tableId)
 	if dataInterceptor != nil {
 		ctn := dataInterceptor.BeforeListMap(db, where, order, start, limit, includeTotal)
@@ -65,6 +85,7 @@ func (this *MySqlDataOperator) ListMap(tableId string, where string, order strin
 			return ret, -1
 		}
 	}
+
 	m, err := gosqljson.QueryDbToMap(db, true,
 		fmt.Sprint("SELECT * FROM ", tableId,
 			" WHERE 1=1 ", where, " ", order, " LIMIT ?,?"), start, limit)
@@ -86,9 +107,14 @@ func (this *MySqlDataOperator) ListMap(tableId string, where string, order strin
 			return ret, -1
 		}
 	}
+
 	if dataInterceptor != nil {
 		dataInterceptor.AfterListMap(db, m, int64(cnt))
 	}
+	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
+		globalDataInterceptor.AfterListMap(db, m, int64(cnt))
+	}
+
 	return m, int64(cnt)
 }
 func (this *MySqlDataOperator) ListArray(tableId string, where string, order string,
@@ -101,6 +127,13 @@ func (this *MySqlDataOperator) ListArray(tableId string, where string, order str
 		fmt.Println(err)
 		return ret, -1
 	}
+
+	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
+		ctn := globalDataInterceptor.BeforeListArray(db, where, order, start, limit, includeTotal)
+		if !ctn {
+			return ret, -1
+		}
+	}
 	dataInterceptor := GetDataInterceptor(tableId)
 	if dataInterceptor != nil {
 		ctn := dataInterceptor.BeforeListArray(db, where, order, start, limit, includeTotal)
@@ -108,6 +141,7 @@ func (this *MySqlDataOperator) ListArray(tableId string, where string, order str
 			return ret, -1
 		}
 	}
+
 	a, err := gosqljson.QueryDbToArray(db, true,
 		fmt.Sprint("SELECT * FROM ", tableId,
 			" WHERE 1=1 ", where, " ", order, " LIMIT ?,?"), start, limit)
@@ -129,26 +163,39 @@ func (this *MySqlDataOperator) ListArray(tableId string, where string, order str
 			return ret, -1
 		}
 	}
+
 	if dataInterceptor != nil {
 		dataInterceptor.AfterListArray(db, a, int64(cnt))
 	}
+	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
+		globalDataInterceptor.AfterListArray(db, a, int64(cnt))
+	}
+
 	return a, int64(cnt)
 }
 func (this *MySqlDataOperator) Create(tableId string, data map[string]interface{}) interface{} {
 	tableId = normalizeTableId(tableId, this.Ds)
-	dataInterceptor := GetDataInterceptor(tableId)
 	db, err := getConn(this.Ds)
 	defer db.Close()
 	if err != nil {
 		fmt.Println(err)
 		return ""
 	}
+
+	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
+		ctn := globalDataInterceptor.BeforeCreate(db, data)
+		if !ctn {
+			return ""
+		}
+	}
+	dataInterceptor := GetDataInterceptor(tableId)
 	if dataInterceptor != nil {
 		ctn := dataInterceptor.BeforeCreate(db, data)
 		if !ctn {
 			return ""
 		}
 	}
+
 	// Create the record
 	if data["ID"] == nil {
 		data["ID"] = uuid.New()
@@ -163,20 +210,32 @@ func (this *MySqlDataOperator) Create(tableId string, data map[string]interface{
 	sets := buffer.String()
 	sets = sets[0 : len(sets)-1]
 	gosqljson.ExecDb(db, fmt.Sprint("INSERT INTO ", tableId, " SET ", sets), values...)
+
 	if dataInterceptor != nil {
 		dataInterceptor.AfterCreate(db, data)
 	}
+	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
+		globalDataInterceptor.AfterCreate(db, data)
+	}
+
 	return data["ID"]
 }
 func (this *MySqlDataOperator) Update(tableId string, data map[string]interface{}) int64 {
 	tableId = normalizeTableId(tableId, this.Ds)
-	dataInterceptor := GetDataInterceptor(tableId)
 	db, err := getConn(this.Ds)
 	defer db.Close()
 	if err != nil {
 		fmt.Println(err)
 		return -1
 	}
+
+	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
+		ctn := globalDataInterceptor.BeforeUpdate(db, nil, nil)
+		if !ctn {
+			return 0
+		}
+	}
+	dataInterceptor := GetDataInterceptor(tableId)
 	if dataInterceptor != nil {
 		ctn := dataInterceptor.BeforeUpdate(db, nil, nil)
 		if !ctn {
@@ -205,26 +264,39 @@ func (this *MySqlDataOperator) Update(tableId string, data map[string]interface{
 		fmt.Println(err)
 		return -1
 	}
+
 	if dataInterceptor != nil {
 		dataInterceptor.AfterUpdate(db, nil, nil)
 	}
+	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
+		globalDataInterceptor.AfterUpdate(db, nil, nil)
+	}
+
 	return rowsAffected
 }
 func (this *MySqlDataOperator) Duplicate(tableId string, id string) interface{} {
 	tableId = normalizeTableId(tableId, this.Ds)
-	dataInterceptor := GetDataInterceptor(tableId)
 	db, err := getConn(this.Ds)
 	defer db.Close()
 	if err != nil {
 		fmt.Println(err)
 		return ""
 	}
+
+	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
+		ctn := globalDataInterceptor.BeforeDuplicate(db, nil, nil)
+		if !ctn {
+			return ""
+		}
+	}
+	dataInterceptor := GetDataInterceptor(tableId)
 	if dataInterceptor != nil {
 		ctn := dataInterceptor.BeforeDuplicate(db, nil, nil)
 		if !ctn {
 			return ""
 		}
 	}
+
 	// Duplicate the record
 	data, _ := gosqljson.QueryDbToMap(db, false,
 		fmt.Sprint("SELECT * FROM ", tableId, " WHERE ID=?"), id)
@@ -252,17 +324,28 @@ func (this *MySqlDataOperator) Duplicate(tableId string, id string) interface{} 
 	if dataInterceptor != nil {
 		dataInterceptor.AfterDuplicate(db, nil, nil)
 	}
+	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
+		globalDataInterceptor.AfterDuplicate(db, nil, nil)
+	}
+
 	return newId
 }
 func (this *MySqlDataOperator) Delete(tableId string, id string) int64 {
 	tableId = normalizeTableId(tableId, this.Ds)
-	dataInterceptor := GetDataInterceptor(tableId)
 	db, err := getConn(this.Ds)
 	defer db.Close()
 	if err != nil {
 		fmt.Println(err)
 		return -1
 	}
+
+	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
+		ctn := globalDataInterceptor.BeforeDelete(db, tableId)
+		if !ctn {
+			return 0
+		}
+	}
+	dataInterceptor := GetDataInterceptor(tableId)
 	if dataInterceptor != nil {
 		ctn := dataInterceptor.BeforeDelete(db, tableId)
 		if !ctn {
@@ -275,9 +358,14 @@ func (this *MySqlDataOperator) Delete(tableId string, id string) int64 {
 		fmt.Println(err)
 		return -1
 	}
+
 	if dataInterceptor != nil {
 		dataInterceptor.AfterDelete(db, tableId)
 	}
+	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
+		globalDataInterceptor.AfterDelete(db, tableId)
+	}
+
 	return rowsAffected
 }
 func (this *MySqlDataOperator) QueryMap(tableId string, sqlSelect string, sqlSelectCount string,
@@ -296,6 +384,13 @@ func (this *MySqlDataOperator) QueryMap(tableId string, sqlSelect string, sqlSel
 		fmt.Println(err)
 		return ret, -1
 	}
+
+	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
+		ctn := globalDataInterceptor.BeforeQueryMap(db, sqlSelect, sqlSelectCount, start, limit, includeTotal)
+		if !ctn {
+			return ret, -1
+		}
+	}
 	dataInterceptor := GetDataInterceptor(tableId)
 	if dataInterceptor != nil {
 		ctn := dataInterceptor.BeforeQueryMap(db, sqlSelect, sqlSelectCount, start, limit, includeTotal)
@@ -303,6 +398,7 @@ func (this *MySqlDataOperator) QueryMap(tableId string, sqlSelect string, sqlSel
 			return ret, -1
 		}
 	}
+
 	m, err := gosqljson.QueryDbToMap(db, true,
 		fmt.Sprint(sqlSelect, " LIMIT ?,?"), start, limit)
 	cnt := -1
@@ -324,9 +420,14 @@ func (this *MySqlDataOperator) QueryMap(tableId string, sqlSelect string, sqlSel
 			return ret, -1
 		}
 	}
+
 	if dataInterceptor != nil {
 		dataInterceptor.AfterQueryMap(db, m, int64(cnt))
 	}
+	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
+		globalDataInterceptor.AfterQueryMap(db, m, int64(cnt))
+	}
+
 	return m, int64(cnt)
 }
 func (this *MySqlDataOperator) QueryArray(tableId string, sqlSelect string, sqlSelectCount string,
@@ -345,6 +446,13 @@ func (this *MySqlDataOperator) QueryArray(tableId string, sqlSelect string, sqlS
 		fmt.Println(err)
 		return ret, -1
 	}
+
+	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
+		ctn := globalDataInterceptor.BeforeQueryArray(db, sqlSelect, sqlSelectCount, start, limit, includeTotal)
+		if !ctn {
+			return ret, -1
+		}
+	}
 	dataInterceptor := GetDataInterceptor(tableId)
 	if dataInterceptor != nil {
 		ctn := dataInterceptor.BeforeQueryArray(db, sqlSelect, sqlSelectCount, start, limit, includeTotal)
@@ -352,6 +460,7 @@ func (this *MySqlDataOperator) QueryArray(tableId string, sqlSelect string, sqlS
 			return ret, -1
 		}
 	}
+
 	a, err := gosqljson.QueryDbToArray(db, true,
 		fmt.Sprint(sqlSelect, " LIMIT ?,?"), start, limit)
 	if err != nil {
@@ -373,9 +482,14 @@ func (this *MySqlDataOperator) QueryArray(tableId string, sqlSelect string, sqlS
 			return ret, -1
 		}
 	}
+
 	if dataInterceptor != nil {
 		dataInterceptor.AfterQueryArray(db, a, int64(cnt))
 	}
+	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
+		globalDataInterceptor.AfterQueryArray(db, a, int64(cnt))
+	}
+
 	return a, int64(cnt)
 }
 

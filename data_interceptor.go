@@ -14,6 +14,12 @@ func GetDataInterceptor(id string) DataInterceptor {
 	return dataInterceptorRegistry[strings.ToUpper(id)]
 }
 
+var GlobalDataInterceptorRegistry = make([]DataInterceptor, 0)
+
+func RegisterGlobalDataInterceptor(globalDataInterceptor DataInterceptor) {
+	GlobalDataInterceptorRegistry = append(GlobalDataInterceptorRegistry, globalDataInterceptor)
+}
+
 type DataInterceptor interface {
 	BeforeLoad(ds interface{}, id string) bool
 	AfterLoad(ds interface{}, data map[string]string)
