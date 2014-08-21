@@ -15,7 +15,7 @@ type MySqlDataOperator struct {
 	Ds string
 }
 
-func (this *MySqlDataOperator) Load(tableId string, id string) map[string]string {
+func (this *MySqlDataOperator) Load(tableId string, id string, context map[string]interface{}) map[string]string {
 	ret := make(map[string]string, 0)
 	tableId = normalizeTableId(tableId, this.Ds)
 	db, err := getConn(this.Ds)
@@ -26,14 +26,14 @@ func (this *MySqlDataOperator) Load(tableId string, id string) map[string]string
 	}
 
 	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
-		ctn := globalDataInterceptor.BeforeLoad(db, tableId)
+		ctn := globalDataInterceptor.BeforeLoad(db, context, tableId)
 		if !ctn {
 			return ret
 		}
 	}
 	dataInterceptor := GetDataInterceptor(tableId)
 	if dataInterceptor != nil {
-		ctn := dataInterceptor.BeforeLoad(db, tableId)
+		ctn := dataInterceptor.BeforeLoad(db, context, tableId)
 		if !ctn {
 			return ret
 		}
@@ -48,10 +48,10 @@ func (this *MySqlDataOperator) Load(tableId string, id string) map[string]string
 	}
 
 	if dataInterceptor != nil {
-		dataInterceptor.AfterLoad(db, m[0])
+		dataInterceptor.AfterLoad(db, context, m[0])
 	}
 	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
-		globalDataInterceptor.AfterLoad(db, m[0])
+		globalDataInterceptor.AfterLoad(db, context, m[0])
 	}
 
 	if m != nil && len(m) == 1 {
@@ -62,7 +62,7 @@ func (this *MySqlDataOperator) Load(tableId string, id string) map[string]string
 
 }
 func (this *MySqlDataOperator) ListMap(tableId string, where string, order string,
-	start int64, limit int64, includeTotal bool) ([]map[string]string, int64) {
+	start int64, limit int64, includeTotal bool, context map[string]interface{}) ([]map[string]string, int64) {
 	ret := make([]map[string]string, 0)
 	tableId = normalizeTableId(tableId, this.Ds)
 	db, err := getConn(this.Ds)
@@ -73,14 +73,14 @@ func (this *MySqlDataOperator) ListMap(tableId string, where string, order strin
 	}
 
 	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
-		ctn := globalDataInterceptor.BeforeListMap(db, where, order, start, limit, includeTotal)
+		ctn := globalDataInterceptor.BeforeListMap(db, context, where, order, start, limit, includeTotal)
 		if !ctn {
 			return ret, -1
 		}
 	}
 	dataInterceptor := GetDataInterceptor(tableId)
 	if dataInterceptor != nil {
-		ctn := dataInterceptor.BeforeListMap(db, where, order, start, limit, includeTotal)
+		ctn := dataInterceptor.BeforeListMap(db, context, where, order, start, limit, includeTotal)
 		if !ctn {
 			return ret, -1
 		}
@@ -109,16 +109,16 @@ func (this *MySqlDataOperator) ListMap(tableId string, where string, order strin
 	}
 
 	if dataInterceptor != nil {
-		dataInterceptor.AfterListMap(db, m, int64(cnt))
+		dataInterceptor.AfterListMap(db, context, m, int64(cnt))
 	}
 	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
-		globalDataInterceptor.AfterListMap(db, m, int64(cnt))
+		globalDataInterceptor.AfterListMap(db, context, m, int64(cnt))
 	}
 
 	return m, int64(cnt)
 }
 func (this *MySqlDataOperator) ListArray(tableId string, where string, order string,
-	start int64, limit int64, includeTotal bool) ([][]string, int64) {
+	start int64, limit int64, includeTotal bool, context map[string]interface{}) ([][]string, int64) {
 	ret := make([][]string, 0)
 	tableId = normalizeTableId(tableId, this.Ds)
 	db, err := getConn(this.Ds)
@@ -129,14 +129,14 @@ func (this *MySqlDataOperator) ListArray(tableId string, where string, order str
 	}
 
 	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
-		ctn := globalDataInterceptor.BeforeListArray(db, where, order, start, limit, includeTotal)
+		ctn := globalDataInterceptor.BeforeListArray(db, context, where, order, start, limit, includeTotal)
 		if !ctn {
 			return ret, -1
 		}
 	}
 	dataInterceptor := GetDataInterceptor(tableId)
 	if dataInterceptor != nil {
-		ctn := dataInterceptor.BeforeListArray(db, where, order, start, limit, includeTotal)
+		ctn := dataInterceptor.BeforeListArray(db, context, where, order, start, limit, includeTotal)
 		if !ctn {
 			return ret, -1
 		}
@@ -165,15 +165,15 @@ func (this *MySqlDataOperator) ListArray(tableId string, where string, order str
 	}
 
 	if dataInterceptor != nil {
-		dataInterceptor.AfterListArray(db, a, int64(cnt))
+		dataInterceptor.AfterListArray(db, context, a, int64(cnt))
 	}
 	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
-		globalDataInterceptor.AfterListArray(db, a, int64(cnt))
+		globalDataInterceptor.AfterListArray(db, context, a, int64(cnt))
 	}
 
 	return a, int64(cnt)
 }
-func (this *MySqlDataOperator) Create(tableId string, data map[string]interface{}) interface{} {
+func (this *MySqlDataOperator) Create(tableId string, data map[string]interface{}, context map[string]interface{}) interface{} {
 	tableId = normalizeTableId(tableId, this.Ds)
 	db, err := getConn(this.Ds)
 	defer db.Close()
@@ -183,14 +183,14 @@ func (this *MySqlDataOperator) Create(tableId string, data map[string]interface{
 	}
 
 	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
-		ctn := globalDataInterceptor.BeforeCreate(db, data)
+		ctn := globalDataInterceptor.BeforeCreate(db, context, data)
 		if !ctn {
 			return ""
 		}
 	}
 	dataInterceptor := GetDataInterceptor(tableId)
 	if dataInterceptor != nil {
-		ctn := dataInterceptor.BeforeCreate(db, data)
+		ctn := dataInterceptor.BeforeCreate(db, context, data)
 		if !ctn {
 			return ""
 		}
@@ -212,15 +212,15 @@ func (this *MySqlDataOperator) Create(tableId string, data map[string]interface{
 	gosqljson.ExecDb(db, fmt.Sprint("INSERT INTO ", tableId, " SET ", sets), values...)
 
 	if dataInterceptor != nil {
-		dataInterceptor.AfterCreate(db, data)
+		dataInterceptor.AfterCreate(db, context, data)
 	}
 	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
-		globalDataInterceptor.AfterCreate(db, data)
+		globalDataInterceptor.AfterCreate(db, context, data)
 	}
 
 	return data["ID"]
 }
-func (this *MySqlDataOperator) Update(tableId string, data map[string]interface{}) int64 {
+func (this *MySqlDataOperator) Update(tableId string, data map[string]interface{}, context map[string]interface{}) int64 {
 	tableId = normalizeTableId(tableId, this.Ds)
 	db, err := getConn(this.Ds)
 	defer db.Close()
@@ -230,14 +230,14 @@ func (this *MySqlDataOperator) Update(tableId string, data map[string]interface{
 	}
 
 	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
-		ctn := globalDataInterceptor.BeforeUpdate(db, nil, nil)
+		ctn := globalDataInterceptor.BeforeUpdate(db, context, nil, nil)
 		if !ctn {
 			return 0
 		}
 	}
 	dataInterceptor := GetDataInterceptor(tableId)
 	if dataInterceptor != nil {
-		ctn := dataInterceptor.BeforeUpdate(db, nil, nil)
+		ctn := dataInterceptor.BeforeUpdate(db, context, nil, nil)
 		if !ctn {
 			return 0
 		}
@@ -266,15 +266,15 @@ func (this *MySqlDataOperator) Update(tableId string, data map[string]interface{
 	}
 
 	if dataInterceptor != nil {
-		dataInterceptor.AfterUpdate(db, nil, nil)
+		dataInterceptor.AfterUpdate(db, context, nil, nil)
 	}
 	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
-		globalDataInterceptor.AfterUpdate(db, nil, nil)
+		globalDataInterceptor.AfterUpdate(db, context, nil, nil)
 	}
 
 	return rowsAffected
 }
-func (this *MySqlDataOperator) Duplicate(tableId string, id string) interface{} {
+func (this *MySqlDataOperator) Duplicate(tableId string, id string, context map[string]interface{}) interface{} {
 	tableId = normalizeTableId(tableId, this.Ds)
 	db, err := getConn(this.Ds)
 	defer db.Close()
@@ -284,14 +284,14 @@ func (this *MySqlDataOperator) Duplicate(tableId string, id string) interface{} 
 	}
 
 	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
-		ctn := globalDataInterceptor.BeforeDuplicate(db, nil, nil)
+		ctn := globalDataInterceptor.BeforeDuplicate(db, context, nil, nil)
 		if !ctn {
 			return ""
 		}
 	}
 	dataInterceptor := GetDataInterceptor(tableId)
 	if dataInterceptor != nil {
-		ctn := dataInterceptor.BeforeDuplicate(db, nil, nil)
+		ctn := dataInterceptor.BeforeDuplicate(db, context, nil, nil)
 		if !ctn {
 			return ""
 		}
@@ -322,15 +322,15 @@ func (this *MySqlDataOperator) Duplicate(tableId string, id string) interface{} 
 	gosqljson.ExecDb(db, fmt.Sprint("INSERT INTO ", tableId, " SET ", sets), newValues...)
 
 	if dataInterceptor != nil {
-		dataInterceptor.AfterDuplicate(db, nil, nil)
+		dataInterceptor.AfterDuplicate(db, context, nil, nil)
 	}
 	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
-		globalDataInterceptor.AfterDuplicate(db, nil, nil)
+		globalDataInterceptor.AfterDuplicate(db, context, nil, nil)
 	}
 
 	return newId
 }
-func (this *MySqlDataOperator) Delete(tableId string, id string) int64 {
+func (this *MySqlDataOperator) Delete(tableId string, id string, context map[string]interface{}) int64 {
 	tableId = normalizeTableId(tableId, this.Ds)
 	db, err := getConn(this.Ds)
 	defer db.Close()
@@ -340,14 +340,14 @@ func (this *MySqlDataOperator) Delete(tableId string, id string) int64 {
 	}
 
 	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
-		ctn := globalDataInterceptor.BeforeDelete(db, tableId)
+		ctn := globalDataInterceptor.BeforeDelete(db, context, tableId)
 		if !ctn {
 			return 0
 		}
 	}
 	dataInterceptor := GetDataInterceptor(tableId)
 	if dataInterceptor != nil {
-		ctn := dataInterceptor.BeforeDelete(db, tableId)
+		ctn := dataInterceptor.BeforeDelete(db, context, tableId)
 		if !ctn {
 			return 0
 		}
@@ -360,16 +360,16 @@ func (this *MySqlDataOperator) Delete(tableId string, id string) int64 {
 	}
 
 	if dataInterceptor != nil {
-		dataInterceptor.AfterDelete(db, tableId)
+		dataInterceptor.AfterDelete(db, context, tableId)
 	}
 	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
-		globalDataInterceptor.AfterDelete(db, tableId)
+		globalDataInterceptor.AfterDelete(db, context, tableId)
 	}
 
 	return rowsAffected
 }
 func (this *MySqlDataOperator) QueryMap(tableId string, sqlSelect string, sqlSelectCount string,
-	start int64, limit int64, includeTotal bool) ([]map[string]string, int64) {
+	start int64, limit int64, includeTotal bool, context map[string]interface{}) ([]map[string]string, int64) {
 	ret := make([]map[string]string, 0)
 	tableId = normalizeTableId(tableId, this.Ds)
 	if !isSelect(sqlSelect) {
@@ -386,14 +386,14 @@ func (this *MySqlDataOperator) QueryMap(tableId string, sqlSelect string, sqlSel
 	}
 
 	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
-		ctn := globalDataInterceptor.BeforeQueryMap(db, sqlSelect, sqlSelectCount, start, limit, includeTotal)
+		ctn := globalDataInterceptor.BeforeQueryMap(db, context, sqlSelect, sqlSelectCount, start, limit, includeTotal)
 		if !ctn {
 			return ret, -1
 		}
 	}
 	dataInterceptor := GetDataInterceptor(tableId)
 	if dataInterceptor != nil {
-		ctn := dataInterceptor.BeforeQueryMap(db, sqlSelect, sqlSelectCount, start, limit, includeTotal)
+		ctn := dataInterceptor.BeforeQueryMap(db, context, sqlSelect, sqlSelectCount, start, limit, includeTotal)
 		if !ctn {
 			return ret, -1
 		}
@@ -422,16 +422,16 @@ func (this *MySqlDataOperator) QueryMap(tableId string, sqlSelect string, sqlSel
 	}
 
 	if dataInterceptor != nil {
-		dataInterceptor.AfterQueryMap(db, m, int64(cnt))
+		dataInterceptor.AfterQueryMap(db, context, m, int64(cnt))
 	}
 	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
-		globalDataInterceptor.AfterQueryMap(db, m, int64(cnt))
+		globalDataInterceptor.AfterQueryMap(db, context, m, int64(cnt))
 	}
 
 	return m, int64(cnt)
 }
 func (this *MySqlDataOperator) QueryArray(tableId string, sqlSelect string, sqlSelectCount string,
-	start int64, limit int64, includeTotal bool) ([][]string, int64) {
+	start int64, limit int64, includeTotal bool, context map[string]interface{}) ([][]string, int64) {
 	ret := make([][]string, 0)
 	tableId = normalizeTableId(tableId, this.Ds)
 	if !isSelect(sqlSelect) {
@@ -448,14 +448,14 @@ func (this *MySqlDataOperator) QueryArray(tableId string, sqlSelect string, sqlS
 	}
 
 	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
-		ctn := globalDataInterceptor.BeforeQueryArray(db, sqlSelect, sqlSelectCount, start, limit, includeTotal)
+		ctn := globalDataInterceptor.BeforeQueryArray(db, context, sqlSelect, sqlSelectCount, start, limit, includeTotal)
 		if !ctn {
 			return ret, -1
 		}
 	}
 	dataInterceptor := GetDataInterceptor(tableId)
 	if dataInterceptor != nil {
-		ctn := dataInterceptor.BeforeQueryArray(db, sqlSelect, sqlSelectCount, start, limit, includeTotal)
+		ctn := dataInterceptor.BeforeQueryArray(db, context, sqlSelect, sqlSelectCount, start, limit, includeTotal)
 		if !ctn {
 			return ret, -1
 		}
@@ -484,10 +484,10 @@ func (this *MySqlDataOperator) QueryArray(tableId string, sqlSelect string, sqlS
 	}
 
 	if dataInterceptor != nil {
-		dataInterceptor.AfterQueryArray(db, a, int64(cnt))
+		dataInterceptor.AfterQueryArray(db, context, a, int64(cnt))
 	}
 	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
-		globalDataInterceptor.AfterQueryArray(db, a, int64(cnt))
+		globalDataInterceptor.AfterQueryArray(db, context, a, int64(cnt))
 	}
 
 	return a, int64(cnt)
@@ -519,5 +519,5 @@ func normalizeTableId(tableId string, ds string) string {
 		return fmt.Sprint(a[0], ".", a[1])
 	}
 	db := extractDbNameFromDs(ds)
-	return fmt.Sprint(db, ".", tableId)
+	return strings.Replace(fmt.Sprint(db, ".", tableId), "'", "''", -1)
 }

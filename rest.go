@@ -27,6 +27,9 @@ type Gorest struct {
 func (this *Gorest) Serve() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	handler := func(w http.ResponseWriter, r *http.Request) {
+		context := make(map[string]interface{})
+		context["api_token_id"] = r.Header.Get("api_token_id")
+		context["api_token_key"] = r.Header.Get("api_token_key")
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		urlPath := r.URL.Path
 		urlPrefix := fmt.Sprint("/", this.UrlPrefix, "/")
@@ -67,9 +70,9 @@ func (this *Gorest) Serve() {
 				var data interface{}
 				var total int64 = -1
 				if array {
-					data, total = this.Dbo.ListArray(tableId, where, order, start, limit, includeTotal)
+					data, total = this.Dbo.ListArray(tableId, where, order, start, limit, includeTotal, context)
 				} else {
-					data, total = this.Dbo.ListMap(tableId, where, order, start, limit, includeTotal)
+					data, total = this.Dbo.ListMap(tableId, where, order, start, limit, includeTotal, context)
 				}
 				m := map[string]interface{}{
 					"data":  data,
@@ -86,7 +89,7 @@ func (this *Gorest) Serve() {
 				// Load record by id.
 				dataId := restData[1]
 
-				data := this.Dbo.Load(tableId, dataId)
+				data := this.Dbo.Load(tableId, dataId, context)
 
 				json, err := json.Marshal(data)
 				if err != nil {
@@ -123,9 +126,9 @@ func (this *Gorest) Serve() {
 				var data interface{}
 				var total int64 = -1
 				if array {
-					data, total = this.Dbo.QueryArray(tableId, sqlSelect, sqlSelectCount, start, limit, includeTotal)
+					data, total = this.Dbo.QueryArray(tableId, sqlSelect, sqlSelectCount, start, limit, includeTotal, context)
 				} else {
-					data, total = this.Dbo.QueryMap(tableId, sqlSelect, sqlSelectCount, start, limit, includeTotal)
+					data, total = this.Dbo.QueryMap(tableId, sqlSelect, sqlSelectCount, start, limit, includeTotal, context)
 				}
 				m := map[string]interface{}{
 					"data":  data,
@@ -151,7 +154,7 @@ func (this *Gorest) Serve() {
 				for k, v := range m {
 					mUpper[strings.ToUpper(k)] = v
 				}
-				data := this.Dbo.Create(tableId, mUpper)
+				data := this.Dbo.Create(tableId, mUpper, context)
 				json, err := json.Marshal(data)
 				if err != nil {
 					http.Error(w, err.Error(), 500)
@@ -164,7 +167,7 @@ func (this *Gorest) Serve() {
 			// Duplicate a new record.
 			dataId := restData[1]
 
-			data := this.Dbo.Duplicate(tableId, dataId)
+			data := this.Dbo.Duplicate(tableId, dataId, context)
 
 			json, err := json.Marshal(data)
 			if err != nil {
@@ -186,7 +189,7 @@ func (this *Gorest) Serve() {
 			for k, v := range m {
 				mUpper[strings.ToUpper(k)] = v
 			}
-			data := this.Dbo.Update(tableId, mUpper)
+			data := this.Dbo.Update(tableId, mUpper, context)
 			json, err := json.Marshal(data)
 			if err != nil {
 				http.Error(w, err.Error(), 500)
@@ -198,7 +201,7 @@ func (this *Gorest) Serve() {
 			// Remove the record.
 			dataId := restData[1]
 
-			data := this.Dbo.Delete(tableId, dataId)
+			data := this.Dbo.Delete(tableId, dataId, context)
 
 			json, err := json.Marshal(data)
 			if err != nil {
