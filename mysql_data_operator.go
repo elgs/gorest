@@ -20,7 +20,7 @@ func (this *MySqlDataOperator) Load(tableId string, id string) map[string]string
 	db, err := getConn(this.Ds)
 	defer db.Close()
 	if err != nil {
-		fmt.Println()
+		fmt.Println(err)
 		return nil
 	}
 	dataInterceptor := GetDataInterceptor(tableId)
@@ -34,7 +34,7 @@ func (this *MySqlDataOperator) Load(tableId string, id string) map[string]string
 	m, err := gosqljson.QueryDbToMap(db, true,
 		fmt.Sprint("SELECT * FROM ", tableId, " WHERE ID=?"), id)
 	if err != nil {
-		fmt.Println()
+		fmt.Println(err)
 		return nil
 	}
 	if dataInterceptor != nil {
@@ -52,7 +52,7 @@ func (this *MySqlDataOperator) ListMap(tableId string, where string, order strin
 	db, err := getConn(this.Ds)
 	defer db.Close()
 	if err != nil {
-		fmt.Println()
+		fmt.Println(err)
 		return nil, -1
 	}
 	dataInterceptor := GetDataInterceptor(tableId)
@@ -66,7 +66,7 @@ func (this *MySqlDataOperator) ListMap(tableId string, where string, order strin
 		fmt.Sprint("SELECT * FROM ", tableId,
 			" WHERE 1=1 ", where, " ", order, " LIMIT ?,?"), start, limit)
 	if err != nil {
-		fmt.Println()
+		fmt.Println(err)
 		return nil, -1
 	}
 	cnt := -1
@@ -93,7 +93,7 @@ func (this *MySqlDataOperator) ListArray(tableId string, where string, order str
 	db, err := getConn(this.Ds)
 	defer db.Close()
 	if err != nil {
-		fmt.Println()
+		fmt.Println(err)
 		return nil, -1
 	}
 	dataInterceptor := GetDataInterceptor(tableId)
@@ -135,7 +135,7 @@ func (this *MySqlDataOperator) Create(tableId string, data map[string]interface{
 	db, err := getConn(this.Ds)
 	defer db.Close()
 	if err != nil {
-		fmt.Println()
+		fmt.Println(err)
 		return nil
 	}
 	if dataInterceptor != nil {
@@ -169,7 +169,7 @@ func (this *MySqlDataOperator) Update(tableId string, data map[string]interface{
 	db, err := getConn(this.Ds)
 	defer db.Close()
 	if err != nil {
-		fmt.Println()
+		fmt.Println(err)
 		return -1
 	}
 	if dataInterceptor != nil {
@@ -210,7 +210,7 @@ func (this *MySqlDataOperator) Duplicate(tableId string, id string) interface{} 
 	db, err := getConn(this.Ds)
 	defer db.Close()
 	if err != nil {
-		fmt.Println()
+		fmt.Println(err)
 		return nil
 	}
 	if dataInterceptor != nil {
@@ -254,7 +254,7 @@ func (this *MySqlDataOperator) Delete(tableId string, id string) int64 {
 	db, err := getConn(this.Ds)
 	defer db.Close()
 	if err != nil {
-		fmt.Println()
+		fmt.Println(err)
 		return -1
 	}
 	if dataInterceptor != nil {
@@ -285,7 +285,7 @@ func (this *MySqlDataOperator) QueryMap(tableId string, sqlSelect string, sqlSel
 	db, err := getConn(this.Ds)
 	defer db.Close()
 	if err != nil {
-		fmt.Println()
+		fmt.Println(err)
 		return nil, -1
 	}
 	dataInterceptor := GetDataInterceptor(tableId)
@@ -299,7 +299,7 @@ func (this *MySqlDataOperator) QueryMap(tableId string, sqlSelect string, sqlSel
 		fmt.Sprint(sqlSelect, " LIMIT ?,?"), start, limit)
 	cnt := -1
 	if err != nil {
-		fmt.Println()
+		fmt.Println(err)
 		return nil, -1
 	}
 	if includeTotal {
@@ -332,7 +332,7 @@ func (this *MySqlDataOperator) QueryArray(tableId string, sqlSelect string, sqlS
 	db, err := getConn(this.Ds)
 	defer db.Close()
 	if err != nil {
-		fmt.Println()
+		fmt.Println(err)
 		return nil, -1
 	}
 	dataInterceptor := GetDataInterceptor(tableId)
@@ -392,8 +392,8 @@ func extractDbNameFromDs(ds string) string {
 func normalizeTableId(tableId string, ds string) string {
 	if strings.Contains(tableId, ".") {
 		a := strings.Split(tableId, ".")
-		return fmt.Sprint(a[0], ".", strings.ToUpper(a[1]))
+		return fmt.Sprint(a[0], ".", a[1])
 	}
 	db := extractDbNameFromDs(ds)
-	return fmt.Sprint(db, ".", strings.ToUpper(tableId))
+	return fmt.Sprint(db, ".", tableId)
 }

@@ -27,7 +27,7 @@ type Gorest struct {
 func (this *Gorest) Serve() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	handler := func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		urlPath := r.URL.Path
 		urlPrefix := fmt.Sprint("/", this.UrlPrefix, "/")
 		if !strings.HasPrefix(urlPath, urlPrefix) {
@@ -81,7 +81,7 @@ func (this *Gorest) Serve() {
 					return
 				}
 				jsonString := string(json)
-				fmt.Fprintf(w, jsonString)
+				fmt.Fprint(w, jsonString)
 			} else {
 				// Load record by id.
 				dataId := restData[1]
@@ -94,7 +94,7 @@ func (this *Gorest) Serve() {
 					return
 				}
 				jsonString := string(json)
-				fmt.Fprintf(w, jsonString)
+				fmt.Fprint(w, jsonString)
 			}
 		case "POST":
 			if tableId == "_query" {
@@ -137,7 +137,7 @@ func (this *Gorest) Serve() {
 					return
 				}
 				jsonString := string(json)
-				fmt.Fprintf(w, jsonString)
+				fmt.Fprint(w, jsonString)
 			} else {
 				// Create the record.
 				decoder := json.NewDecoder(r.Body)
@@ -158,7 +158,7 @@ func (this *Gorest) Serve() {
 					return
 				}
 				jsonString := string(json)
-				fmt.Fprintf(w, jsonString)
+				fmt.Fprint(w, jsonString)
 			}
 		case "COPY":
 			// Duplicate a new record.
@@ -172,7 +172,7 @@ func (this *Gorest) Serve() {
 				return
 			}
 			jsonString := string(json)
-			fmt.Fprintf(w, jsonString)
+			fmt.Fprint(w, jsonString)
 		case "PUT":
 			// Update an existing record.
 			decoder := json.NewDecoder(r.Body)
@@ -193,7 +193,7 @@ func (this *Gorest) Serve() {
 				return
 			}
 			jsonString := string(json)
-			fmt.Fprintf(w, jsonString)
+			fmt.Fprint(w, jsonString)
 		case "DELETE":
 			// Remove the record.
 			dataId := restData[1]
@@ -206,7 +206,7 @@ func (this *Gorest) Serve() {
 				return
 			}
 			jsonString := string(json)
-			fmt.Fprintf(w, jsonString)
+			fmt.Fprint(w, jsonString)
 		default:
 			// Give an error message.
 		}
