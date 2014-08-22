@@ -146,10 +146,13 @@ func (this *Gorest) Serve() {
 			} else {
 				// Create the record.
 				decoder := json.NewDecoder(r.Body)
-				var m map[string]interface{}
+				m := make(map[string]interface{})
 				err := decoder.Decode(&m)
 				if err != nil {
-					fmt.Println(err)
+					m["err"] = err.Error()
+					jsonData, _ := json.Marshal(m)
+					jsonString := string(jsonData)
+					fmt.Fprint(w, jsonString)
 					return
 				}
 				mUpper := make(map[string]interface{})
@@ -185,10 +188,13 @@ func (this *Gorest) Serve() {
 		case "PUT":
 			// Update an existing record.
 			decoder := json.NewDecoder(r.Body)
-			var m map[string]interface{}
+			m := make(map[string]interface{})
 			err := decoder.Decode(&m)
 			if err != nil {
-				http.Error(w, err.Error(), 500)
+				m["err"] = err.Error()
+				jsonData, _ := json.Marshal(m)
+				jsonString := string(jsonData)
+				fmt.Fprint(w, jsonString)
 				return
 			}
 			mUpper := make(map[string]interface{})
