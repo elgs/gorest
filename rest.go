@@ -79,17 +79,12 @@ func (this *Gorest) Serve() {
 				m := map[string]interface{}{
 					"data":  data,
 					"total": total,
-					"err":   err.Error(),
 				}
-				json, err := json.Marshal(m)
 				if err != nil {
-					m = map[string]interface{}{
-						"data":  data,
-						"total": total,
-						"err":   err.Error(),
-					}
+					m["err"] = err.Error()
 				}
-				jsonString := string(json)
+				jsonData, err := json.Marshal(m)
+				jsonString := string(jsonData)
 				fmt.Fprint(w, jsonString)
 			} else {
 				// Load record by id.
@@ -99,16 +94,12 @@ func (this *Gorest) Serve() {
 
 				m := map[string]interface{}{
 					"data": data,
-					"err":  err.Error(),
 				}
-				json, err := json.Marshal(m)
 				if err != nil {
-					m = map[string]interface{}{
-						"data": data,
-						"err":  err.Error(),
-					}
+					m["err"] = err.Error()
 				}
-				jsonString := string(json)
+				jsonData, err := json.Marshal(m)
+				jsonString := string(jsonData)
 				fmt.Fprint(w, jsonString)
 			}
 		case "POST":
@@ -145,15 +136,11 @@ func (this *Gorest) Serve() {
 				m := map[string]interface{}{
 					"data":  data,
 					"total": total,
-					"err":   err.Error(),
+				}
+				if err != nil {
+					m["err"] = err.Error()
 				}
 				jsonData, err := json.Marshal(m)
-				if err != nil {
-					m := map[string]interface{}{
-						"err": err.Error(),
-					}
-					jsonData, err = json.Marshal(m)
-				}
 				jsonString := string(jsonData)
 				fmt.Fprint(w, jsonString)
 			} else {
@@ -172,15 +159,11 @@ func (this *Gorest) Serve() {
 				data, err := this.Dbo.Create(tableId, mUpper, context)
 				m = map[string]interface{}{
 					"data": data,
-					"err":  err.Error(),
+				}
+				if err != nil {
+					m["err"] = err.Error()
 				}
 				jsonData, err := json.Marshal(m)
-				if err != nil {
-					m := map[string]interface{}{
-						"err": err.Error(),
-					}
-					jsonData, err = json.Marshal(m)
-				}
 				jsonString := string(jsonData)
 				fmt.Fprint(w, jsonString)
 			}
@@ -192,15 +175,11 @@ func (this *Gorest) Serve() {
 
 			m := map[string]interface{}{
 				"data": data,
-				"err":  err.Error(),
+			}
+			if err != nil {
+				m["err"] = err.Error()
 			}
 			jsonData, err := json.Marshal(m)
-			if err != nil {
-				m := map[string]interface{}{
-					"err": err.Error(),
-				}
-				jsonData, err = json.Marshal(m)
-			}
 			jsonString := string(jsonData)
 			fmt.Fprint(w, jsonString)
 		case "PUT":
@@ -219,15 +198,11 @@ func (this *Gorest) Serve() {
 			data, err := this.Dbo.Update(tableId, mUpper, context)
 			m = map[string]interface{}{
 				"data": data,
-				"err":  err.Error(),
+			}
+			if err != nil {
+				m["err"] = err.Error()
 			}
 			jsonData, err := json.Marshal(m)
-			if err != nil {
-				m := map[string]interface{}{
-					"err": err.Error(),
-				}
-				jsonData, err = json.Marshal(m)
-			}
 			jsonString := string(jsonData)
 			fmt.Fprint(w, jsonString)
 		case "DELETE":
@@ -238,15 +213,11 @@ func (this *Gorest) Serve() {
 
 			m := map[string]interface{}{
 				"data": data,
-				"err":  err.Error(),
+			}
+			if err != nil {
+				m["err"] = err.Error()
 			}
 			jsonData, err := json.Marshal(m)
-			if err != nil {
-				m := map[string]interface{}{
-					"err": err.Error(),
-				}
-				jsonData, err = json.Marshal(m)
-			}
 			jsonString := string(jsonData)
 			fmt.Fprint(w, jsonString)
 		default:
