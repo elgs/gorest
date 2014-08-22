@@ -62,26 +62,32 @@ func (this *Gorest) Serve() {
 				start, err := strconv.ParseInt(s, 10, 0)
 				if err != nil {
 					start = 0
+					err = nil
 				}
 				limit, err := strconv.ParseInt(l, 10, 0)
 				if err != nil {
 					limit = 25
+					err = nil
 				}
 				var data interface{}
 				var total int64 = -1
 				if array {
-					data, total = this.Dbo.ListArray(tableId, where, order, start, limit, includeTotal, context)
+					data, total, err = this.Dbo.ListArray(tableId, where, order, start, limit, includeTotal, context)
 				} else {
-					data, total = this.Dbo.ListMap(tableId, where, order, start, limit, includeTotal, context)
+					data, total, err = this.Dbo.ListMap(tableId, where, order, start, limit, includeTotal, context)
 				}
 				m := map[string]interface{}{
 					"data":  data,
 					"total": total,
+					"err":   err.Error(),
 				}
 				json, err := json.Marshal(m)
 				if err != nil {
-					http.Error(w, err.Error(), 500)
-					return
+					m = map[string]interface{}{
+						"data":  data,
+						"total": total,
+						"err":   err.Error(),
+					}
 				}
 				jsonString := string(json)
 				fmt.Fprint(w, jsonString)
@@ -89,12 +95,18 @@ func (this *Gorest) Serve() {
 				// Load record by id.
 				dataId := restData[1]
 
-				data := this.Dbo.Load(tableId, dataId, context)
+				data, err := this.Dbo.Load(tableId, dataId, context)
 
-				json, err := json.Marshal(data)
+				m := map[string]interface{}{
+					"data": data,
+					"err":  err.Error(),
+				}
+				json, err := json.Marshal(m)
 				if err != nil {
-					http.Error(w, err.Error(), 500)
-					return
+					m = map[string]interface{}{
+						"data": data,
+						"err":  err.Error(),
+					}
 				}
 				jsonString := string(json)
 				fmt.Fprint(w, jsonString)
@@ -126,20 +138,23 @@ func (this *Gorest) Serve() {
 				var data interface{}
 				var total int64 = -1
 				if array {
-					data, total = this.Dbo.QueryArray(tableId, sqlSelect, sqlSelectCount, start, limit, includeTotal, context)
+					data, total, err = this.Dbo.QueryArray(tableId, sqlSelect, sqlSelectCount, start, limit, includeTotal, context)
 				} else {
-					data, total = this.Dbo.QueryMap(tableId, sqlSelect, sqlSelectCount, start, limit, includeTotal, context)
+					data, total, err = this.Dbo.QueryMap(tableId, sqlSelect, sqlSelectCount, start, limit, includeTotal, context)
 				}
 				m := map[string]interface{}{
 					"data":  data,
 					"total": total,
+					"err":   err.Error(),
 				}
-				json, err := json.Marshal(m)
+				jsonData, err := json.Marshal(m)
 				if err != nil {
-					http.Error(w, err.Error(), 500)
-					return
+					m := map[string]interface{}{
+						"err": err.Error(),
+					}
+					jsonData, err = json.Marshal(m)
 				}
-				jsonString := string(json)
+				jsonString := string(jsonData)
 				fmt.Fprint(w, jsonString)
 			} else {
 				// Create the record.
@@ -154,27 +169,39 @@ func (this *Gorest) Serve() {
 				for k, v := range m {
 					mUpper[strings.ToUpper(k)] = v
 				}
-				data := this.Dbo.Create(tableId, mUpper, context)
-				json, err := json.Marshal(data)
-				if err != nil {
-					http.Error(w, err.Error(), 500)
-					return
+				data, err := this.Dbo.Create(tableId, mUpper, context)
+				m = map[string]interface{}{
+					"data": data,
+					"err":  err.Error(),
 				}
-				jsonString := string(json)
+				jsonData, err := json.Marshal(m)
+				if err != nil {
+					m := map[string]interface{}{
+						"err": err.Error(),
+					}
+					jsonData, err = json.Marshal(m)
+				}
+				jsonString := string(jsonData)
 				fmt.Fprint(w, jsonString)
 			}
 		case "COPY":
 			// Duplicate a new record.
 			dataId := restData[1]
 
-			data := this.Dbo.Duplicate(tableId, dataId, context)
+			data, err := this.Dbo.Duplicate(tableId, dataId, context)
 
-			json, err := json.Marshal(data)
-			if err != nil {
-				http.Error(w, err.Error(), 500)
-				return
+			m := map[string]interface{}{
+				"data": data,
+				"err":  err.Error(),
 			}
-			jsonString := string(json)
+			jsonData, err := json.Marshal(m)
+			if err != nil {
+				m := map[string]interface{}{
+					"err": err.Error(),
+				}
+				jsonData, err = json.Marshal(m)
+			}
+			jsonString := string(jsonData)
 			fmt.Fprint(w, jsonString)
 		case "PUT":
 			// Update an existing record.
@@ -189,26 +216,38 @@ func (this *Gorest) Serve() {
 			for k, v := range m {
 				mUpper[strings.ToUpper(k)] = v
 			}
-			data := this.Dbo.Update(tableId, mUpper, context)
-			json, err := json.Marshal(data)
-			if err != nil {
-				http.Error(w, err.Error(), 500)
-				return
+			data, err := this.Dbo.Update(tableId, mUpper, context)
+			m = map[string]interface{}{
+				"data": data,
+				"err":  err.Error(),
 			}
-			jsonString := string(json)
+			jsonData, err := json.Marshal(m)
+			if err != nil {
+				m := map[string]interface{}{
+					"err": err.Error(),
+				}
+				jsonData, err = json.Marshal(m)
+			}
+			jsonString := string(jsonData)
 			fmt.Fprint(w, jsonString)
 		case "DELETE":
 			// Remove the record.
 			dataId := restData[1]
 
-			data := this.Dbo.Delete(tableId, dataId, context)
+			data, err := this.Dbo.Delete(tableId, dataId, context)
 
-			json, err := json.Marshal(data)
-			if err != nil {
-				http.Error(w, err.Error(), 500)
-				return
+			m := map[string]interface{}{
+				"data": data,
+				"err":  err.Error(),
 			}
-			jsonString := string(json)
+			jsonData, err := json.Marshal(m)
+			if err != nil {
+				m := map[string]interface{}{
+					"err": err.Error(),
+				}
+				jsonData, err = json.Marshal(m)
+			}
+			jsonString := string(jsonData)
 			fmt.Fprint(w, jsonString)
 		default:
 			// Give an error message.
