@@ -87,7 +87,7 @@ outputs(beautified manually):
 #Caveat
 The default implementation of `MySqlDataOperator` assumes:
 
-1. all table names and field names are in upper case;
+1. all field names are in upper case;
 2. each table has a field `ID` as the primary key;
 3. the `ID` field is of char(36);
 
@@ -100,143 +100,154 @@ to be implemented by database providers, in order to connect to other databases
 or other data sources.
 
 #API
-TODO
+Gets from test table data in the first page(1-25)(in JSON):
+```curl -X GET -H "api_token_id:0" -H "api_token_key:0" "http://localhost:8080/api/test"```
+Returns:
+```json
+{"data":[{"create_time":"2014-08-18 18:43:38","id":"0","name":"Alicia"},{"create_time":"2014-08-18 18:43:38","id":"1","name":"Brian"},{"create_time":"2014-08-18 18:43:38","id":"2","name":"Chloe"},{"create_time":"2014-08-18 18:43:38","id":"4","name":"Bianca"},{"create_time":"2014-08-18 18:43:38","id":"5","name":"Leo"},{"create_time":"2014-08-18 18:43:38","id":"6","name":"Joy"},{"create_time":"2014-08-18 18:43:38","id":"7","name":"Samuel"}],"total":-1}
+```
+
+Gets from test table data(3-6)(in JSON):
+```curl -X GET -H "api_token_id:0" -H "api_token_key:0" "http://localhost:8080/api/test?start=3&limit=4"```
+Returns:
+```json
+{"data":[{"create_time":"2014-08-18 18:43:38","id":"4","name":"Bianca"},{"create_time":"2014-08-18 18:43:38","id":"5","name":"Leo"},{"create_time":"2014-08-18 18:43:38","id":"6","name":"Joy"},{"create_time":"2014-08-18 18:43:38","id":"7","name":"Samuel"}],"total":-1}
+```
+
+Gets from test table data(3-6)(In array, including total rows):
+```curl -X GET -H "api_token_id:0" -H "api_token_key:0" "http://localhost:8080/api/test?start=3&limit=4&array=1&total=1"```
+Returns:
+```json
+{"data":[["id","name","create_time"],["4","Bianca","2014-08-18 18:43:38"],["5","Leo","2014-08-18 18:43:38"],["6","Joy","2014-08-18 18:43:38"],["7","Samuel","2014-08-18 18:43:38"]],"total":7}
+```
+
+Gets from test table record with ID=1:
+```curl -X GET -H "api_token_id:0" -H "api_token_key:0" "http://localhost:8080/api/test/1"```
+Returns:
+```json
+{"data":{"create_time":"2014-08-18 18:43:38","id":"1","name":"Brian"}}
+```
+
+Duplicates from test table the record with ID=1:
+```curl -X COPY -H "api_token_id:0" -H "api_token_key:0" "http://localhost:8080/api/test/1"```
+Returns:
+```json
+ID(New record)：{"data":"d2480a37-88da-492c-a379-a4cdee3049b8"}
+```
+
+Deletes from test table the record  with ID=d2480a37-88da-492c-a379-a4cdee3049b8:
+```curl -X DELETE -H "api_token_id:0" -H "api_token_key:0" "http://localhost:8080/api/test/d2480a37-88da-492c-a379-a4cdee3049b8"```
+Returns:
+```json
+Rows affected {"data":1}
+```
+
+Creates in test table a new record:
+```curl -X POST -H "api_token_id:0" -H "api_token_key:0" -d '{"name": "Elgs"}' "http://localhost:8080/api/test"```
+Returns:
+```json
+ID(New record)：{"data":"192ec8b5-5085-49a1-a9f1-c01a2a682b41"}
+```
+
+Updates in the test table the record with ID=192ec8b5-5085-49a1-a9f1-c01a2a682b41:
+```curl -X PUT -H "api_token_id:0" -H "api_token_key:0" -d '{"id":"192ec8b5-5085-49a1-a9f1-c01a2a682b41","name":"Peter"}' "http://localhost:8080/api/test"```
+Returns:
+```json
+Rows affected {"data":1}
+```
+
+Invalid token:
+```curl -X GET -H "api_token_id:0" -H "api_token_key:1" "http://localhost:8080/api/test"```
+Returns:
+```json
+{"data":[],"err":"Authentication failed.","total":-1}
+```
 
 #Sample Data Interceptor
 ```go
 package gorest
 
 import (
-	"database/sql"
 	"fmt"
-	_ "github.com/go-sql-driver/mysql"
 )
 
-func init() {
-	tableId := "test.TEST"
-	RegisterDataInterceptor(tableId, &TDataInterceptor{TableId: tableId})
-}
-
-type TDataInterceptor struct {
+type EchoDataInterceptor struct {
 	*DefaultDataInterceptor
-	TableId string
 }
 
-func (this *TDataInterceptor) BeforeCreate(ds interface{}, data map[string]interface{}) bool {
+func (this *EchoDataInterceptor) BeforeCreate(ds interface{}, context map[string]interface{}, data map[string]interface{}) (bool, error) {
 	fmt.Println("Here I'm in BeforeCreate")
-	if db, ok := ds.(*sql.DB); ok {
-		_ = db
-	}
-	return true
+	//if db, ok := ds.(*sql.DB); ok {
+	//	_ = db
+	//}
+	return true, nil
 }
-func (this *TDataInterceptor) AfterCreate(ds interface{}, data map[string]interface{}) {
+func (this *EchoDataInterceptor) AfterCreate(ds interface{}, context map[string]interface{}, data map[string]interface{}) error {
 	fmt.Println("Here I'm in AfterCreate")
-	if db, ok := ds.(*sql.DB); ok {
-		_ = db
-	}
+	return nil
 }
-func (this *TDataInterceptor) BeforeLoad(ds interface{}, id string) bool {
+func (this *EchoDataInterceptor) BeforeLoad(ds interface{}, context map[string]interface{}, id string) (bool, error) {
 	fmt.Println("Here I'm in BeforeLoad")
-	if db, ok := ds.(*sql.DB); ok {
-		_ = db
-	}
-	return true
+	return true, nil
 }
-func (this *TDataInterceptor) AfterLoad(ds interface{}, data map[string]string) {
+func (this *EchoDataInterceptor) AfterLoad(ds interface{}, context map[string]interface{}, data map[string]string) error {
 	fmt.Println("Here I'm in AfterLoad")
-	if db, ok := ds.(*sql.DB); ok {
-		_ = db
-	}
+	return nil
 }
-func (this *TDataInterceptor) BeforeUpdate(ds interface{}, oldData map[string]interface{}, data map[string]interface{}) bool {
+func (this *EchoDataInterceptor) BeforeUpdate(ds interface{}, context map[string]interface{}, oldData map[string]interface{}, data map[string]interface{}) (bool, error) {
 	fmt.Println("Here I'm in BeforeUpdate")
-	if db, ok := ds.(*sql.DB); ok {
-		_ = db
-	}
-	return true
+	return true, nil
 }
-func (this *TDataInterceptor) AfterUpdate(ds interface{}, oldData map[string]interface{}, data map[string]interface{}) {
+func (this *EchoDataInterceptor) AfterUpdate(ds interface{}, context map[string]interface{}, oldData map[string]interface{}, data map[string]interface{}) error {
 	fmt.Println("Here I'm in AfterUpdate")
-	if db, ok := ds.(*sql.DB); ok {
-		_ = db
-	}
+	return nil
 }
-func (this *TDataInterceptor) BeforeDuplicate(ds interface{}, oldData map[string]interface{}, data map[string]interface{}) bool {
+func (this *EchoDataInterceptor) BeforeDuplicate(ds interface{}, context map[string]interface{}, oldData map[string]interface{}, data map[string]interface{}) (bool, error) {
 	fmt.Println("Here I'm in BeforeDuplicate")
-	if db, ok := ds.(*sql.DB); ok {
-		_ = db
-	}
-	return true
+	return true, nil
 }
-func (this *TDataInterceptor) AfterDuplicate(ds interface{}, oldData map[string]interface{}, data map[string]interface{}) {
+func (this *EchoDataInterceptor) AfterDuplicate(ds interface{}, context map[string]interface{}, oldData map[string]interface{}, data map[string]interface{}) error {
 	fmt.Println("Here I'm in AfterDuplicate")
-	if db, ok := ds.(*sql.DB); ok {
-		_ = db
-	}
+	return nil
 }
-func (this *TDataInterceptor) BeforeDelete(ds interface{}, id string) bool {
+func (this *EchoDataInterceptor) BeforeDelete(ds interface{}, context map[string]interface{}, id string) (bool, error) {
 	fmt.Println("Here I'm in BeforeDelete")
-	if db, ok := ds.(*sql.DB); ok {
-		_ = db
-	}
-	return true
+	return true, nil
 }
-func (this *TDataInterceptor) AfterDelete(ds interface{}, id string) {
+func (this *EchoDataInterceptor) AfterDelete(ds interface{}, context map[string]interface{}, id string) error {
 	fmt.Println("Here I'm in AfterDelete")
-	if db, ok := ds.(*sql.DB); ok {
-		_ = db
-	}
+	return nil
 }
-func (this *TDataInterceptor) BeforeListMap(ds interface{}, where string, order string, start int64, limit int64, includeTotal bool) bool {
+func (this *EchoDataInterceptor) BeforeListMap(ds interface{}, context map[string]interface{}, where string, order string, start int64, limit int64, includeTotal bool) (bool, error) {
 	fmt.Println("Here I'm in BeforeListMap")
-	if db, ok := ds.(*sql.DB); ok {
-		_ = db
-	}
-	return true
+	return true, nil
 }
-func (this *TDataInterceptor) AfterListMap(ds interface{}, data []map[string]string, total int64) {
+func (this *EchoDataInterceptor) AfterListMap(ds interface{}, context map[string]interface{}, data []map[string]string, total int64) error {
 	fmt.Println("Here I'm in AfterListMap")
-	if db, ok := ds.(*sql.DB); ok {
-		_ = db
-	}
+	return nil
 }
-func (this *TDataInterceptor) BeforeListArray(ds interface{}, where string, order string, start int64, limit int64, includeTotal bool) bool {
+func (this *EchoDataInterceptor) BeforeListArray(ds interface{}, context map[string]interface{}, where string, order string, start int64, limit int64, includeTotal bool) (bool, error) {
 	fmt.Println("Here I'm in BeforeListArray")
-	if db, ok := ds.(*sql.DB); ok {
-		_ = db
-	}
-	return true
+	return true, nil
 }
-func (this *TDataInterceptor) AfterListArray(ds interface{}, data [][]string, total int64) {
+func (this *EchoDataInterceptor) AfterListArray(ds interface{}, context map[string]interface{}, data [][]string, total int64) error {
 	fmt.Println("Here I'm in AfterListArray")
-	if db, ok := ds.(*sql.DB); ok {
-		_ = db
-	}
+	return nil
 }
-func (this *TDataInterceptor) BeforeQueryMap(ds interface{}, sqlSelect string, sqlSelectCount string, start int64, limit int64, includeTotal bool) bool {
+func (this *EchoDataInterceptor) BeforeQueryMap(ds interface{}, context map[string]interface{}, sqlSelect string, sqlSelectCount string, start int64, limit int64, includeTotal bool) (bool, error) {
 	fmt.Println("Here I'm in BeforeQuerytMap")
-	if db, ok := ds.(*sql.DB); ok {
-		_ = db
-	}
-	return true
+	return true, nil
 }
-func (this *TDataInterceptor) AfterQueryMap(ds interface{}, data []map[string]string, total int64) {
+func (this *EchoDataInterceptor) AfterQueryMap(ds interface{}, context map[string]interface{}, data []map[string]string, total int64) error {
 	fmt.Println("Here I'm in AfterQueryMap")
-	if db, ok := ds.(*sql.DB); ok {
-		_ = db
-	}
+	return nil
 }
-func (this *TDataInterceptor) BeforeQueryArray(ds interface{}, sqlSelect string, sqlSelectCount string, start int64, limit int64, includeTotal bool) bool {
+func (this *EchoDataInterceptor) BeforeQueryArray(ds interface{}, context map[string]interface{}, sqlSelect string, sqlSelectCount string, start int64, limit int64, includeTotal bool) (bool, error) {
 	fmt.Println("Here I'm in BeforeQueryArray")
-	if db, ok := ds.(*sql.DB); ok {
-		_ = db
-	}
-	return true
+	return true, nil
 }
-func (this *TDataInterceptor) AfterQueryArray(ds interface{}, data [][]string, total int64) {
+func (this *EchoDataInterceptor) AfterQueryArray(ds interface{}, context map[string]interface{}, data [][]string, total int64) error {
 	fmt.Println("Here I'm in AfterQueryArray")
-	if db, ok := ds.(*sql.DB); ok {
-		_ = db
-	}
+	return nil
 }
 ```
