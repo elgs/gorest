@@ -19,6 +19,7 @@ type MySqlDataOperator struct {
 func (this *MySqlDataOperator) Load(tableId string, id string, context map[string]interface{}) (map[string]string, error) {
 	ret := make(map[string]string, 0)
 	tableId = normalizeTableId(tableId, this.Ds)
+	context["table_id"] = tableId
 	db, err := getConn(this.Ds)
 	defer db.Close()
 	if err != nil {
@@ -66,6 +67,7 @@ func (this *MySqlDataOperator) ListMap(tableId string, where string, order strin
 	start int64, limit int64, includeTotal bool, context map[string]interface{}) ([]map[string]string, int64, error) {
 	ret := make([]map[string]string, 0)
 	tableId = normalizeTableId(tableId, this.Ds)
+	context["table_id"] = tableId
 	db, err := getConn(this.Ds)
 	defer db.Close()
 	if err != nil {
@@ -122,6 +124,7 @@ func (this *MySqlDataOperator) ListArray(tableId string, where string, order str
 	start int64, limit int64, includeTotal bool, context map[string]interface{}) ([][]string, int64, error) {
 	ret := make([][]string, 0)
 	tableId = normalizeTableId(tableId, this.Ds)
+	context["table_id"] = tableId
 	db, err := getConn(this.Ds)
 	defer db.Close()
 	if err != nil {
@@ -176,6 +179,7 @@ func (this *MySqlDataOperator) ListArray(tableId string, where string, order str
 }
 func (this *MySqlDataOperator) Create(tableId string, data map[string]interface{}, context map[string]interface{}) (interface{}, error) {
 	tableId = normalizeTableId(tableId, this.Ds)
+	context["table_id"] = tableId
 	db, err := getConn(this.Ds)
 	defer db.Close()
 	if err != nil {
@@ -223,6 +227,7 @@ func (this *MySqlDataOperator) Create(tableId string, data map[string]interface{
 }
 func (this *MySqlDataOperator) Update(tableId string, data map[string]interface{}, context map[string]interface{}) (int64, error) {
 	tableId = normalizeTableId(tableId, this.Ds)
+	context["table_id"] = tableId
 	db, err := getConn(this.Ds)
 	defer db.Close()
 	if err != nil {
@@ -277,6 +282,7 @@ func (this *MySqlDataOperator) Update(tableId string, data map[string]interface{
 }
 func (this *MySqlDataOperator) Duplicate(tableId string, id string, context map[string]interface{}) (interface{}, error) {
 	tableId = normalizeTableId(tableId, this.Ds)
+	context["table_id"] = tableId
 	db, err := getConn(this.Ds)
 	defer db.Close()
 	if err != nil {
@@ -333,6 +339,7 @@ func (this *MySqlDataOperator) Duplicate(tableId string, id string, context map[
 }
 func (this *MySqlDataOperator) Delete(tableId string, id string, context map[string]interface{}) (int64, error) {
 	tableId = normalizeTableId(tableId, this.Ds)
+	context["table_id"] = tableId
 	db, err := getConn(this.Ds)
 	defer db.Close()
 	if err != nil {
@@ -373,6 +380,7 @@ func (this *MySqlDataOperator) QueryMap(tableId string, sqlSelect string, sqlSel
 	start int64, limit int64, includeTotal bool, context map[string]interface{}) ([]map[string]string, int64, error) {
 	ret := make([]map[string]string, 0)
 	tableId = normalizeTableId(tableId, this.Ds)
+	context["table_id"] = tableId
 	if !isSelect(sqlSelect) {
 		return ret, -1, nil
 	}
@@ -435,6 +443,7 @@ func (this *MySqlDataOperator) QueryArray(tableId string, sqlSelect string, sqlS
 	start int64, limit int64, includeTotal bool, context map[string]interface{}) ([][]string, int64, error) {
 	ret := make([][]string, 0)
 	tableId = normalizeTableId(tableId, this.Ds)
+	context["table_id"] = tableId
 	if !isSelect(sqlSelect) {
 		return ret, -1, errors.New("Invalid query.")
 	}
