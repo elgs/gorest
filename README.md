@@ -180,6 +180,18 @@ Returns:
 ```json
 {"data":[],"err":"Authentication failed.","total":-1}
 ```
+#Operators
+"eq": " = ",
+"ne": " != ",
+"gt": " > ",
+"lt": " < ",
+"ge": " >= ",
+"le": " <= ",
+"li": " LIKE ",
+"nl": " NOT LIKE ",
+"nu": " IS NULL ",
+"nn": " IS NOT NULL ",
+"rl": " RLIKE ",
 
 #Sample Data Interceptor
 ```go
