@@ -31,13 +31,13 @@ type DataInterceptor interface {
 	AfterDuplicate(ds interface{}, context map[string]interface{}, oldData map[string]interface{}, data map[string]interface{}) error
 	BeforeDelete(ds interface{}, context map[string]interface{}, id string) (bool, error)
 	AfterDelete(ds interface{}, context map[string]interface{}, id string) error
-	BeforeListMap(ds interface{}, context map[string]interface{}, where string, order string, start int64, limit int64, includeTotal bool) (bool, error)
+	BeforeListMap(ds interface{}, context map[string]interface{}, filter *string, sort *string, start int64, limit int64, includeTotal bool) (bool, error)
 	AfterListMap(ds interface{}, context map[string]interface{}, data []map[string]string, total int64) error
-	BeforeListArray(ds interface{}, context map[string]interface{}, where string, order string, start int64, limit int64, includeTotal bool) (bool, error)
+	BeforeListArray(ds interface{}, context map[string]interface{}, filter *string, sort *string, start int64, limit int64, includeTotal bool) (bool, error)
 	AfterListArray(ds interface{}, context map[string]interface{}, data [][]string, total int64) error
-	BeforeQueryMap(ds interface{}, context map[string]interface{}, sqlSelect string, sqlSelectCount string, start int64, limit int64, includeTotal bool) (bool, error)
+	BeforeQueryMap(ds interface{}, context map[string]interface{}, sqlSelect *string, sqlSelectCount *string, start int64, limit int64, includeTotal bool) (bool, error)
 	AfterQueryMap(ds interface{}, context map[string]interface{}, data []map[string]string, total int64) error
-	BeforeQueryArray(ds interface{}, context map[string]interface{}, sqlSelect string, sqlSelectCount string, start int64, limit int64, includeTotal bool) (bool, error)
+	BeforeQueryArray(ds interface{}, context map[string]interface{}, sqlSelect *string, sqlSelectCount *string, start int64, limit int64, includeTotal bool) (bool, error)
 	AfterQueryArray(ds interface{}, context map[string]interface{}, data [][]string, total int64) error
 }
 
@@ -73,25 +73,25 @@ func (this *DefaultDataInterceptor) BeforeDelete(ds interface{}, context map[str
 func (this *DefaultDataInterceptor) AfterDelete(ds interface{}, context map[string]interface{}, id string) error {
 	return nil
 }
-func (this *DefaultDataInterceptor) BeforeListMap(ds interface{}, context map[string]interface{}, where string, order string, start int64, limit int64, includeTotal bool) (bool, error) {
+func (this *DefaultDataInterceptor) BeforeListMap(ds interface{}, context map[string]interface{}, filter *string, sort *string, start int64, limit int64, includeTotal bool) (bool, error) {
 	return true, nil
 }
 func (this *DefaultDataInterceptor) AfterListMap(ds interface{}, context map[string]interface{}, data []map[string]string, total int64) error {
 	return nil
 }
-func (this *DefaultDataInterceptor) BeforeListArray(ds interface{}, context map[string]interface{}, where string, order string, start int64, limit int64, includeTotal bool) (bool, error) {
+func (this *DefaultDataInterceptor) BeforeListArray(ds interface{}, context map[string]interface{}, filter *string, sort *string, start int64, limit int64, includeTotal bool) (bool, error) {
 	return true, nil
 }
 func (this *DefaultDataInterceptor) AfterListArray(ds interface{}, context map[string]interface{}, data [][]string, total int64) error {
 	return nil
 }
-func (this *DefaultDataInterceptor) BeforeQueryMap(ds interface{}, context map[string]interface{}, sqlSelect string, sqlSelectCount string, start int64, limit int64, includeTotal bool) (bool, error) {
+func (this *DefaultDataInterceptor) BeforeQueryMap(ds interface{}, context map[string]interface{}, sqlSelect *string, sqlSelectCount *string, start int64, limit int64, includeTotal bool) (bool, error) {
 	return true, nil
 }
 func (this *DefaultDataInterceptor) AfterQueryMap(ds interface{}, context map[string]interface{}, data []map[string]string, total int64) error {
 	return nil
 }
-func (this *DefaultDataInterceptor) BeforeQueryArray(ds interface{}, context map[string]interface{}, sqlSelect string, sqlSelectCount string, start int64, limit int64, includeTotal bool) (bool, error) {
+func (this *DefaultDataInterceptor) BeforeQueryArray(ds interface{}, context map[string]interface{}, sqlSelect *string, sqlSelectCount *string, start int64, limit int64, includeTotal bool) (bool, error) {
 	return true, nil
 }
 func (this *DefaultDataInterceptor) AfterQueryArray(ds interface{}, context map[string]interface{}, data [][]string, total int64) error {

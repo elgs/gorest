@@ -51,7 +51,7 @@ func (this *EchoDataInterceptor) AfterDelete(ds interface{}, context map[string]
 	fmt.Println("Here I'm in AfterDelete")
 	return nil
 }
-func (this *EchoDataInterceptor) BeforeListMap(ds interface{}, context map[string]interface{}, where string, order string, start int64, limit int64, includeTotal bool) (bool, error) {
+func (this *EchoDataInterceptor) BeforeListMap(ds interface{}, context map[string]interface{}, filter *string, sort *string, start int64, limit int64, includeTotal bool) (bool, error) {
 	fmt.Println("Here I'm in BeforeListMap")
 	return true, nil
 }
@@ -59,7 +59,7 @@ func (this *EchoDataInterceptor) AfterListMap(ds interface{}, context map[string
 	fmt.Println("Here I'm in AfterListMap")
 	return nil
 }
-func (this *EchoDataInterceptor) BeforeListArray(ds interface{}, context map[string]interface{}, where string, order string, start int64, limit int64, includeTotal bool) (bool, error) {
+func (this *EchoDataInterceptor) BeforeListArray(ds interface{}, context map[string]interface{}, filter *string, sort *string, start int64, limit int64, includeTotal bool) (bool, error) {
 	fmt.Println("Here I'm in BeforeListArray")
 	return true, nil
 }
@@ -67,7 +67,7 @@ func (this *EchoDataInterceptor) AfterListArray(ds interface{}, context map[stri
 	fmt.Println("Here I'm in AfterListArray")
 	return nil
 }
-func (this *EchoDataInterceptor) BeforeQueryMap(ds interface{}, context map[string]interface{}, sqlSelect string, sqlSelectCount string, start int64, limit int64, includeTotal bool) (bool, error) {
+func (this *EchoDataInterceptor) BeforeQueryMap(ds interface{}, context map[string]interface{}, sqlSelect *string, sqlSelectCount *string, start int64, limit int64, includeTotal bool) (bool, error) {
 	fmt.Println("Here I'm in BeforeQuerytMap")
 	return true, nil
 }
@@ -75,7 +75,7 @@ func (this *EchoDataInterceptor) AfterQueryMap(ds interface{}, context map[strin
 	fmt.Println("Here I'm in AfterQueryMap")
 	return nil
 }
-func (this *EchoDataInterceptor) BeforeQueryArray(ds interface{}, context map[string]interface{}, sqlSelect string, sqlSelectCount string, start int64, limit int64, includeTotal bool) (bool, error) {
+func (this *EchoDataInterceptor) BeforeQueryArray(ds interface{}, context map[string]interface{}, sqlSelect *string, sqlSelectCount *string, start int64, limit int64, includeTotal bool) (bool, error) {
 	fmt.Println("Here I'm in BeforeQueryArray")
 	return true, nil
 }

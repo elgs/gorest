@@ -47,7 +47,7 @@ func (this *Gorest) Serve() {
 				//List records.
 				t := r.FormValue("total")
 				a := r.FormValue("array")
-				where := r.FormValue("where")
+				filter := r.FormValue("filter")
 				sort := r.FormValue("sort")
 				s := r.FormValue("start")
 				l := r.FormValue("limit")
@@ -72,9 +72,9 @@ func (this *Gorest) Serve() {
 				var data interface{}
 				var total int64 = -1
 				if array {
-					data, total, err = this.Dbo.ListArray(tableId, where, sort, start, limit, includeTotal, context)
+					data, total, err = this.Dbo.ListArray(tableId, filter, sort, start, limit, includeTotal, context)
 				} else {
-					data, total, err = this.Dbo.ListMap(tableId, where, sort, start, limit, includeTotal, context)
+					data, total, err = this.Dbo.ListMap(tableId, filter, sort, start, limit, includeTotal, context)
 				}
 				m := map[string]interface{}{
 					"data":  data,
