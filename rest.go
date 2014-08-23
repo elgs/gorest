@@ -47,7 +47,7 @@ func (this *Gorest) Serve() {
 				//List records.
 				t := r.FormValue("total")
 				a := r.FormValue("array")
-				filter := r.FormValue("filter")
+				filter := r.Form["filter"]
 				sort := r.FormValue("sort")
 				s := r.FormValue("start")
 				l := r.FormValue("limit")

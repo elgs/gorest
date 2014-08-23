@@ -63,7 +63,7 @@ func (this *MySqlDataOperator) Load(tableId string, id string, context map[strin
 	}
 
 }
-func (this *MySqlDataOperator) ListMap(tableId string, filter string, sort string,
+func (this *MySqlDataOperator) ListMap(tableId string, filter []string, sort string,
 	start int64, limit int64, includeTotal bool, context map[string]interface{}) ([]map[string]string, int64, error) {
 	ret := make([]map[string]string, 0)
 	tableId = normalizeTableId(tableId, this.Ds)
@@ -76,22 +76,23 @@ func (this *MySqlDataOperator) ListMap(tableId string, filter string, sort strin
 	}
 
 	sort = parseSort(sort)
+	where := parseFilter(filter)
 	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
-		ctn, err := globalDataInterceptor.BeforeListMap(db, context, &filter, &sort, start, limit, includeTotal)
+		ctn, err := globalDataInterceptor.BeforeListMap(db, context, &where, &sort, start, limit, includeTotal)
 		if !ctn {
 			return ret, -1, err
 		}
 	}
 	dataInterceptor := GetDataInterceptor(tableId)
 	if dataInterceptor != nil {
-		ctn, err := dataInterceptor.BeforeListMap(db, context, &filter, &sort, start, limit, includeTotal)
+		ctn, err := dataInterceptor.BeforeListMap(db, context, &where, &sort, start, limit, includeTotal)
 		if !ctn {
 			return ret, -1, err
 		}
 	}
 
 	m, err := gosqljson.QueryDbToMap(db, true,
-		fmt.Sprint("SELECT * FROM ", tableId, filter, " ", sort, " LIMIT ?,?"), start, limit)
+		fmt.Sprint("SELECT * FROM ", tableId, where, sort, " LIMIT ?,?"), start, limit)
 	if err != nil {
 		fmt.Println(err)
 		return ret, -1, err
@@ -99,7 +100,7 @@ func (this *MySqlDataOperator) ListMap(tableId string, filter string, sort strin
 	cnt := -1
 	if includeTotal {
 		c, err := gosqljson.QueryDbToMap(db, false,
-			fmt.Sprint("SELECT COUNT(*) AS CNT FROM ", tableId, filter))
+			fmt.Sprint("SELECT COUNT(*) AS CNT FROM ", tableId, where))
 		if err != nil {
 			fmt.Println(err)
 			return ret, -1, err
@@ -120,7 +121,7 @@ func (this *MySqlDataOperator) ListMap(tableId string, filter string, sort strin
 
 	return m, int64(cnt), err
 }
-func (this *MySqlDataOperator) ListArray(tableId string, filter string, sort string,
+func (this *MySqlDataOperator) ListArray(tableId string, filter []string, sort string,
 	start int64, limit int64, includeTotal bool, context map[string]interface{}) ([][]string, int64, error) {
 	ret := make([][]string, 0)
 	tableId = normalizeTableId(tableId, this.Ds)
@@ -133,22 +134,23 @@ func (this *MySqlDataOperator) ListArray(tableId string, filter string, sort str
 	}
 
 	sort = parseSort(sort)
+	where := parseFilter(filter)
 	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
-		ctn, err := globalDataInterceptor.BeforeListArray(db, context, &filter, &sort, start, limit, includeTotal)
+		ctn, err := globalDataInterceptor.BeforeListArray(db, context, &where, &sort, start, limit, includeTotal)
 		if !ctn {
 			return ret, -1, err
 		}
 	}
 	dataInterceptor := GetDataInterceptor(tableId)
 	if dataInterceptor != nil {
-		ctn, err := dataInterceptor.BeforeListArray(db, context, &filter, &sort, start, limit, includeTotal)
+		ctn, err := dataInterceptor.BeforeListArray(db, context, &where, &sort, start, limit, includeTotal)
 		if !ctn {
 			return ret, -1, err
 		}
 	}
 
 	a, err := gosqljson.QueryDbToArray(db, true,
-		fmt.Sprint("SELECT * FROM ", tableId, filter, " ", sort, " LIMIT ?,?"), start, limit)
+		fmt.Sprint("SELECT * FROM ", tableId, where, sort, " LIMIT ?,?"), start, limit)
 	if err != nil {
 		fmt.Println(err)
 		return ret, -1, err
@@ -156,7 +158,7 @@ func (this *MySqlDataOperator) ListArray(tableId string, filter string, sort str
 	cnt := -1
 	if includeTotal {
 		c, err := gosqljson.QueryDbToMap(db, false,
-			fmt.Sprint("SELECT COUNT(*) AS CNT FROM ", tableId, filter))
+			fmt.Sprint("SELECT COUNT(*) AS CNT FROM ", tableId, where))
 		if err != nil {
 			fmt.Println(err)
 			return ret, -1, err
@@ -539,9 +541,44 @@ func parseSort(sort string) string {
 	return fmt.Sprint(" ORDER BY ", strings.ToUpper(strings.Replace(sort, ":", " ", -1)), " ")
 }
 
-func parseFilter(filter string) string {
-	if len(strings.TrimSpace(filter)) == 0 {
+func parseFilter(filter []string) string {
+	if len(filter) == 0 {
 		return ""
 	}
-	return filter
+	var buffer bytes.Buffer
+	for _, v := range filter {
+
+		t := strings.SplitN(v, ",", 3)
+		if len(t) <= 1 {
+			continue
+		} else if len(t) == 2 {
+			op := t[1]
+			if op == "nu" || op == "nn" {
+				f := strings.ToUpper(strings.Replace(strings.Replace(t[0], "'", "", -1), "--", "", -1))
+				buffer.WriteString(fmt.Sprint(" AND ", f, ops[op]))
+			} else {
+				continue
+			}
+		} else if len(t) == 3 {
+			op := t[1]
+			f := strings.ToUpper(strings.Replace(strings.Replace(t[0], "'", "", -1), "--", "", -1))
+			v := strings.Replace(t[2], "'", "''", -1)
+			buffer.WriteString(fmt.Sprint(" AND ", f, ops[op], v))
+		}
+	}
+	return fmt.Sprint(" WHERE 1=1 ", buffer.String())
+}
+
+var ops map[string]string = map[string]string{
+	"eq": " = ",
+	"ne": " != ",
+	"gt": " > ",
+	"lt": " < ",
+	"ge": " >= ",
+	"le": " <= ",
+	"li": " LIKE ",
+	"nl": " NOT LIKE ",
+	"nu": " IS NULL ",
+	"nn": " IS NOT NULL ",
+	"rl": " RLIKE ",
 }
