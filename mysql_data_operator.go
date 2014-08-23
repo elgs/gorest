@@ -63,7 +63,7 @@ func (this *MySqlDataOperator) Load(tableId string, id string, context map[strin
 	}
 
 }
-func (this *MySqlDataOperator) ListMap(tableId string, where string, order string,
+func (this *MySqlDataOperator) ListMap(tableId string, where string, sort string,
 	start int64, limit int64, includeTotal bool, context map[string]interface{}) ([]map[string]string, int64, error) {
 	ret := make([]map[string]string, 0)
 	tableId = normalizeTableId(tableId, this.Ds)
@@ -75,15 +75,16 @@ func (this *MySqlDataOperator) ListMap(tableId string, where string, order strin
 		return ret, -1, err
 	}
 
+	sort = parseSort(sort)
 	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
-		ctn, err := globalDataInterceptor.BeforeListMap(db, context, where, order, start, limit, includeTotal)
+		ctn, err := globalDataInterceptor.BeforeListMap(db, context, where, sort, start, limit, includeTotal)
 		if !ctn {
 			return ret, -1, err
 		}
 	}
 	dataInterceptor := GetDataInterceptor(tableId)
 	if dataInterceptor != nil {
-		ctn, err := dataInterceptor.BeforeListMap(db, context, where, order, start, limit, includeTotal)
+		ctn, err := dataInterceptor.BeforeListMap(db, context, where, sort, start, limit, includeTotal)
 		if !ctn {
 			return ret, -1, err
 		}
@@ -91,7 +92,7 @@ func (this *MySqlDataOperator) ListMap(tableId string, where string, order strin
 
 	m, err := gosqljson.QueryDbToMap(db, true,
 		fmt.Sprint("SELECT * FROM ", tableId,
-			" WHERE 1=1 ", where, " ", order, " LIMIT ?,?"), start, limit)
+			" WHERE 1=1 ", where, " ", sort, " LIMIT ?,?"), start, limit)
 	if err != nil {
 		fmt.Println(err)
 		return ret, -1, err
@@ -120,7 +121,7 @@ func (this *MySqlDataOperator) ListMap(tableId string, where string, order strin
 
 	return m, int64(cnt), err
 }
-func (this *MySqlDataOperator) ListArray(tableId string, where string, order string,
+func (this *MySqlDataOperator) ListArray(tableId string, where string, sort string,
 	start int64, limit int64, includeTotal bool, context map[string]interface{}) ([][]string, int64, error) {
 	ret := make([][]string, 0)
 	tableId = normalizeTableId(tableId, this.Ds)
@@ -132,15 +133,16 @@ func (this *MySqlDataOperator) ListArray(tableId string, where string, order str
 		return ret, -1, err
 	}
 
+	sort = parseSort(sort)
 	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
-		ctn, err := globalDataInterceptor.BeforeListArray(db, context, where, order, start, limit, includeTotal)
+		ctn, err := globalDataInterceptor.BeforeListArray(db, context, where, sort, start, limit, includeTotal)
 		if !ctn {
 			return ret, -1, err
 		}
 	}
 	dataInterceptor := GetDataInterceptor(tableId)
 	if dataInterceptor != nil {
-		ctn, err := dataInterceptor.BeforeListArray(db, context, where, order, start, limit, includeTotal)
+		ctn, err := dataInterceptor.BeforeListArray(db, context, where, sort, start, limit, includeTotal)
 		if !ctn {
 			return ret, -1, err
 		}
@@ -148,7 +150,7 @@ func (this *MySqlDataOperator) ListArray(tableId string, where string, order str
 
 	a, err := gosqljson.QueryDbToArray(db, true,
 		fmt.Sprint("SELECT * FROM ", tableId,
-			" WHERE 1=1 ", where, " ", order, " LIMIT ?,?"), start, limit)
+			" WHERE 1=1 ", where, " ", sort, " LIMIT ?,?"), start, limit)
 	if err != nil {
 		fmt.Println(err)
 		return ret, -1, err
@@ -530,4 +532,11 @@ func normalizeTableId(tableId string, ds string) string {
 	}
 	db := extractDbNameFromDs(ds)
 	return strings.Replace(fmt.Sprint(db, ".", tableId), "'", "''", -1)
+}
+
+func parseSort(sort string) string {
+	if len(strings.TrimSpace(sort)) == 0 {
+		return ""
+	}
+	return fmt.Sprint(" ORDER BY ", strings.ToUpper(strings.Replace(sort, ":", " ", -1)), " ")
 }
