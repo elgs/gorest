@@ -547,15 +547,14 @@ func parseFilter(filter []string) string {
 	}
 	var buffer bytes.Buffer
 	for _, v := range filter {
-
-		t := strings.SplitN(v, ",", 3)
+		t := strings.SplitN(v, ":", 3)
 		if len(t) <= 1 {
 			continue
 		} else if len(t) == 2 {
 			op := t[1]
 			if op == "nu" || op == "nn" {
 				f := strings.ToUpper(strings.Replace(strings.Replace(t[0], "'", "", -1), "--", "", -1))
-				buffer.WriteString(fmt.Sprint(" AND ", f, ops[op]))
+				buffer.WriteString(fmt.Sprint(" AND (", f, ops[op], ") "))
 			} else {
 				continue
 			}
@@ -563,7 +562,7 @@ func parseFilter(filter []string) string {
 			op := t[1]
 			f := strings.ToUpper(strings.Replace(strings.Replace(t[0], "'", "", -1), "--", "", -1))
 			v := strings.Replace(t[2], "'", "''", -1)
-			buffer.WriteString(fmt.Sprint(" AND ", f, ops[op], v))
+			buffer.WriteString(fmt.Sprint(" AND (", f, ops[op], v, ") "))
 		}
 	}
 	return fmt.Sprint(" WHERE 1=1 ", buffer.String())
