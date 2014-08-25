@@ -76,7 +76,7 @@ func (this *MySqlDataOperator) ListMap(tableId string, filter []string, sort str
 	}
 
 	sort = parseSort(sort)
-	where := parseFilter(filter)
+	where := parseFilters(filter)
 	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
 		ctn, err := globalDataInterceptor.BeforeListMap(db, context, &where, &sort, start, limit, includeTotal)
 		if !ctn {
@@ -134,7 +134,7 @@ func (this *MySqlDataOperator) ListArray(tableId string, filter []string, sort s
 	}
 
 	sort = parseSort(sort)
-	where := parseFilter(filter)
+	where := parseFilters(filter)
 	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
 		ctn, err := globalDataInterceptor.BeforeListArray(db, context, &where, &sort, start, limit, includeTotal)
 		if !ctn {
@@ -541,31 +541,70 @@ func parseSort(sort string) string {
 	return fmt.Sprint(" ORDER BY ", strings.ToUpper(strings.Replace(sort, ":", " ", -1)), " ")
 }
 
-func parseFilter(filter []string) string {
+func parseFilter(filter string) string {
 	if len(filter) == 0 {
 		return ""
 	}
-	var buffer bytes.Buffer
-	for _, v := range filter {
-		t := strings.SplitN(v, ":", 3)
-		if len(t) <= 1 {
-			continue
-		} else if len(t) == 2 {
-			op := t[1]
-			if op == "nu" || op == "nn" {
-				f := strings.ToUpper(strings.Replace(strings.Replace(t[0], "'", "", -1), "--", "", -1))
-				buffer.WriteString(fmt.Sprint(" AND (", f, ops[op], ") "))
-			} else {
-				continue
-			}
-		} else if len(t) == 3 {
-			op := t[1]
+	t := strings.SplitN(filter, ":", 3)
+	if len(t) <= 1 {
+		return ""
+	} else if len(t) == 2 {
+		op := t[1]
+		if op == "nu" || op == "nn" {
 			f := strings.ToUpper(strings.Replace(strings.Replace(t[0], "'", "", -1), "--", "", -1))
-			v := strings.Replace(t[2], "'", "''", -1)
-			buffer.WriteString(fmt.Sprint(" AND (", f, ops[op], v, ") "))
+			return fmt.Sprint("(", f, ops[op], ")")
+		} else {
+			return "(1=0)"
+		}
+	} else if len(t) == 3 {
+		op := t[1]
+		f := strings.ToUpper(strings.Replace(strings.Replace(t[0], "'", "", -1), "--", "", -1))
+		v := strings.Replace(t[2], "'", "''", -1)
+		return fmt.Sprint("(", f, ops[op], v, ")")
+	}
+	return "(1=0)"
+}
+
+func parseFilters(filters []string) string {
+	if len(filters) == 0 {
+		return ""
+	}
+	for _, filter := range filters {
+		stack := &Stack{}
+		for _, c := range filter {
+			s := string(c)
+			if s == ")" {
+				var t string
+				var p string
+				for p != "(" {
+					p = stack.Pop().(string)
+					t += p
+				}
+				t = reverse(t)
+				t = parseFilter(t)
+			} else {
+				stack.Push(s)
+			}
 		}
 	}
-	return fmt.Sprint(" WHERE 1=1 ", buffer.String())
+	return ""
+}
+
+func reverse(input string) string {
+	n := 0
+	rune := make([]rune, len(input))
+	for _, r := range input {
+		rune[n] = r
+		n++
+	}
+	rune = rune[0:n]
+	// Reverse
+	for i := 0; i < n/2; i++ {
+		rune[i], rune[n-1-i] = rune[n-1-i], rune[i]
+	}
+	// Convert back to UTF-8.
+	output := string(rune)
+	return output
 }
 
 var ops map[string]string = map[string]string{
