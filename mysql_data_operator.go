@@ -556,7 +556,7 @@ func parseFilters(filters []string) (r string) {
 		r += fmt.Sprint("AND ", parseFilter(v))
 	}
 	r = fmt.Sprint(" WHERE 1=1 ", r)
-	fmt.Println(r)
+	//fmt.Println(r)
 	return
 }
 
