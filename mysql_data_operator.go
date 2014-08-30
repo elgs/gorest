@@ -14,14 +14,16 @@ import (
 
 type MySqlDataOperator struct {
 	*DefaultDataOperator
-	Ds     string
-	DbType string
+	Ds         string
+	DbType     string
+	TokenTable string
 }
 
 func (this *MySqlDataOperator) Load(tableId string, id string, context map[string]interface{}) (map[string]string, error) {
 	ret := make(map[string]string, 0)
 	tableId = normalizeTableId(tableId, this.DbType, this.Ds)
 	context["table_id"] = tableId
+	context["token_table"] = this.TokenTable
 	db, err := getConn(this.DbType, this.Ds)
 	defer db.Close()
 	if err != nil {
@@ -70,6 +72,7 @@ func (this *MySqlDataOperator) ListMap(tableId string, filter []string, sort str
 	ret := make([]map[string]string, 0)
 	tableId = normalizeTableId(tableId, this.DbType, this.Ds)
 	context["table_id"] = tableId
+	context["token_table"] = this.TokenTable
 	db, err := getConn(this.DbType, this.Ds)
 	defer db.Close()
 	if err != nil {
@@ -128,6 +131,7 @@ func (this *MySqlDataOperator) ListArray(tableId string, filter []string, sort s
 	ret := make([][]string, 0)
 	tableId = normalizeTableId(tableId, this.DbType, this.Ds)
 	context["table_id"] = tableId
+	context["token_table"] = this.TokenTable
 	db, err := getConn(this.DbType, this.Ds)
 	defer db.Close()
 	if err != nil {
@@ -184,6 +188,7 @@ func (this *MySqlDataOperator) ListArray(tableId string, filter []string, sort s
 func (this *MySqlDataOperator) Create(tableId string, data map[string]interface{}, context map[string]interface{}) (interface{}, error) {
 	tableId = normalizeTableId(tableId, this.DbType, this.Ds)
 	context["table_id"] = tableId
+	context["token_table"] = this.TokenTable
 	db, err := getConn(this.DbType, this.Ds)
 	defer db.Close()
 	if err != nil {
@@ -232,6 +237,7 @@ func (this *MySqlDataOperator) Create(tableId string, data map[string]interface{
 func (this *MySqlDataOperator) Update(tableId string, data map[string]interface{}, context map[string]interface{}) (int64, error) {
 	tableId = normalizeTableId(tableId, this.DbType, this.Ds)
 	context["table_id"] = tableId
+	context["token_table"] = this.TokenTable
 	db, err := getConn(this.DbType, this.Ds)
 	defer db.Close()
 	if err != nil {
@@ -287,6 +293,7 @@ func (this *MySqlDataOperator) Update(tableId string, data map[string]interface{
 func (this *MySqlDataOperator) Duplicate(tableId string, id string, context map[string]interface{}) (interface{}, error) {
 	tableId = normalizeTableId(tableId, this.DbType, this.Ds)
 	context["table_id"] = tableId
+	context["token_table"] = this.TokenTable
 	db, err := getConn(this.DbType, this.Ds)
 	defer db.Close()
 	if err != nil {
@@ -344,6 +351,7 @@ func (this *MySqlDataOperator) Duplicate(tableId string, id string, context map[
 func (this *MySqlDataOperator) Delete(tableId string, id string, context map[string]interface{}) (int64, error) {
 	tableId = normalizeTableId(tableId, this.DbType, this.Ds)
 	context["table_id"] = tableId
+	context["token_table"] = this.TokenTable
 	db, err := getConn(this.DbType, this.Ds)
 	defer db.Close()
 	if err != nil {
@@ -385,6 +393,7 @@ func (this *MySqlDataOperator) QueryMap(tableId string, sqlSelect string, sqlSel
 	ret := make([]map[string]string, 0)
 	tableId = normalizeTableId(tableId, this.DbType, this.Ds)
 	context["table_id"] = tableId
+	context["token_table"] = this.TokenTable
 	if !isSelect(sqlSelect) {
 		return ret, -1, nil
 	}
@@ -448,6 +457,7 @@ func (this *MySqlDataOperator) QueryArray(tableId string, sqlSelect string, sqlS
 	ret := make([][]string, 0)
 	tableId = normalizeTableId(tableId, this.DbType, this.Ds)
 	context["table_id"] = tableId
+	context["token_table"] = this.TokenTable
 	if !isSelect(sqlSelect) {
 		return ret, -1, errors.New("Invalid query.")
 	}
@@ -522,7 +532,7 @@ func getConn(dbType string, ds string) (*sql.DB, error) {
 
 func extractDbNameFromDs(dbType string, ds string) string {
 	switch dbType {
-	case "sqlite":
+	case "sqlite3":
 		return ""
 	default:
 		a := strings.LastIndex(ds, "/")
