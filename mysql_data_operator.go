@@ -14,15 +14,15 @@ import (
 
 type MySqlDataOperator struct {
 	*DefaultDataOperator
-	Ds              string
-	DbNameExtractor func(ds string) string
+	Ds     string
+	DbType string
 }
 
 func (this *MySqlDataOperator) Load(tableId string, id string, context map[string]interface{}) (map[string]string, error) {
 	ret := make(map[string]string, 0)
-	tableId = normalizeTableId(tableId, this.Ds, this.DbNameExtractor)
+	tableId = normalizeTableId(tableId, this.DbType, this.Ds)
 	context["table_id"] = tableId
-	db, err := getConn(this.Ds)
+	db, err := getConn(this.DbType, this.Ds)
 	defer db.Close()
 	if err != nil {
 		fmt.Println(err)
@@ -68,9 +68,9 @@ func (this *MySqlDataOperator) Load(tableId string, id string, context map[strin
 func (this *MySqlDataOperator) ListMap(tableId string, filter []string, sort string,
 	start int64, limit int64, includeTotal bool, context map[string]interface{}) ([]map[string]string, int64, error) {
 	ret := make([]map[string]string, 0)
-	tableId = normalizeTableId(tableId, this.Ds, this.DbNameExtractor)
+	tableId = normalizeTableId(tableId, this.DbType, this.Ds)
 	context["table_id"] = tableId
-	db, err := getConn(this.Ds)
+	db, err := getConn(this.DbType, this.Ds)
 	defer db.Close()
 	if err != nil {
 		fmt.Println(err)
@@ -126,9 +126,9 @@ func (this *MySqlDataOperator) ListMap(tableId string, filter []string, sort str
 func (this *MySqlDataOperator) ListArray(tableId string, filter []string, sort string,
 	start int64, limit int64, includeTotal bool, context map[string]interface{}) ([][]string, int64, error) {
 	ret := make([][]string, 0)
-	tableId = normalizeTableId(tableId, this.Ds, this.DbNameExtractor)
+	tableId = normalizeTableId(tableId, this.DbType, this.Ds)
 	context["table_id"] = tableId
-	db, err := getConn(this.Ds)
+	db, err := getConn(this.DbType, this.Ds)
 	defer db.Close()
 	if err != nil {
 		fmt.Println(err)
@@ -182,9 +182,9 @@ func (this *MySqlDataOperator) ListArray(tableId string, filter []string, sort s
 	return a, int64(cnt), err
 }
 func (this *MySqlDataOperator) Create(tableId string, data map[string]interface{}, context map[string]interface{}) (interface{}, error) {
-	tableId = normalizeTableId(tableId, this.Ds, this.DbNameExtractor)
+	tableId = normalizeTableId(tableId, this.DbType, this.Ds)
 	context["table_id"] = tableId
-	db, err := getConn(this.Ds)
+	db, err := getConn(this.DbType, this.Ds)
 	defer db.Close()
 	if err != nil {
 		fmt.Println(err)
@@ -230,9 +230,9 @@ func (this *MySqlDataOperator) Create(tableId string, data map[string]interface{
 	return data["ID"], err
 }
 func (this *MySqlDataOperator) Update(tableId string, data map[string]interface{}, context map[string]interface{}) (int64, error) {
-	tableId = normalizeTableId(tableId, this.Ds, this.DbNameExtractor)
+	tableId = normalizeTableId(tableId, this.DbType, this.Ds)
 	context["table_id"] = tableId
-	db, err := getConn(this.Ds)
+	db, err := getConn(this.DbType, this.Ds)
 	defer db.Close()
 	if err != nil {
 		fmt.Println(err)
@@ -285,9 +285,9 @@ func (this *MySqlDataOperator) Update(tableId string, data map[string]interface{
 	return rowsAffected, err
 }
 func (this *MySqlDataOperator) Duplicate(tableId string, id string, context map[string]interface{}) (interface{}, error) {
-	tableId = normalizeTableId(tableId, this.Ds, this.DbNameExtractor)
+	tableId = normalizeTableId(tableId, this.DbType, this.Ds)
 	context["table_id"] = tableId
-	db, err := getConn(this.Ds)
+	db, err := getConn(this.DbType, this.Ds)
 	defer db.Close()
 	if err != nil {
 		fmt.Println(err)
@@ -342,9 +342,9 @@ func (this *MySqlDataOperator) Duplicate(tableId string, id string, context map[
 	return newId, err
 }
 func (this *MySqlDataOperator) Delete(tableId string, id string, context map[string]interface{}) (int64, error) {
-	tableId = normalizeTableId(tableId, this.Ds, this.DbNameExtractor)
+	tableId = normalizeTableId(tableId, this.DbType, this.Ds)
 	context["table_id"] = tableId
-	db, err := getConn(this.Ds)
+	db, err := getConn(this.DbType, this.Ds)
 	defer db.Close()
 	if err != nil {
 		fmt.Println(err)
@@ -383,7 +383,7 @@ func (this *MySqlDataOperator) Delete(tableId string, id string, context map[str
 func (this *MySqlDataOperator) QueryMap(tableId string, sqlSelect string, sqlSelectCount string,
 	start int64, limit int64, includeTotal bool, context map[string]interface{}) ([]map[string]string, int64, error) {
 	ret := make([]map[string]string, 0)
-	tableId = normalizeTableId(tableId, this.Ds, this.DbNameExtractor)
+	tableId = normalizeTableId(tableId, this.DbType, this.Ds)
 	context["table_id"] = tableId
 	if !isSelect(sqlSelect) {
 		return ret, -1, nil
@@ -391,7 +391,7 @@ func (this *MySqlDataOperator) QueryMap(tableId string, sqlSelect string, sqlSel
 	if includeTotal && !isSelect(sqlSelectCount) {
 		return ret, -1, nil
 	}
-	db, err := getConn(this.Ds)
+	db, err := getConn(this.DbType, this.Ds)
 	defer db.Close()
 	if err != nil {
 		fmt.Println(err)
@@ -446,7 +446,7 @@ func (this *MySqlDataOperator) QueryMap(tableId string, sqlSelect string, sqlSel
 func (this *MySqlDataOperator) QueryArray(tableId string, sqlSelect string, sqlSelectCount string,
 	start int64, limit int64, includeTotal bool, context map[string]interface{}) ([][]string, int64, error) {
 	ret := make([][]string, 0)
-	tableId = normalizeTableId(tableId, this.Ds, this.DbNameExtractor)
+	tableId = normalizeTableId(tableId, this.DbType, this.Ds)
 	context["table_id"] = tableId
 	if !isSelect(sqlSelect) {
 		return ret, -1, errors.New("Invalid query.")
@@ -454,7 +454,7 @@ func (this *MySqlDataOperator) QueryArray(tableId string, sqlSelect string, sqlS
 	if includeTotal && !isSelect(sqlSelectCount) {
 		return ret, -1, errors.New("Invalid query.")
 	}
-	db, err := getConn(this.Ds)
+	db, err := getConn(this.DbType, this.Ds)
 	defer db.Close()
 	if err != nil {
 		fmt.Println(err)
@@ -511,19 +511,49 @@ func isSelect(sqlSelect string) bool {
 	return strings.HasPrefix(strings.ToUpper(sqlSelect), "SELECT ")
 }
 
-func getConn(ds string) (*sql.DB, error) {
-	db, err := sql.Open("mysql", ds)
+func getConn(dbType string, ds string) (*sql.DB, error) {
+	if len(strings.TrimSpace(dbType)) == 0 {
+		dbType = "mysql"
+	}
+	db, err := sql.Open(dbType, ds)
 	db.SetMaxIdleConns(10)
 	return db, err
 }
 
-func normalizeTableId(tableId string, ds string, extract func(ds string) string) string {
+func extractDbNameFromDs(dbType string, ds string) string {
+	switch dbType {
+	case "sqlite":
+		return ""
+	default:
+		a := strings.LastIndex(ds, "/")
+		b := ds[a+1:]
+		c := strings.Index(b, "?")
+		if c < 0 {
+			return b
+		}
+		return b[:c]
+	}
+}
+
+func normalizeTableId(tableId string, dbType string, ds string) string {
 	if strings.Contains(tableId, ".") {
 		a := strings.Split(tableId, ".")
 		return fmt.Sprint(a[0], ".", a[1])
 	}
-	db := extract(ds)
-	return strings.Replace(fmt.Sprint(db, ".", tableId), "'", "''", -1)
+	db := extractDbNameFromDs(dbType, ds)
+
+	mysqlSafe(&tableId)
+	if len(strings.TrimSpace(db)) == 0 {
+		return tableId
+	} else {
+		mysqlSafe(&db)
+		return fmt.Sprint(db, ".", tableId)
+	}
+}
+
+func mysqlSafe(s *string) {
+	*s = strings.Replace(*s, "'", "''", -1)
+	*s = strings.Replace(*s, "--", "", -1)
 }
 
 func parseSort(sort string) string {
