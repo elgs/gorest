@@ -216,14 +216,23 @@ func (this *MySqlDataOperator) Create(tableId string, data map[string]interface{
 	}
 	dataLen := len(data)
 	values := make([]interface{}, 0, dataLen)
-	var buffer bytes.Buffer
+	var fieldBuffer bytes.Buffer
+	var qmBuffer bytes.Buffer
+	count := 0
 	for k, v := range data {
-		buffer.WriteString(fmt.Sprint(k, "=?,"))
+		count++
+		if count == dataLen {
+			fieldBuffer.WriteString(fmt.Sprint(k, ""))
+			qmBuffer.WriteString("?")
+		} else {
+			fieldBuffer.WriteString(fmt.Sprint(k, ","))
+			qmBuffer.WriteString("?,")
+		}
 		values = append(values, v)
 	}
-	sets := buffer.String()
-	sets = sets[0 : len(sets)-1]
-	gosqljson.ExecDb(db, fmt.Sprint("INSERT INTO ", tableId, " SET ", sets), values...)
+	fields := fieldBuffer.String()
+	qms := qmBuffer.String()
+	gosqljson.ExecDb(db, fmt.Sprint("INSERT INTO ", tableId, " (", fields, ") VALUES (", qms, ")"), values...)
 
 	if dataInterceptor != nil {
 		dataInterceptor.AfterCreate(db, context, data)
@@ -330,14 +339,23 @@ func (this *MySqlDataOperator) Duplicate(tableId string, id string, context map[
 
 	newDataLen := len(newData)
 	newValues := make([]interface{}, 0, newDataLen)
-	var buffer bytes.Buffer
-	for k, v := range newData {
-		buffer.WriteString(fmt.Sprint(k, "=?,"))
+	var fieldBuffer bytes.Buffer
+	var qmBuffer bytes.Buffer
+	count := 0
+	for k, v := range data {
+		count++
+		if count == newDataLen {
+			fieldBuffer.WriteString(fmt.Sprint(k, ""))
+			qmBuffer.WriteString("?")
+		} else {
+			fieldBuffer.WriteString(fmt.Sprint(k, ","))
+			qmBuffer.WriteString("?,")
+		}
 		newValues = append(newValues, v)
 	}
-	sets := buffer.String()
-	sets = sets[0 : len(sets)-1]
-	gosqljson.ExecDb(db, fmt.Sprint("INSERT INTO ", tableId, " SET ", sets), newValues...)
+	fields := fieldBuffer.String()
+	qms := qmBuffer.String()
+	gosqljson.ExecDb(db, fmt.Sprint("INSERT INTO ", tableId, " (", fields, ") VALUES (", qms, ")"), newValues...)
 
 	if dataInterceptor != nil {
 		dataInterceptor.AfterDuplicate(db, context, nil, nil)

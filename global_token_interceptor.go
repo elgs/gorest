@@ -37,6 +37,7 @@ func checkToken(db *sql.DB, id string, key string, context map[string]interface{
 		if data != nil && len(data) == 1 {
 			record := data[0]
 			tokenRegistry[record["ID"]] = []string{record["TOKEN_KEY"], record["USER_ID"]}
+			context["user_id"] = record["USER_ID"]
 			return true, nil
 		}
 	}
