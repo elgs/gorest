@@ -27,19 +27,19 @@ func (this *EchoDataInterceptor) AfterLoad(ds interface{}, context map[string]in
 	fmt.Println("Here I'm in AfterLoad")
 	return nil
 }
-func (this *EchoDataInterceptor) BeforeUpdate(ds interface{}, context map[string]interface{}, oldData map[string]interface{}, data map[string]interface{}) (bool, error) {
+func (this *EchoDataInterceptor) BeforeUpdate(ds interface{}, context map[string]interface{}, data map[string]interface{}) (bool, error) {
 	fmt.Println("Here I'm in BeforeUpdate")
 	return true, nil
 }
-func (this *EchoDataInterceptor) AfterUpdate(ds interface{}, context map[string]interface{}, oldData map[string]interface{}, data map[string]interface{}) error {
+func (this *EchoDataInterceptor) AfterUpdate(ds interface{}, context map[string]interface{}, data map[string]interface{}) error {
 	fmt.Println("Here I'm in AfterUpdate")
 	return nil
 }
-func (this *EchoDataInterceptor) BeforeDuplicate(ds interface{}, context map[string]interface{}, oldData map[string]interface{}, data map[string]interface{}) (bool, error) {
+func (this *EchoDataInterceptor) BeforeDuplicate(ds interface{}, context map[string]interface{}, id string) (bool, error) {
 	fmt.Println("Here I'm in BeforeDuplicate")
 	return true, nil
 }
-func (this *EchoDataInterceptor) AfterDuplicate(ds interface{}, context map[string]interface{}, oldData map[string]interface{}, data map[string]interface{}) error {
+func (this *EchoDataInterceptor) AfterDuplicate(ds interface{}, context map[string]interface{}, oldId string, newId string) error {
 	fmt.Println("Here I'm in AfterDuplicate")
 	return nil
 }

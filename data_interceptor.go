@@ -25,10 +25,10 @@ type DataInterceptor interface {
 	AfterLoad(ds interface{}, context map[string]interface{}, data map[string]string) error
 	BeforeCreate(ds interface{}, context map[string]interface{}, data map[string]interface{}) (bool, error)
 	AfterCreate(ds interface{}, context map[string]interface{}, data map[string]interface{}) error
-	BeforeUpdate(ds interface{}, context map[string]interface{}, oldData map[string]interface{}, data map[string]interface{}) (bool, error)
-	AfterUpdate(ds interface{}, context map[string]interface{}, oldData map[string]interface{}, data map[string]interface{}) error
-	BeforeDuplicate(ds interface{}, context map[string]interface{}, oldData map[string]interface{}, data map[string]interface{}) (bool, error)
-	AfterDuplicate(ds interface{}, context map[string]interface{}, oldData map[string]interface{}, data map[string]interface{}) error
+	BeforeUpdate(ds interface{}, context map[string]interface{}, data map[string]interface{}) (bool, error)
+	AfterUpdate(ds interface{}, context map[string]interface{}, data map[string]interface{}) error
+	BeforeDuplicate(ds interface{}, context map[string]interface{}, id string) (bool, error)
+	AfterDuplicate(ds interface{}, context map[string]interface{}, oldId string, newId string) error
 	BeforeDelete(ds interface{}, context map[string]interface{}, id string) (bool, error)
 	AfterDelete(ds interface{}, context map[string]interface{}, id string) error
 	BeforeListMap(ds interface{}, context map[string]interface{}, filter *string, sort *string, start int64, limit int64, includeTotal bool) (bool, error)
@@ -55,16 +55,16 @@ func (this *DefaultDataInterceptor) BeforeCreate(ds interface{}, context map[str
 func (this *DefaultDataInterceptor) AfterCreate(ds interface{}, context map[string]interface{}, data map[string]interface{}) error {
 	return nil
 }
-func (this *DefaultDataInterceptor) BeforeUpdate(ds interface{}, context map[string]interface{}, oldData map[string]interface{}, data map[string]interface{}) (bool, error) {
+func (this *DefaultDataInterceptor) BeforeUpdate(ds interface{}, context map[string]interface{}, data map[string]interface{}) (bool, error) {
 	return true, nil
 }
-func (this *DefaultDataInterceptor) AfterUpdate(ds interface{}, context map[string]interface{}, oldData map[string]interface{}, data map[string]interface{}) error {
+func (this *DefaultDataInterceptor) AfterUpdate(ds interface{}, context map[string]interface{}, data map[string]interface{}) error {
 	return nil
 }
-func (this *DefaultDataInterceptor) BeforeDuplicate(ds interface{}, context map[string]interface{}, oldData map[string]interface{}, data map[string]interface{}) (bool, error) {
+func (this *DefaultDataInterceptor) BeforeDuplicate(ds interface{}, context map[string]interface{}, id string) (bool, error) {
 	return true, nil
 }
-func (this *DefaultDataInterceptor) AfterDuplicate(ds interface{}, context map[string]interface{}, oldData map[string]interface{}, data map[string]interface{}) error {
+func (this *DefaultDataInterceptor) AfterDuplicate(ds interface{}, context map[string]interface{}, oldId string, newId string) error {
 	return nil
 }
 func (this *DefaultDataInterceptor) BeforeDelete(ds interface{}, context map[string]interface{}, id string) (bool, error) {

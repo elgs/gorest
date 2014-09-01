@@ -255,14 +255,14 @@ func (this *MySqlDataOperator) Update(tableId string, data map[string]interface{
 	}
 
 	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
-		ctn, err := globalDataInterceptor.BeforeUpdate(db, context, nil, nil)
+		ctn, err := globalDataInterceptor.BeforeUpdate(db, context, data)
 		if !ctn {
 			return 0, err
 		}
 	}
 	dataInterceptor := GetDataInterceptor(tableId)
 	if dataInterceptor != nil {
-		ctn, err := dataInterceptor.BeforeUpdate(db, context, nil, nil)
+		ctn, err := dataInterceptor.BeforeUpdate(db, context, data)
 		if !ctn {
 			return 0, err
 		}
@@ -291,10 +291,10 @@ func (this *MySqlDataOperator) Update(tableId string, data map[string]interface{
 	}
 
 	if dataInterceptor != nil {
-		dataInterceptor.AfterUpdate(db, context, nil, nil)
+		dataInterceptor.AfterUpdate(db, context, data)
 	}
 	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
-		globalDataInterceptor.AfterUpdate(db, context, nil, nil)
+		globalDataInterceptor.AfterUpdate(db, context, data)
 	}
 
 	return rowsAffected, err
@@ -311,14 +311,14 @@ func (this *MySqlDataOperator) Duplicate(tableId string, id string, context map[
 	}
 
 	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
-		ctn, err := globalDataInterceptor.BeforeDuplicate(db, context, nil, nil)
+		ctn, err := globalDataInterceptor.BeforeDuplicate(db, context, id)
 		if !ctn {
 			return "", err
 		}
 	}
 	dataInterceptor := GetDataInterceptor(tableId)
 	if dataInterceptor != nil {
-		ctn, err := dataInterceptor.BeforeDuplicate(db, context, nil, nil)
+		ctn, err := dataInterceptor.BeforeDuplicate(db, context, id)
 		if !ctn {
 			return "", err
 		}
@@ -358,10 +358,10 @@ func (this *MySqlDataOperator) Duplicate(tableId string, id string, context map[
 	gosqljson.ExecDb(db, fmt.Sprint("INSERT INTO ", tableId, " (", fields, ") VALUES (", qms, ")"), newValues...)
 
 	if dataInterceptor != nil {
-		dataInterceptor.AfterDuplicate(db, context, nil, nil)
+		dataInterceptor.AfterDuplicate(db, context, id, newId)
 	}
 	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
-		globalDataInterceptor.AfterDuplicate(db, context, nil, nil)
+		globalDataInterceptor.AfterDuplicate(db, context, id, newId)
 	}
 
 	return newId, err
