@@ -222,7 +222,7 @@ func (this *MySqlDataOperator) Create(tableId string, data map[string]interface{
 	for k, v := range data {
 		count++
 		if count == dataLen {
-			fieldBuffer.WriteString(fmt.Sprint(k, ""))
+			fieldBuffer.WriteString(k)
 			qmBuffer.WriteString("?")
 		} else {
 			fieldBuffer.WriteString(fmt.Sprint(k, ","))
@@ -332,7 +332,7 @@ func (this *MySqlDataOperator) Duplicate(tableId string, id string, context map[
 	}
 	newData := make(map[string]interface{}, len(data[0]))
 	for k, v := range data[0] {
-		newData[fmt.Sprint(k)] = v
+		newData[k] = v
 	}
 	newId := uuid.New()
 	newData["ID"] = newId
@@ -342,10 +342,10 @@ func (this *MySqlDataOperator) Duplicate(tableId string, id string, context map[
 	var fieldBuffer bytes.Buffer
 	var qmBuffer bytes.Buffer
 	count := 0
-	for k, v := range data {
+	for k, v := range newData {
 		count++
 		if count == newDataLen {
-			fieldBuffer.WriteString(fmt.Sprint(k, ""))
+			fieldBuffer.WriteString(k)
 			qmBuffer.WriteString("?")
 		} else {
 			fieldBuffer.WriteString(fmt.Sprint(k, ","))

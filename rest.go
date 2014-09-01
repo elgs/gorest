@@ -179,7 +179,6 @@ func (this *Gorest) Serve() {
 		case "COPY":
 			// Duplicate a new record.
 			dataId := restData[1]
-
 			data, err := this.Dbo.Duplicate(tableId, dataId, context)
 
 			m := map[string]interface{}{
