@@ -53,6 +53,12 @@ func (this *MySqlDataOperator) Load(tableId string, id string, context map[strin
 		return ret, err
 	}
 
+	if len(m) == 0 {
+		m = []map[string]string{
+			make(map[string]string, 0),
+		}
+	}
+
 	if dataInterceptor != nil {
 		dataInterceptor.AfterLoad(db, context, m[0])
 	}
