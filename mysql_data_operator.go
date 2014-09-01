@@ -46,8 +46,12 @@ func (this *MySqlDataOperator) Load(tableId string, id string, context map[strin
 	}
 
 	// Load the record
+	extraFilter := context["extra_filter"]
+	if extraFilter == nil {
+		extraFilter = ""
+	}
 	m, err := gosqljson.QueryDbToMap(db, true,
-		fmt.Sprint("SELECT * FROM ", tableId, " WHERE ID=?"), id)
+		fmt.Sprint("SELECT * FROM ", tableId, " WHERE ID=? ", extraFilter), id)
 	if err != nil {
 		fmt.Println(err)
 		return ret, err
@@ -550,7 +554,6 @@ func getConn(dbType string, ds string) (*sql.DB, error) {
 		dbType = "mysql"
 	}
 	db, err := sql.Open(dbType, ds)
-	db.SetMaxIdleConns(10)
 	return db, err
 }
 
