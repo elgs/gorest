@@ -570,16 +570,16 @@ func normalizeTableId(tableId string, dbType string, ds string) string {
 	}
 	db := extractDbNameFromDs(dbType, ds)
 
-	mysqlSafe(&tableId)
+	MysqlSafe(&tableId)
 	if len(strings.TrimSpace(db)) == 0 {
 		return tableId
 	} else {
-		mysqlSafe(&db)
+		MysqlSafe(&db)
 		return fmt.Sprint(db, ".", tableId)
 	}
 }
 
-func mysqlSafe(s *string) {
+func MysqlSafe(s *string) {
 	*s = strings.Replace(*s, "'", "''", -1)
 	*s = strings.Replace(*s, "--", "", -1)
 }

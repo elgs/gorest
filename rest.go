@@ -145,6 +145,12 @@ func (this *Gorest) Serve() {
 				fmt.Fprint(w, jsonString)
 			} else {
 				// Create the record.
+				metaValues := r.URL.Query()["meta"]
+				meta := false
+				if metaValues != nil && metaValues[0] == "1" {
+					meta = true
+				}
+				context["meta"] = meta
 				decoder := json.NewDecoder(r.Body)
 				m := make(map[string]interface{})
 				err := decoder.Decode(&m)
@@ -187,6 +193,12 @@ func (this *Gorest) Serve() {
 			fmt.Fprint(w, jsonString)
 		case "PUT":
 			// Update an existing record.
+			metaValues := r.URL.Query()["meta"]
+			meta := false
+			if metaValues != nil && metaValues[0] == "1" {
+				meta = true
+			}
+			context["meta"] = meta
 			decoder := json.NewDecoder(r.Body)
 			m := make(map[string]interface{})
 			err := decoder.Decode(&m)
