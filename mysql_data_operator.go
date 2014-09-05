@@ -106,6 +106,7 @@ func (this *MySqlDataOperator) ListMap(tableId string, filter []string, sort str
 		}
 	}
 
+	fmt.Println(where)
 	m, err := gosqljson.QueryDbToMap(db, true,
 		fmt.Sprint("SELECT * FROM ", tableId, where, sort, " LIMIT ?,?"), start, limit)
 	if err != nil {
