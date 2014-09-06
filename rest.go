@@ -32,6 +32,8 @@ func (this *Gorest) Serve() {
 		context["api_token_key"] = r.Header.Get("api_token_key")
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "*")
+		w.Header().Set("Access-Control-Allow-Headers", "*")
 		urlPath := r.URL.Path
 		urlPrefix := fmt.Sprint("/", this.UrlPrefix, "/")
 		if !strings.HasPrefix(urlPath, urlPrefix) {
