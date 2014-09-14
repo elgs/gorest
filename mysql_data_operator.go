@@ -12,6 +12,15 @@ import (
 	"strings"
 )
 
+//func init() {
+//	id := "api"
+//	RegisterDataOperator(id, &MySqlDataOperator{
+//		Ds:         "",
+//		DbType:     "mysql",
+//		TokenTable: "",
+//	})
+//}
+
 type MySqlDataOperator struct {
 	*DefaultDataOperator
 	Ds         string

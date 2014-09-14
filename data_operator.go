@@ -1,5 +1,15 @@
 package gorest
 
+var dataOperatorRegistry = make(map[string]DataOperator)
+
+func RegisterDataOperator(id string, dataOperator DataOperator) {
+	dataOperatorRegistry[id] = dataOperator
+}
+
+func GetDataOperator(id string) DataOperator {
+	return dataOperatorRegistry[id]
+}
+
 type DataOperator interface {
 	Load(resourceId string, id string, context map[string]interface{}) (map[string]string, error)
 	ListMap(resourceId string, filter []string, sort string, start int64, limit int64, includeTotal bool, context map[string]interface{}) ([]map[string]string, int64, error)
