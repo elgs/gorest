@@ -19,9 +19,6 @@ type Gorest struct {
 	HostHttps     string
 	CertFileHttps string
 	KeyFileHttps  string
-
-	UrlPrefix string
-	Dbo       DataOperator
 }
 
 func (this *Gorest) Serve() {
@@ -35,10 +32,18 @@ func (this *Gorest) Serve() {
 		w.Header().Set("Access-Control-Allow-Methods", r.Header.Get("Access-Control-Request-Method"))
 		w.Header().Set("Access-Control-Allow-Headers", r.Header.Get("Access-Control-Request-Headers"))
 		urlPath := r.URL.Path
-		urlPrefix := fmt.Sprint("/", this.UrlPrefix, "/")
-		if !strings.HasPrefix(urlPath, urlPrefix) {
+		var dbo DataOperator = nil
+		var urlPrefix string
+		for kUrlPrefix, _ := range dataOperatorRegistry {
+			urlPrefix := fmt.Sprint("/", kUrlPrefix, "/")
+			if strings.HasPrefix(urlPath, urlPrefix) {
+				dbo = dataOperatorRegistry[kUrlPrefix]
+			}
+		}
+		if dbo == nil {
 			return
 		}
+
 		restUrl := urlPath[len(urlPrefix):]
 		restData := strings.Split(restUrl, "/")
 		tableId := restData[0]
@@ -75,9 +80,9 @@ func (this *Gorest) Serve() {
 				var data interface{}
 				var total int64 = -1
 				if array {
-					data, total, err = this.Dbo.ListArray(tableId, filter, sort, start, limit, includeTotal, context)
+					data, total, err = dbo.ListArray(tableId, filter, sort, start, limit, includeTotal, context)
 				} else {
-					data, total, err = this.Dbo.ListMap(tableId, filter, sort, start, limit, includeTotal, context)
+					data, total, err = dbo.ListMap(tableId, filter, sort, start, limit, includeTotal, context)
 				}
 				m := map[string]interface{}{
 					"data":  data,
@@ -93,7 +98,7 @@ func (this *Gorest) Serve() {
 				// Load record by id.
 				dataId := restData[1]
 
-				data, err := this.Dbo.Load(tableId, dataId, context)
+				data, err := dbo.Load(tableId, dataId, context)
 
 				m := map[string]interface{}{
 					"data": data,
@@ -132,9 +137,9 @@ func (this *Gorest) Serve() {
 				var data interface{}
 				var total int64 = -1
 				if array {
-					data, total, err = this.Dbo.QueryArray(tableId, sqlSelect, sqlSelectCount, start, limit, includeTotal, context)
+					data, total, err = dbo.QueryArray(tableId, sqlSelect, sqlSelectCount, start, limit, includeTotal, context)
 				} else {
-					data, total, err = this.Dbo.QueryMap(tableId, sqlSelect, sqlSelectCount, start, limit, includeTotal, context)
+					data, total, err = dbo.QueryMap(tableId, sqlSelect, sqlSelectCount, start, limit, includeTotal, context)
 				}
 				m := map[string]interface{}{
 					"data":  data,
@@ -168,7 +173,7 @@ func (this *Gorest) Serve() {
 				for k, v := range m {
 					mUpper[strings.ToUpper(k)] = v
 				}
-				data, err := this.Dbo.Create(tableId, mUpper, context)
+				data, err := dbo.Create(tableId, mUpper, context)
 				m = map[string]interface{}{
 					"data": data,
 				}
@@ -182,7 +187,7 @@ func (this *Gorest) Serve() {
 		case "COPY":
 			// Duplicate a new record.
 			dataId := restData[1]
-			data, err := this.Dbo.Duplicate(tableId, dataId, context)
+			data, err := dbo.Duplicate(tableId, dataId, context)
 
 			m := map[string]interface{}{
 				"data": data,
@@ -215,7 +220,7 @@ func (this *Gorest) Serve() {
 			for k, v := range m {
 				mUpper[strings.ToUpper(k)] = v
 			}
-			data, err := this.Dbo.Update(tableId, mUpper, context)
+			data, err := dbo.Update(tableId, mUpper, context)
 			m = map[string]interface{}{
 				"data": data,
 			}
@@ -229,7 +234,7 @@ func (this *Gorest) Serve() {
 			// Remove the record.
 			dataId := restData[1]
 
-			data, err := this.Dbo.Delete(tableId, dataId, context)
+			data, err := dbo.Delete(tableId, dataId, context)
 
 			m := map[string]interface{}{
 				"data": data,
@@ -248,13 +253,13 @@ func (this *Gorest) Serve() {
 
 	if this.EnableHttp {
 		go func() {
-			fmt.Println(fmt.Sprint("Listening on http://", this.HostHttp, ":", this.PortHttp, "/", this.UrlPrefix))
+			fmt.Println(fmt.Sprint("Listening on http://", this.HostHttp, ":", this.PortHttp, "/"))
 			http.ListenAndServe(fmt.Sprint(this.HostHttp, ":", this.PortHttp), nil)
 		}()
 	}
 	if this.EnableHttps {
 		go func() {
-			fmt.Println(fmt.Sprint("Listening on https://", this.HostHttps, ":", this.PortHttps, "/", this.UrlPrefix))
+			fmt.Println(fmt.Sprint("Listening on https://", this.HostHttps, ":", this.PortHttps, "/"))
 			http.ListenAndServeTLS(fmt.Sprint(this.HostHttps, ":", this.PortHttps), this.CertFileHttps, this.KeyFileHttps, nil)
 		}()
 	}
