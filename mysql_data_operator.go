@@ -49,7 +49,8 @@ func (this *MySqlDataOperator) Load(tableId string, id string, context map[strin
 	if extraFilter == nil {
 		extraFilter = ""
 	}
-	m, err := gosqljson.QueryDbToMap(db, true,
+	c := context["case"].(string)
+	m, err := gosqljson.QueryDbToMap(db, c,
 		fmt.Sprint("SELECT * FROM ", tableId, " WHERE ID=? ", extraFilter), id)
 	if err != nil {
 		fmt.Println(err)
@@ -104,7 +105,8 @@ func (this *MySqlDataOperator) ListMap(tableId string, filter []string, sort str
 		}
 	}
 
-	m, err := gosqljson.QueryDbToMap(db, true,
+	c := context["case"].(string)
+	m, err := gosqljson.QueryDbToMap(db, c,
 		fmt.Sprint("SELECT * FROM ", tableId, where, sort, " LIMIT ?,?"), start, limit)
 	if err != nil {
 		fmt.Println(err)
@@ -112,7 +114,7 @@ func (this *MySqlDataOperator) ListMap(tableId string, filter []string, sort str
 	}
 	cnt := -1
 	if includeTotal {
-		c, err := gosqljson.QueryDbToMap(db, false,
+		c, err := gosqljson.QueryDbToMap(db, "upper",
 			fmt.Sprint("SELECT COUNT(*) AS CNT FROM ", tableId, where))
 		if err != nil {
 			fmt.Println(err)
@@ -162,7 +164,8 @@ func (this *MySqlDataOperator) ListArray(tableId string, filter []string, sort s
 		}
 	}
 
-	a, err := gosqljson.QueryDbToArray(db, true,
+	c := context["case"].(string)
+	a, err := gosqljson.QueryDbToArray(db, c,
 		fmt.Sprint("SELECT * FROM ", tableId, where, sort, " LIMIT ?,?"), start, limit)
 	if err != nil {
 		fmt.Println(err)
@@ -170,7 +173,7 @@ func (this *MySqlDataOperator) ListArray(tableId string, filter []string, sort s
 	}
 	cnt := -1
 	if includeTotal {
-		c, err := gosqljson.QueryDbToMap(db, false,
+		c, err := gosqljson.QueryDbToMap(db, "upper",
 			fmt.Sprint("SELECT COUNT(*) AS CNT FROM ", tableId, where))
 		if err != nil {
 			fmt.Println(err)
@@ -329,7 +332,7 @@ func (this *MySqlDataOperator) Duplicate(tableId string, id string, context map[
 	}
 
 	// Duplicate the record
-	data, err := gosqljson.QueryDbToMap(db, false,
+	data, err := gosqljson.QueryDbToMap(db, "upper",
 		fmt.Sprint("SELECT * FROM ", tableId, " WHERE ID=?"), id)
 	if data == nil || len(data) != 1 {
 		return "", err
@@ -441,7 +444,7 @@ func (this *MySqlDataOperator) QueryMap(tableId string, sqlSelect string, sqlSel
 		}
 	}
 
-	m, err := gosqljson.QueryDbToMap(db, true,
+	m, err := gosqljson.QueryDbToMap(db, "lower",
 		fmt.Sprint(sqlSelect, " LIMIT ?,?"), start, limit)
 	cnt := -1
 	if err != nil {
@@ -449,7 +452,7 @@ func (this *MySqlDataOperator) QueryMap(tableId string, sqlSelect string, sqlSel
 		return ret, -1, err
 	}
 	if includeTotal {
-		c, err := gosqljson.QueryDbToMap(db, false, sqlSelectCount)
+		c, err := gosqljson.QueryDbToMap(db, "upper", sqlSelectCount)
 		if err != nil {
 			fmt.Println(err)
 			return ret, -1, err
@@ -504,7 +507,7 @@ func (this *MySqlDataOperator) QueryArray(tableId string, sqlSelect string, sqlS
 		}
 	}
 
-	a, err := gosqljson.QueryDbToArray(db, true,
+	a, err := gosqljson.QueryDbToArray(db, "lower",
 		fmt.Sprint(sqlSelect, " LIMIT ?,?"), start, limit)
 	if err != nil {
 		fmt.Println(err)
@@ -512,7 +515,7 @@ func (this *MySqlDataOperator) QueryArray(tableId string, sqlSelect string, sqlS
 	}
 	cnt := -1
 	if includeTotal {
-		c, err := gosqljson.QueryDbToMap(db, false, sqlSelectCount)
+		c, err := gosqljson.QueryDbToMap(db, "upper", sqlSelectCount)
 		if err != nil {
 			fmt.Println(err)
 			return ret, -1, err

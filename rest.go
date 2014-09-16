@@ -35,16 +35,17 @@ func (this *Gorest) Serve() {
 		var dbo DataOperator = nil
 		var urlPrefix string
 		for kUrlPrefix, _ := range dataOperatorRegistry {
-			urlPrefix := fmt.Sprint("/", kUrlPrefix, "/")
-			if strings.HasPrefix(urlPath, urlPrefix) {
+			if strings.HasPrefix(urlPath, fmt.Sprint("/", kUrlPrefix, "/")) {
 				dbo = dataOperatorRegistry[kUrlPrefix]
+				urlPrefix = kUrlPrefix
+				break
 			}
 		}
 		if dbo == nil {
 			return
 		}
 
-		restUrl := urlPath[len(urlPrefix):]
+		restUrl := urlPath[len(urlPrefix)+2:]
 		restData := strings.Split(restUrl, "/")
 		tableId := restData[0]
 		switch r.Method {
@@ -59,6 +60,11 @@ func (this *Gorest) Serve() {
 				sort := r.FormValue("sort")
 				s := r.FormValue("start")
 				l := r.FormValue("limit")
+				c := r.FormValue("case")
+				if c != "upper" && c != "camel" {
+					c = "lower"
+				}
+				context["case"] = c
 				includeTotal := false
 				array := false
 				if t == "1" {
@@ -97,6 +103,11 @@ func (this *Gorest) Serve() {
 			} else {
 				// Load record by id.
 				dataId := restData[1]
+				c := r.FormValue("case")
+				if c != "upper" && c != "camel" {
+					c = "lower"
+				}
+				context["case"] = c
 
 				data, err := dbo.Load(tableId, dataId, context)
 
