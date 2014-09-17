@@ -110,7 +110,7 @@ func (this *MySqlDataOperator) ListMap(tableId string, field []string, filter []
 	c := context["case"].(string)
 	fields := parseFields(field)
 	m, err := gosqljson.QueryDbToMap(db, c,
-		fmt.Sprint("SELECT", fields, "FROM ", tableId, where, group, sort, " LIMIT ?,?"), start, limit)
+		fmt.Sprint("SELECT", fields, "FROM ", tableId, where, parseGroup(group), sort, " LIMIT ?,?"), start, limit)
 	if err != nil {
 		fmt.Println(err)
 		return ret, -1, err
@@ -118,7 +118,7 @@ func (this *MySqlDataOperator) ListMap(tableId string, field []string, filter []
 	cnt := -1
 	if includeTotal {
 		c, err := gosqljson.QueryDbToMap(db, "upper",
-			fmt.Sprint("SELECT COUNT(*) AS CNT FROM (", "SELECT", fields, "FROM ", tableId, where, group, ")a"))
+			fmt.Sprint("SELECT COUNT(*) AS CNT FROM (", "SELECT", fields, "FROM ", tableId, where, parseGroup(group), ")a"))
 		if err != nil {
 			fmt.Println(err)
 			return ret, -1, err
@@ -170,7 +170,7 @@ func (this *MySqlDataOperator) ListArray(tableId string, field []string, filter 
 	c := context["case"].(string)
 	fields := parseFields(field)
 	a, err := gosqljson.QueryDbToArray(db, c,
-		fmt.Sprint("SELECT", fields, "FROM ", tableId, where, group, sort, " LIMIT ?,?"), start, limit)
+		fmt.Sprint("SELECT", fields, "FROM ", tableId, where, parseGroup(group), sort, " LIMIT ?,?"), start, limit)
 	if err != nil {
 		fmt.Println(err)
 		return ret, -1, err
@@ -178,7 +178,7 @@ func (this *MySqlDataOperator) ListArray(tableId string, field []string, filter 
 	cnt := -1
 	if includeTotal {
 		c, err := gosqljson.QueryDbToMap(db, "upper",
-			fmt.Sprint("SELECT COUNT(*) AS CNT FROM (", "SELECT", fields, "FROM ", tableId, where, group, ")a"))
+			fmt.Sprint("SELECT COUNT(*) AS CNT FROM (", "SELECT", fields, "FROM ", tableId, where, parseGroup(group), ")a"))
 		if err != nil {
 			fmt.Println(err)
 			return ret, -1, err
@@ -633,5 +633,12 @@ func parseFields(fields []string) (r string) {
 		}
 	}
 	r = fmt.Sprint(" ", r, " ")
+	return
+}
+func parseGroup(group string) (r string) {
+	if strings.TrimSpace(group) == "" {
+		return ""
+	}
+	r = fmt.Sprint(" GROUP BY ", strings.ToUpper(group))
 	return
 }
