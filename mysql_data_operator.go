@@ -50,8 +50,10 @@ func (this *MySqlDataOperator) Load(tableId string, id string, field []string, c
 		extraFilter = ""
 	}
 	c := context["case"].(string)
+
+	fields := parseFields(field)
 	m, err := gosqljson.QueryDbToMap(db, c,
-		fmt.Sprint("SELECT * FROM ", tableId, " WHERE ID=? ", extraFilter), id)
+		fmt.Sprint("SELECT", fields, "FROM ", tableId, " WHERE ID=? ", extraFilter), id)
 	if err != nil {
 		fmt.Println(err)
 		return ret, err
@@ -106,8 +108,9 @@ func (this *MySqlDataOperator) ListMap(tableId string, field []string, filter []
 	}
 
 	c := context["case"].(string)
+	fields := parseFields(field)
 	m, err := gosqljson.QueryDbToMap(db, c,
-		fmt.Sprint("SELECT * FROM ", tableId, where, sort, " LIMIT ?,?"), start, limit)
+		fmt.Sprint("SELECT", fields, "FROM ", tableId, where, group, sort, " LIMIT ?,?"), start, limit)
 	if err != nil {
 		fmt.Println(err)
 		return ret, -1, err
@@ -115,7 +118,7 @@ func (this *MySqlDataOperator) ListMap(tableId string, field []string, filter []
 	cnt := -1
 	if includeTotal {
 		c, err := gosqljson.QueryDbToMap(db, "upper",
-			fmt.Sprint("SELECT COUNT(*) AS CNT FROM ", tableId, where))
+			fmt.Sprint("SELECT COUNT(*) AS CNT FROM (", "SELECT", fields, "FROM ", tableId, where, group, ")a"))
 		if err != nil {
 			fmt.Println(err)
 			return ret, -1, err
@@ -165,8 +168,9 @@ func (this *MySqlDataOperator) ListArray(tableId string, field []string, filter 
 	}
 
 	c := context["case"].(string)
+	fields := parseFields(field)
 	a, err := gosqljson.QueryDbToArray(db, c,
-		fmt.Sprint("SELECT * FROM ", tableId, where, sort, " LIMIT ?,?"), start, limit)
+		fmt.Sprint("SELECT", fields, "FROM ", tableId, where, group, sort, " LIMIT ?,?"), start, limit)
 	if err != nil {
 		fmt.Println(err)
 		return ret, -1, err
@@ -174,7 +178,7 @@ func (this *MySqlDataOperator) ListArray(tableId string, field []string, filter 
 	cnt := -1
 	if includeTotal {
 		c, err := gosqljson.QueryDbToMap(db, "upper",
-			fmt.Sprint("SELECT COUNT(*) AS CNT FROM ", tableId, where))
+			fmt.Sprint("SELECT COUNT(*) AS CNT FROM (", "SELECT", fields, "FROM ", tableId, where, group, ")a"))
 		if err != nil {
 			fmt.Println(err)
 			return ret, -1, err
@@ -608,11 +612,26 @@ func parseFilters(filters []string) (r string) {
 	for _, v := range filters {
 		r += fmt.Sprint("AND ", parseFilter(v))
 	}
-	r = fmt.Sprint(" WHERE 1=1 ", r)
+	r = fmt.Sprint(" WHERE 1=1 ", r, " ")
 	//fmt.Println(r)
 	return
 }
 
 var parser = &exparser.Parser{
 	Operators: exparser.MysqlOperators,
+}
+
+func parseFields(fields []string) (r string) {
+	if fields == nil || len(fields) == 0 {
+		return " * "
+	}
+	for i, v := range fields {
+		if i == len(fields)-1 {
+			r += fmt.Sprint(v)
+		} else {
+			r += fmt.Sprint(v, ",")
+		}
+	}
+	r = fmt.Sprint(" ", r, " ")
+	return
 }
