@@ -44,10 +44,10 @@ type DataInterceptor interface {
 
 type DefaultDataInterceptor struct{}
 
-func (this *DefaultDataInterceptor) BeforeLoad(resourceId string, ds interface{}, context map[string]interface{}, id string) (bool, error) {
+func (this *DefaultDataInterceptor) BeforeLoad(resourceId string, ds interface{}, field []string, context map[string]interface{}, id string) (bool, error) {
 	return true, nil
 }
-func (this *DefaultDataInterceptor) AfterLoad(resourceId string, ds interface{}, context map[string]interface{}, data map[string]string) error {
+func (this *DefaultDataInterceptor) AfterLoad(resourceId string, ds interface{}, field []string, context map[string]interface{}, data map[string]string) error {
 	return nil
 }
 func (this *DefaultDataInterceptor) BeforeCreate(resourceId string, ds interface{}, context map[string]interface{}, data map[string]interface{}) (bool, error) {
@@ -74,16 +74,16 @@ func (this *DefaultDataInterceptor) BeforeDelete(resourceId string, ds interface
 func (this *DefaultDataInterceptor) AfterDelete(resourceId string, ds interface{}, context map[string]interface{}, id string) error {
 	return nil
 }
-func (this *DefaultDataInterceptor) BeforeListMap(resourceId string, ds interface{}, context map[string]interface{}, filter *string, sort *string, group *string, start int64, limit int64, includeTotal bool) (bool, error) {
+func (this *DefaultDataInterceptor) BeforeListMap(resourceId string, ds interface{}, field []string, context map[string]interface{}, filter *string, sort *string, group *string, start int64, limit int64, includeTotal bool) (bool, error) {
 	return true, nil
 }
-func (this *DefaultDataInterceptor) AfterListMap(resourceId string, ds interface{}, context map[string]interface{}, data []map[string]string, total int64) error {
+func (this *DefaultDataInterceptor) AfterListMap(resourceId string, ds interface{}, field []string, context map[string]interface{}, data []map[string]string, total int64) error {
 	return nil
 }
-func (this *DefaultDataInterceptor) BeforeListArray(resourceId string, ds interface{}, context map[string]interface{}, filter *string, sort *string, group *string, start int64, limit int64, includeTotal bool) (bool, error) {
+func (this *DefaultDataInterceptor) BeforeListArray(resourceId string, ds interface{}, field []string, context map[string]interface{}, filter *string, sort *string, group *string, start int64, limit int64, includeTotal bool) (bool, error) {
 	return true, nil
 }
-func (this *DefaultDataInterceptor) AfterListArray(resourceId string, ds interface{}, context map[string]interface{}, data [][]string, total int64) error {
+func (this *DefaultDataInterceptor) AfterListArray(resourceId string, ds interface{}, field []string, context map[string]interface{}, data [][]string, total int64) error {
 	return nil
 }
 
