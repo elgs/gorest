@@ -51,7 +51,7 @@ func (this *EchoDataInterceptor) AfterDelete(resourceId string, ds interface{}, 
 	fmt.Println("Here I'm in AfterDelete")
 	return nil
 }
-func (this *EchoDataInterceptor) BeforeListMap(resourceId string, ds interface{}, context map[string]interface{}, filter *string, sort *string, start int64, limit int64, includeTotal bool) (bool, error) {
+func (this *EchoDataInterceptor) BeforeListMap(resourceId string, ds interface{}, context map[string]interface{}, filter *string, sort *string, group *string, start int64, limit int64, includeTotal bool) (bool, error) {
 	fmt.Println("Here I'm in BeforeListMap")
 	return true, nil
 }
@@ -59,7 +59,7 @@ func (this *EchoDataInterceptor) AfterListMap(resourceId string, ds interface{},
 	fmt.Println("Here I'm in AfterListMap")
 	return nil
 }
-func (this *EchoDataInterceptor) BeforeListArray(resourceId string, ds interface{}, context map[string]interface{}, filter *string, sort *string, start int64, limit int64, includeTotal bool) (bool, error) {
+func (this *EchoDataInterceptor) BeforeListArray(resourceId string, ds interface{}, context map[string]interface{}, filter *string, sort *string, group *string, start int64, limit int64, includeTotal bool) (bool, error) {
 	fmt.Println("Here I'm in BeforeListArray")
 	return true, nil
 }
@@ -67,19 +67,20 @@ func (this *EchoDataInterceptor) AfterListArray(resourceId string, ds interface{
 	fmt.Println("Here I'm in AfterListArray")
 	return nil
 }
-func (this *EchoDataInterceptor) BeforeQueryMap(resourceId string, ds interface{}, context map[string]interface{}, sqlSelect *string, sqlSelectCount *string, start int64, limit int64, includeTotal bool) (bool, error) {
-	fmt.Println("Here I'm in BeforeQuerytMap")
-	return true, nil
-}
-func (this *EchoDataInterceptor) AfterQueryMap(resourceId string, ds interface{}, context map[string]interface{}, data []map[string]string, total int64) error {
-	fmt.Println("Here I'm in AfterQueryMap")
-	return nil
-}
-func (this *EchoDataInterceptor) BeforeQueryArray(resourceId string, ds interface{}, context map[string]interface{}, sqlSelect *string, sqlSelectCount *string, start int64, limit int64, includeTotal bool) (bool, error) {
-	fmt.Println("Here I'm in BeforeQueryArray")
-	return true, nil
-}
-func (this *EchoDataInterceptor) AfterQueryArray(resourceId string, ds interface{}, context map[string]interface{}, data [][]string, total int64) error {
-	fmt.Println("Here I'm in AfterQueryArray")
-	return nil
-}
+
+//func (this *EchoDataInterceptor) BeforeQueryMap(resourceId string, ds interface{}, context map[string]interface{}, sqlSelect *string, sqlSelectCount *string, start int64, limit int64, includeTotal bool) (bool, error) {
+//	fmt.Println("Here I'm in BeforeQuerytMap")
+//	return true, nil
+//}
+//func (this *EchoDataInterceptor) AfterQueryMap(resourceId string, ds interface{}, context map[string]interface{}, data []map[string]string, total int64) error {
+//	fmt.Println("Here I'm in AfterQueryMap")
+//	return nil
+//}
+//func (this *EchoDataInterceptor) BeforeQueryArray(resourceId string, ds interface{}, context map[string]interface{}, sqlSelect *string, sqlSelectCount *string, start int64, limit int64, includeTotal bool) (bool, error) {
+//	fmt.Println("Here I'm in BeforeQueryArray")
+//	return true, nil
+//}
+//func (this *EchoDataInterceptor) AfterQueryArray(resourceId string, ds interface{}, context map[string]interface{}, data [][]string, total int64) error {
+//	fmt.Println("Here I'm in AfterQueryArray")
+//	return nil
+//}

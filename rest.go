@@ -57,7 +57,9 @@ func (this *Gorest) Serve() {
 				t := r.FormValue("total")
 				a := r.FormValue("array")
 				filter := r.Form["filter"]
+				field := r.Form["field"]
 				sort := r.FormValue("sort")
+				group := r.FormValue("group")
 				s := r.FormValue("start")
 				l := r.FormValue("limit")
 				c := r.FormValue("case")
@@ -86,9 +88,9 @@ func (this *Gorest) Serve() {
 				var data interface{}
 				var total int64 = -1
 				if array {
-					data, total, err = dbo.ListArray(tableId, filter, sort, start, limit, includeTotal, context)
+					data, total, err = dbo.ListArray(tableId, field, filter, sort, group, start, limit, includeTotal, context)
 				} else {
-					data, total, err = dbo.ListMap(tableId, filter, sort, start, limit, includeTotal, context)
+					data, total, err = dbo.ListMap(tableId, field, filter, sort, group, start, limit, includeTotal, context)
 				}
 				m := map[string]interface{}{
 					"data":  data,
@@ -109,7 +111,9 @@ func (this *Gorest) Serve() {
 				}
 				context["case"] = c
 
-				data, err := dbo.Load(tableId, dataId, context)
+				field := r.Form["field"]
+
+				data, err := dbo.Load(tableId, dataId, field, context)
 
 				m := map[string]interface{}{
 					"data": data,
@@ -122,79 +126,79 @@ func (this *Gorest) Serve() {
 				fmt.Fprint(w, jsonString)
 			}
 		case "POST":
-			if tableId == "_query" {
-				sqlSelect := r.FormValue("sql_select")
-				sqlSelectCount := r.FormValue("sql_select_count")
-				t := r.FormValue("total")
-				a := r.FormValue("array")
-				s := r.FormValue("start")
-				l := r.FormValue("limit")
-				includeTotal := false
-				array := false
-				if t == "1" {
-					includeTotal = true
-				}
-				if a == "1" {
-					array = true
-				}
-				start, err := strconv.ParseInt(s, 10, 0)
-				if err != nil {
-					start = 0
-				}
-				limit, err := strconv.ParseInt(l, 10, 0)
-				if err != nil {
-					limit = 25
-				}
-				var data interface{}
-				var total int64 = -1
-				if array {
-					data, total, err = dbo.QueryArray(tableId, sqlSelect, sqlSelectCount, start, limit, includeTotal, context)
-				} else {
-					data, total, err = dbo.QueryMap(tableId, sqlSelect, sqlSelectCount, start, limit, includeTotal, context)
-				}
-				m := map[string]interface{}{
-					"data":  data,
-					"total": total,
-				}
-				if err != nil {
-					m["err"] = err.Error()
-				}
-				jsonData, err := json.Marshal(m)
-				jsonString := string(jsonData)
-				fmt.Fprint(w, jsonString)
-			} else {
-				// Create the record.
-				metaValues := r.URL.Query()["meta"]
-				meta := false
-				if metaValues != nil && metaValues[0] == "1" {
-					meta = true
-				}
-				context["meta"] = meta
-				decoder := json.NewDecoder(r.Body)
-				m := make(map[string]interface{})
-				err := decoder.Decode(&m)
-				if err != nil {
-					m["err"] = err.Error()
-					jsonData, _ := json.Marshal(m)
-					jsonString := string(jsonData)
-					fmt.Fprint(w, jsonString)
-					return
-				}
-				mUpper := make(map[string]interface{})
-				for k, v := range m {
-					mUpper[strings.ToUpper(k)] = v
-				}
-				data, err := dbo.Create(tableId, mUpper, context)
-				m = map[string]interface{}{
-					"data": data,
-				}
-				if err != nil {
-					m["err"] = err.Error()
-				}
-				jsonData, err := json.Marshal(m)
-				jsonString := string(jsonData)
-				fmt.Fprint(w, jsonString)
+			//if tableId == "_query" {
+			//	sqlSelect := r.FormValue("sql_select")
+			//	sqlSelectCount := r.FormValue("sql_select_count")
+			//	t := r.FormValue("total")
+			//	a := r.FormValue("array")
+			//	s := r.FormValue("start")
+			//	l := r.FormValue("limit")
+			//	includeTotal := false
+			//	array := false
+			//	if t == "1" {
+			//		includeTotal = true
+			//	}
+			//	if a == "1" {
+			//		array = true
+			//	}
+			//	start, err := strconv.ParseInt(s, 10, 0)
+			//	if err != nil {
+			//		start = 0
+			//	}
+			//	limit, err := strconv.ParseInt(l, 10, 0)
+			//	if err != nil {
+			//		limit = 25
+			//	}
+			//	var data interface{}
+			//	var total int64 = -1
+			//	if array {
+			//		data, total, err = dbo.QueryArray(tableId, sqlSelect, sqlSelectCount, start, limit, includeTotal, context)
+			//	} else {
+			//		data, total, err = dbo.QueryMap(tableId, sqlSelect, sqlSelectCount, start, limit, includeTotal, context)
+			//	}
+			//	m := map[string]interface{}{
+			//		"data":  data,
+			//		"total": total,
+			//	}
+			//	if err != nil {
+			//		m["err"] = err.Error()
+			//	}
+			//	jsonData, err := json.Marshal(m)
+			//	jsonString := string(jsonData)
+			//	fmt.Fprint(w, jsonString)
+			//} else {
+			// Create the record.
+			metaValues := r.URL.Query()["meta"]
+			meta := false
+			if metaValues != nil && metaValues[0] == "1" {
+				meta = true
 			}
+			context["meta"] = meta
+			decoder := json.NewDecoder(r.Body)
+			m := make(map[string]interface{})
+			err := decoder.Decode(&m)
+			if err != nil {
+				m["err"] = err.Error()
+				jsonData, _ := json.Marshal(m)
+				jsonString := string(jsonData)
+				fmt.Fprint(w, jsonString)
+				return
+			}
+			mUpper := make(map[string]interface{})
+			for k, v := range m {
+				mUpper[strings.ToUpper(k)] = v
+			}
+			data, err := dbo.Create(tableId, mUpper, context)
+			m = map[string]interface{}{
+				"data": data,
+			}
+			if err != nil {
+				m["err"] = err.Error()
+			}
+			jsonData, err := json.Marshal(m)
+			jsonString := string(jsonData)
+			fmt.Fprint(w, jsonString)
+			//}
 		case "COPY":
 			// Duplicate a new record.
 			dataId := restData[1]
