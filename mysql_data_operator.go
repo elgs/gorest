@@ -206,20 +206,20 @@ func (this *MySqlDataOperator) Create(tableId string, data map[string]interface{
 	defer db.Close()
 	if err != nil {
 		fmt.Println(err)
-		return "", err
+		return nil, err
 	}
 
 	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
 		ctn, err := globalDataInterceptor.BeforeCreate(tableId, db, context, data)
 		if !ctn {
-			return "", err
+			return nil, err
 		}
 	}
 	dataInterceptor := GetDataInterceptor(tableId)
 	if dataInterceptor != nil {
 		ctn, err := dataInterceptor.BeforeCreate(tableId, db, context, data)
 		if !ctn {
-			return "", err
+			return nil, err
 		}
 	}
 
@@ -245,7 +245,12 @@ func (this *MySqlDataOperator) Create(tableId string, data map[string]interface{
 	}
 	fields := fieldBuffer.String()
 	qms := qmBuffer.String()
-	gosqljson.ExecDb(db, fmt.Sprint("INSERT INTO ", tableId, " (", fields, ") VALUES (", qms, ")"), values...)
+	_, err = gosqljson.ExecDb(db, fmt.Sprint("INSERT INTO ", tableId, " (", fields, ") VALUES (", qms, ")"), values...)
+
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
 
 	if dataInterceptor != nil {
 		dataInterceptor.AfterCreate(tableId, db, context, data)
@@ -318,20 +323,20 @@ func (this *MySqlDataOperator) Duplicate(tableId string, id string, context map[
 	defer db.Close()
 	if err != nil {
 		fmt.Println(err)
-		return "", err
+		return nil, err
 	}
 
 	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
 		ctn, err := globalDataInterceptor.BeforeDuplicate(tableId, db, context, id)
 		if !ctn {
-			return "", err
+			return nil, err
 		}
 	}
 	dataInterceptor := GetDataInterceptor(tableId)
 	if dataInterceptor != nil {
 		ctn, err := dataInterceptor.BeforeDuplicate(tableId, db, context, id)
 		if !ctn {
-			return "", err
+			return nil, err
 		}
 	}
 
@@ -339,7 +344,7 @@ func (this *MySqlDataOperator) Duplicate(tableId string, id string, context map[
 	data, err := gosqljson.QueryDbToMap(db, "upper",
 		fmt.Sprint("SELECT * FROM ", tableId, " WHERE ID=?"), id)
 	if data == nil || len(data) != 1 {
-		return "", err
+		return nil, err
 	}
 	newData := make(map[string]interface{}, len(data[0]))
 	for k, v := range data[0] {
@@ -366,7 +371,12 @@ func (this *MySqlDataOperator) Duplicate(tableId string, id string, context map[
 	}
 	fields := fieldBuffer.String()
 	qms := qmBuffer.String()
-	gosqljson.ExecDb(db, fmt.Sprint("INSERT INTO ", tableId, " (", fields, ") VALUES (", qms, ")"), newValues...)
+	_, err = gosqljson.ExecDb(db, fmt.Sprint("INSERT INTO ", tableId, " (", fields, ") VALUES (", qms, ")"), newValues...)
+
+	if err != nil {
+		fmt.Println(err)
+		return -1, err
+	}
 
 	if dataInterceptor != nil {
 		dataInterceptor.AfterDuplicate(tableId, db, context, id, newId)
