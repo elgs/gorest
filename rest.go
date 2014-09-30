@@ -27,7 +27,7 @@ func (this *Gorest) Serve() {
 		context := make(map[string]interface{})
 		context["api_token_id"] = r.Header.Get("api_token_id")
 		context["api_token_key"] = r.Header.Get("api_token_key")
-		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Methods", r.Header.Get("Access-Control-Request-Method"))
 		w.Header().Set("Access-Control-Allow-Headers", r.Header.Get("Access-Control-Request-Headers"))
@@ -101,6 +101,7 @@ func (this *Gorest) Serve() {
 				}
 				jsonData, err := json.Marshal(m)
 				jsonString := string(jsonData)
+				w.Header().Set("Content-Type", "application/json; charset=utf-8")
 				fmt.Fprint(w, jsonString)
 			} else {
 				// Load record by id.
@@ -123,50 +124,10 @@ func (this *Gorest) Serve() {
 				}
 				jsonData, err := json.Marshal(m)
 				jsonString := string(jsonData)
+				w.Header().Set("Content-Type", "application/json; charset=utf-8")
 				fmt.Fprint(w, jsonString)
 			}
 		case "POST":
-			//if tableId == "_query" {
-			//	sqlSelect := r.FormValue("sql_select")
-			//	sqlSelectCount := r.FormValue("sql_select_count")
-			//	t := r.FormValue("total")
-			//	a := r.FormValue("array")
-			//	s := r.FormValue("start")
-			//	l := r.FormValue("limit")
-			//	includeTotal := false
-			//	array := false
-			//	if t == "1" {
-			//		includeTotal = true
-			//	}
-			//	if a == "1" {
-			//		array = true
-			//	}
-			//	start, err := strconv.ParseInt(s, 10, 0)
-			//	if err != nil {
-			//		start = 0
-			//	}
-			//	limit, err := strconv.ParseInt(l, 10, 0)
-			//	if err != nil {
-			//		limit = 25
-			//	}
-			//	var data interface{}
-			//	var total int64 = -1
-			//	if array {
-			//		data, total, err = dbo.QueryArray(tableId, sqlSelect, sqlSelectCount, start, limit, includeTotal, context)
-			//	} else {
-			//		data, total, err = dbo.QueryMap(tableId, sqlSelect, sqlSelectCount, start, limit, includeTotal, context)
-			//	}
-			//	m := map[string]interface{}{
-			//		"data":  data,
-			//		"total": total,
-			//	}
-			//	if err != nil {
-			//		m["err"] = err.Error()
-			//	}
-			//	jsonData, err := json.Marshal(m)
-			//	jsonString := string(jsonData)
-			//	fmt.Fprint(w, jsonString)
-			//} else {
 			// Create the record.
 			metaValues := r.URL.Query()["meta"]
 			meta := false
@@ -197,8 +158,8 @@ func (this *Gorest) Serve() {
 			}
 			jsonData, err := json.Marshal(m)
 			jsonString := string(jsonData)
+			w.Header().Set("Content-Type", "application/json; charset=utf-8")
 			fmt.Fprint(w, jsonString)
-			//}
 		case "COPY":
 			// Duplicate a new record.
 			dataId := restData[1]
@@ -212,6 +173,7 @@ func (this *Gorest) Serve() {
 			}
 			jsonData, err := json.Marshal(m)
 			jsonString := string(jsonData)
+			w.Header().Set("Content-Type", "application/json; charset=utf-8")
 			fmt.Fprint(w, jsonString)
 		case "PUT":
 			// Update an existing record.
@@ -244,6 +206,7 @@ func (this *Gorest) Serve() {
 			}
 			jsonData, err := json.Marshal(m)
 			jsonString := string(jsonData)
+			w.Header().Set("Content-Type", "application/json; charset=utf-8")
 			fmt.Fprint(w, jsonString)
 		case "DELETE":
 			// Remove the record.
@@ -259,6 +222,7 @@ func (this *Gorest) Serve() {
 			}
 			jsonData, err := json.Marshal(m)
 			jsonString := string(jsonData)
+			w.Header().Set("Content-Type", "application/json; charset=utf-8")
 			fmt.Fprint(w, jsonString)
 		default:
 			// Give an error message.

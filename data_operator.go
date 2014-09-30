@@ -18,8 +18,6 @@ type DataOperator interface {
 	Update(resourceId string, data map[string]interface{}, context map[string]interface{}) (int64, error)
 	Duplicate(resourceId string, id string, context map[string]interface{}) (interface{}, error)
 	Delete(resourceId string, id string, context map[string]interface{}) (int64, error)
-	//QueryMap(resourceId string, sqlSelect string, sqlSelectCount string, start int64, limit int64, includeTotal bool, context map[string]interface{}) ([]map[string]string, int64, error)
-	//QueryArray(resourceId string, sqlSelect string, sqlSelectCount string, start int64, limit int64, includeTotal bool, context map[string]interface{}) ([][]string, int64, error)
 }
 
 type DefaultDataOperator struct {
@@ -46,10 +44,3 @@ func (this *DefaultDataOperator) Duplicate(resourceId string, id string, context
 func (this *DefaultDataOperator) Delete(resourceId string, id string, context map[string]interface{}) (int64, error) {
 	return 0, nil
 }
-
-//func (this *DefaultDataOperator) QueryMap(resourceId string, sqlSelect string, sqlSelectCount string, start int64, limit int64, includeTotal bool, context map[string]interface{}) ([]map[string]string, int64, error) {
-//	return nil, -1, nil
-//}
-//func (this *DefaultDataOperator) QueryArray(resourceId string, sqlSelect string, sqlSelectCount string, start int64, limit int64, includeTotal bool, context map[string]interface{}) ([][]string, int64, error) {
-//	return nil, -1, nil
-//}

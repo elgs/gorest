@@ -35,11 +35,6 @@ type DataInterceptor interface {
 	AfterListMap(resourceId string, ds interface{}, field []string, context map[string]interface{}, data []map[string]string, total int64) error
 	BeforeListArray(resourceId string, ds interface{}, field []string, context map[string]interface{}, filter *string, sort *string, group *string, start int64, limit int64, includeTotal bool) (bool, error)
 	AfterListArray(resourceId string, ds interface{}, field []string, context map[string]interface{}, data [][]string, total int64) error
-
-	//BeforeQueryMap(resourceId string, ds interface{}, context map[string]interface{}, sqlSelect *string, sqlSelectCount *string, start int64, limit int64, includeTotal bool) (bool, error)
-	//AfterQueryMap(resourceId string, ds interface{}, context map[string]interface{}, data []map[string]string, total int64) error
-	//BeforeQueryArray(resourceId string, ds interface{}, context map[string]interface{}, sqlSelect *string, sqlSelectCount *string, start int64, limit int64, includeTotal bool) (bool, error)
-	//AfterQueryArray(resourceId string, ds interface{}, context map[string]interface{}, data [][]string, total int64) error
 }
 
 type DefaultDataInterceptor struct{}
@@ -86,16 +81,3 @@ func (this *DefaultDataInterceptor) BeforeListArray(resourceId string, ds interf
 func (this *DefaultDataInterceptor) AfterListArray(resourceId string, ds interface{}, field []string, context map[string]interface{}, data [][]string, total int64) error {
 	return nil
 }
-
-//func (this *DefaultDataInterceptor) BeforeQueryMap(resourceId string, ds interface{}, context map[string]interface{}, sqlSelect *string, sqlSelectCount *string, start int64, limit int64, includeTotal bool) (bool, error) {
-//	return true, nil
-//}
-//func (this *DefaultDataInterceptor) AfterQueryMap(resourceId string, ds interface{}, context map[string]interface{}, data []map[string]string, total int64) error {
-//	return nil
-//}
-//func (this *DefaultDataInterceptor) BeforeQueryArray(resourceId string, ds interface{}, context map[string]interface{}, sqlSelect *string, sqlSelectCount *string, start int64, limit int64, includeTotal bool) (bool, error) {
-//	return true, nil
-//}
-//func (this *DefaultDataInterceptor) AfterQueryArray(resourceId string, ds interface{}, context map[string]interface{}, data [][]string, total int64) error {
-//	return nil
-//}
