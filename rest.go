@@ -21,6 +21,8 @@ type Gorest struct {
 	HostHttps     string
 	CertFileHttps string
 	KeyFileHttps  string
+
+	FileBasePath string
 }
 
 func (this *Gorest) Serve() {
@@ -123,12 +125,11 @@ func (this *Gorest) Serve() {
 
 				if contentType == "bin" {
 					filePath := context["file_path"].(string)
-					start := context["start"].(int64)
-					length := context["length"].(int64)
-					file, _ := os.Open(filePath)
+					filesize := context["file_size"].(int64)
+					file, _ := os.Open(this.FileBasePath + filePath)
 					defer file.Close()
-					file.Seek(start, os.SEEK_SET)
-					n, _ := io.CopyN(w, file, length)
+					file.Seek(0, os.SEEK_SET)
+					n, _ := io.CopyN(w, file, filesize)
 					w.Header().Set("Content-Length", strconv.FormatInt(n, 10))
 					w.Header().Set("Content-Type", "application/octet-stream")
 				} else {
