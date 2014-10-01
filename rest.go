@@ -3,7 +3,9 @@ package gorest
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
+	"os"
 	"runtime"
 	"strconv"
 	"strings"
@@ -114,18 +116,33 @@ func (this *Gorest) Serve() {
 
 				field := r.Form["field"]
 
+				contentType := r.FormValue("content_type")
+				context["content_type"] = contentType
+
 				data, err := dbo.Load(tableId, dataId, field, context)
 
-				m := map[string]interface{}{
-					"data": data,
+				if contentType == "bin" {
+					filePath := context["file_path"].(string)
+					start := context["start"].(int64)
+					length := context["length"].(int64)
+					file, _ := os.Open(filePath)
+					defer file.Close()
+					file.Seek(start, os.SEEK_SET)
+					n, _ := io.CopyN(w, file, length)
+					w.Header().Set("Content-Length", strconv.FormatInt(n, 10))
+					w.Header().Set("Content-Type", "application/octet-stream")
+				} else {
+					m := map[string]interface{}{
+						"data": data,
+					}
+					if err != nil {
+						m["err"] = err.Error()
+					}
+					jsonData, _ := json.Marshal(m)
+					jsonString := string(jsonData)
+					w.Header().Set("Content-Type", "application/json; charset=utf-8")
+					fmt.Fprint(w, jsonString)
 				}
-				if err != nil {
-					m["err"] = err.Error()
-				}
-				jsonData, err := json.Marshal(m)
-				jsonString := string(jsonData)
-				w.Header().Set("Content-Type", "application/json; charset=utf-8")
-				fmt.Fprint(w, jsonString)
 			}
 		case "POST":
 			// Create the record.
