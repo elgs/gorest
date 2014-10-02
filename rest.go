@@ -125,13 +125,15 @@ func (this *Gorest) Serve() {
 
 				if contentType == "bin" {
 					filePath := context["file_path"].(string)
+					fileName := context["file_name"].(string)
 					filesize := context["file_size"].(int64)
-					file, _ := os.Open(this.FileBasePath + filePath)
+					file, _ := os.Open(this.FileBasePath + filePath + dataId)
 					defer file.Close()
 					file.Seek(0, os.SEEK_SET)
 					n, _ := io.CopyN(w, file, filesize)
 					w.Header().Set("Content-Length", strconv.FormatInt(n, 10))
 					w.Header().Set("Content-Type", "application/octet-stream")
+					w.Header().Set("Content-disposition", "attachment; filename='"+fileName+"'")
 				} else {
 					m := map[string]interface{}{
 						"data": data,
