@@ -123,7 +123,7 @@ func (this *Gorest) Serve() {
 
 				data, err := dbo.Load(tableId, dataId, field, context)
 
-				if contentType == "bin" {
+				if contentType == "bin" && err == nil {
 					filePath := context["file_path"].(string)
 					fileName := context["file_name"].(string)
 					filesize := context["file_size"].(int64)
