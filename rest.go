@@ -1,6 +1,7 @@
 package gorest
 
 import (
+	"code.google.com/p/go-uuid/uuid"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -155,31 +156,80 @@ func (this *Gorest) Serve() {
 				meta = true
 			}
 			context["meta"] = meta
-			decoder := json.NewDecoder(r.Body)
-			m := make(map[string]interface{})
-			err := decoder.Decode(&m)
-			if err != nil {
-				m["err"] = err.Error()
-				jsonData, _ := json.Marshal(m)
+
+			contentType := r.FormValue("content_type")
+			context["content_type"] = contentType
+
+			if contentType == "bin" {
+				context["meta"] = true
+				m := make(map[string]interface{})
+
+				file, header, err := r.FormFile("file")
+				fmt.Println(file)
+				defer file.Close()
+
+				if err != nil {
+					m["err"] = err.Error()
+				}
+
+				id := uuid.New()
+				filePath := fmt.Sprint(this.FileBasePath, string(os.PathSeparator), id)
+				out, err := os.Create(filePath)
+				if err != nil {
+					m["err"] = err.Error()
+				}
+				defer out.Close()
+
+				// write the content from POST to the file
+				written, err := io.Copy(out, file)
+				if err != nil {
+					m["err"] = err.Error()
+				}
+
+				m["NAME"] = header.Filename
+				m["PATH"] = "/"
+				m["SIZE"] = written
+				m["ID"] = id
+
+				data, err := dbo.Create(tableId, m, context)
+				m = map[string]interface{}{
+					"data": data,
+				}
+				if err != nil {
+					m["err"] = err.Error()
+				}
+
+				jsonData, err := json.Marshal(m)
 				jsonString := string(jsonData)
+				w.Header().Set("Content-Type", "application/json; charset=utf-8")
 				fmt.Fprint(w, jsonString)
-				return
+			} else {
+				decoder := json.NewDecoder(r.Body)
+				m := make(map[string]interface{})
+				err := decoder.Decode(&m)
+				if err != nil {
+					m["err"] = err.Error()
+					jsonData, _ := json.Marshal(m)
+					jsonString := string(jsonData)
+					fmt.Fprint(w, jsonString)
+					return
+				}
+				mUpper := make(map[string]interface{})
+				for k, v := range m {
+					mUpper[strings.ToUpper(k)] = v
+				}
+				data, err := dbo.Create(tableId, mUpper, context)
+				m = map[string]interface{}{
+					"data": data,
+				}
+				if err != nil {
+					m["err"] = err.Error()
+				}
+				jsonData, err := json.Marshal(m)
+				jsonString := string(jsonData)
+				w.Header().Set("Content-Type", "application/json; charset=utf-8")
+				fmt.Fprint(w, jsonString)
 			}
-			mUpper := make(map[string]interface{})
-			for k, v := range m {
-				mUpper[strings.ToUpper(k)] = v
-			}
-			data, err := dbo.Create(tableId, mUpper, context)
-			m = map[string]interface{}{
-				"data": data,
-			}
-			if err != nil {
-				m["err"] = err.Error()
-			}
-			jsonData, err := json.Marshal(m)
-			jsonString := string(jsonData)
-			w.Header().Set("Content-Type", "application/json; charset=utf-8")
-			fmt.Fprint(w, jsonString)
 		case "COPY":
 			// Duplicate a new record.
 			dataId := restData[1]
