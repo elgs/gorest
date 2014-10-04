@@ -2,6 +2,8 @@ package gorest
 
 import (
 	"code.google.com/p/go-uuid/uuid"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -165,17 +167,19 @@ func (this *Gorest) Serve() {
 				m := make(map[string]interface{})
 
 				file, header, err := r.FormFile("file")
-				fmt.Println(file)
 				defer file.Close()
 
 				if err != nil {
+					fmt.Println(err)
 					m["err"] = err.Error()
 				}
 
 				id := uuid.New()
-				filePath := fmt.Sprint(this.FileBasePath, string(os.PathSeparator), id)
+				filePath := fmt.Sprint(this.FileBasePath, string(os.PathSeparator), id[0:2], string(os.PathSeparator), id)
+				os.MkdirAll(fmt.Sprint(this.FileBasePath, string(os.PathSeparator), id[0:2]), os.FileMode(0755))
 				out, err := os.Create(filePath)
 				if err != nil {
+					fmt.Println(err)
 					m["err"] = err.Error()
 				}
 				defer out.Close()
@@ -186,9 +190,16 @@ func (this *Gorest) Serve() {
 					m["err"] = err.Error()
 				}
 
+				buf := make([]byte, written)
+				hash := sha256.New()
+				hash.Write(buf)
+				md := hash.Sum(nil)
+				mdStr := hex.EncodeToString(md)
+
 				m["NAME"] = header.Filename
-				m["PATH"] = "/"
+				m["PATH"] = "/" + id[0:2] + "/"
 				m["SIZE"] = written
+				m["CHECKSUM"] = mdStr
 				m["ID"] = id
 
 				data, err := dbo.Create(tableId, m, context)
