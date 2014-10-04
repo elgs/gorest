@@ -398,14 +398,14 @@ func (this *MySqlDataOperator) Delete(tableId string, id string, context map[str
 	}
 
 	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
-		ctn, err := globalDataInterceptor.BeforeDelete(tableId, db, context, tableId)
+		ctn, err := globalDataInterceptor.BeforeDelete(tableId, db, context, id)
 		if !ctn {
 			return 0, err
 		}
 	}
 	dataInterceptor := GetDataInterceptor(tableId)
 	if dataInterceptor != nil {
-		ctn, err := dataInterceptor.BeforeDelete(tableId, db, context, tableId)
+		ctn, err := dataInterceptor.BeforeDelete(tableId, db, context, id)
 		if !ctn {
 			return 0, err
 		}
@@ -418,10 +418,10 @@ func (this *MySqlDataOperator) Delete(tableId string, id string, context map[str
 	}
 
 	if dataInterceptor != nil {
-		dataInterceptor.AfterDelete(tableId, db, context, tableId)
+		dataInterceptor.AfterDelete(tableId, db, context, id)
 	}
 	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
-		globalDataInterceptor.AfterDelete(tableId, db, context, tableId)
+		globalDataInterceptor.AfterDelete(tableId, db, context, id)
 	}
 
 	return rowsAffected, err

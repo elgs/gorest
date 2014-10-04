@@ -160,7 +160,6 @@ func (this *Gorest) Serve() {
 			context["meta"] = meta
 
 			contentType := r.FormValue("content_type")
-			context["content_type"] = contentType
 
 			if contentType == "bin" {
 				context["meta"] = true
@@ -292,6 +291,10 @@ func (this *Gorest) Serve() {
 		case "DELETE":
 			// Remove the record.
 			dataId := restData[1]
+
+			contentType := r.FormValue("content_type")
+			context["content_type"] = contentType
+			context["file_base_path"] = this.FileBasePath
 
 			data, err := dbo.Delete(tableId, dataId, context)
 
