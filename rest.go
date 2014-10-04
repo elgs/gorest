@@ -121,12 +121,16 @@ func (this *Gorest) Serve() {
 
 				field := r.Form["field"]
 
-				contentType := r.FormValue("content_type")
-				context["content_type"] = contentType
+				bin := false
+				b := r.FormValue("bin")
+				if b == "1" {
+					bin = true
+				}
+				context["bin"] = bin
 
 				data, err := dbo.Load(tableId, dataId, field, context)
 
-				if contentType == "bin" && err == nil {
+				if bin && err == nil {
 					filePath := context["file_path"].(string)
 					fileName := context["file_name"].(string)
 					filesize := context["file_size"].(int64)
@@ -159,9 +163,13 @@ func (this *Gorest) Serve() {
 			}
 			context["meta"] = meta
 
-			contentType := r.FormValue("content_type")
+			bin := false
+			b := r.FormValue("bin")
+			if b == "1" {
+				bin = true
+			}
 
-			if contentType == "bin" {
+			if bin {
 				context["meta"] = true
 				m := make(map[string]interface{})
 
@@ -292,8 +300,12 @@ func (this *Gorest) Serve() {
 			// Remove the record.
 			dataId := restData[1]
 
-			contentType := r.FormValue("content_type")
-			context["content_type"] = contentType
+			bin := false
+			b := r.FormValue("bin")
+			if b == "1" {
+				bin = true
+			}
+			context["bin"] = bin
 			context["file_base_path"] = this.FileBasePath
 
 			data, err := dbo.Delete(tableId, dataId, context)
