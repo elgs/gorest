@@ -16,7 +16,14 @@ import (
 
 func main() {
 	ds := "user:pass@tcp(host:3306)/test"
-	dbo := &gorest.MySqlDataOperator{Ds: ds}
+	dbType := "mysql"
+	tokenTable := "db_name.table_name"
+	dbo := &gorest.MySqlDataOperator{
+		Ds:         ds,
+		DbType:     dbType,
+		TokenTable: tokenTable,
+	}
+	gorest.RegisterDataOperator("api", dbo)
 	r := &gorest.Gorest{
 		EnableHttp: true,
 		HostHttp:   "0.0.0.0",
@@ -27,9 +34,7 @@ func main() {
 		PortHttps:     8433,
 		CertFileHttps: "cert.crt",
 		KeyFileHttps:  "private.key",
-
-		UrlPrefix: "api",
-		Dbo:       dbo}
+	}
 	r.Serve()
 }
 ```
@@ -263,22 +268,6 @@ func (this *EchoDataInterceptor) BeforeListArray(ds interface{}, context map[str
 }
 func (this *EchoDataInterceptor) AfterListArray(ds interface{}, context map[string]interface{}, data [][]string, total int64) error {
 	fmt.Println("Here I'm in AfterListArray")
-	return nil
-}
-func (this *EchoDataInterceptor) BeforeQueryMap(ds interface{}, context map[string]interface{}, sqlSelect string, sqlSelectCount string, start int64, limit int64, includeTotal bool) (bool, error) {
-	fmt.Println("Here I'm in BeforeQuerytMap")
-	return true, nil
-}
-func (this *EchoDataInterceptor) AfterQueryMap(ds interface{}, context map[string]interface{}, data []map[string]string, total int64) error {
-	fmt.Println("Here I'm in AfterQueryMap")
-	return nil
-}
-func (this *EchoDataInterceptor) BeforeQueryArray(ds interface{}, context map[string]interface{}, sqlSelect string, sqlSelectCount string, start int64, limit int64, includeTotal bool) (bool, error) {
-	fmt.Println("Here I'm in BeforeQueryArray")
-	return true, nil
-}
-func (this *EchoDataInterceptor) AfterQueryArray(ds interface{}, context map[string]interface{}, data [][]string, total int64) error {
-	fmt.Println("Here I'm in AfterQueryArray")
 	return nil
 }
 ```
