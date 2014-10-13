@@ -404,7 +404,7 @@ func (this *MySqlDataOperator) Delete(tableId string, id string, context map[str
 			fmt.Println(err)
 			return -1, err
 		}
-		if data != nil && len[data] != 1 {
+		if data != nil && len(data) != 1 {
 			return -1, errors.New(id + " not found.")
 		}
 		context["data"] = data[0]
