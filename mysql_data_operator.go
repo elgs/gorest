@@ -399,7 +399,7 @@ func (this *MySqlDataOperator) Delete(tableId string, id string, context map[str
 
 	load := context["load"].(bool)
 	if load {
-		data, err := gosqljson.QueryDbToMap(db, "upper", "SELECT * FROM xxx WHERE ID=?", id)
+		data, err := gosqljson.QueryDbToMap(db, "upper", "SELECT * FROM "+tableId+" WHERE ID=?", id)
 		if err != nil {
 			fmt.Println(err)
 			return -1, err
