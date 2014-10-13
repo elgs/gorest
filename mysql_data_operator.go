@@ -406,8 +406,9 @@ func (this *MySqlDataOperator) Delete(tableId string, id string, context map[str
 		}
 		if data != nil && len(data) != 1 {
 			return -1, errors.New(id + " not found.")
+		} else {
+			context["data"] = data[0]
 		}
-		context["data"] = data[0]
 	}
 
 	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
