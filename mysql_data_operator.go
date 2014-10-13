@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"code.google.com/p/go-uuid/uuid"
 	"database/sql"
-	//"errors"
+	"errors"
 	"fmt"
 	"github.com/elgs/exparser"
 	"github.com/elgs/gosqljson"
@@ -404,7 +404,10 @@ func (this *MySqlDataOperator) Delete(tableId string, id string, context map[str
 			fmt.Println(err)
 			return -1, err
 		}
-		context["data"] = data
+		if data != nil && len[data] != 1 {
+			return -1, errors.New(id + " not found.")
+		}
+		context["data"] = data[0]
 	}
 
 	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
