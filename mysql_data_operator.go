@@ -397,6 +397,16 @@ func (this *MySqlDataOperator) Delete(tableId string, id string, context map[str
 		return -1, err
 	}
 
+	load := context["load"].(bool)
+	if load {
+		data, err := gosqljson.QueryDbToMap(db, "upper", "SELECT * FROM xxx WHERE ID=?", id)
+		if err != nil {
+			fmt.Println(err)
+			return -1, err
+		}
+		context["data"] = data
+	}
+
 	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
 		ctn, err := globalDataInterceptor.BeforeDelete(tableId, db, context, id)
 		if !ctn {

@@ -306,6 +306,14 @@ func (this *Gorest) Serve() {
 				bin = true
 			}
 			context["bin"] = bin
+
+			load := false
+			l := r.FormValue("load")
+			if l == "1" {
+				load = true
+			}
+			context["load"] = load
+
 			context["file_base_path"] = this.FileBasePath
 
 			data, err := dbo.Delete(tableId, dataId, context)
