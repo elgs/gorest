@@ -39,13 +39,25 @@ func (this *Gorest) Serve() {
 		w.Header().Set("Access-Control-Allow-Methods", r.Header.Get("Access-Control-Request-Method"))
 		w.Header().Set("Access-Control-Allow-Headers", r.Header.Get("Access-Control-Request-Headers"))
 		urlPath := r.URL.Path
+		//fmt.Println(urlPath)
 		var dbo DataOperator = nil
 		var urlPrefix string
-		for kUrlPrefix, _ := range dataOperatorRegistry {
-			if strings.HasPrefix(urlPath, fmt.Sprint("/", kUrlPrefix, "/")) {
-				dbo = dataOperatorRegistry[kUrlPrefix]
-				urlPrefix = kUrlPrefix
-				break
+		for kUrlPrefix, dataOperator := range dataOperatorRegistry {
+			switch dataOperator := dataOperator.(type) {
+			case DataOperator:
+				if strings.HasPrefix(urlPath, fmt.Sprint("/", kUrlPrefix, "/")) {
+					dbo = dataOperator.(DataOperator)
+					urlPrefix = kUrlPrefix
+					break
+				}
+			case func(w http.ResponseWriter, r *http.Request):
+				if urlPath == kUrlPrefix {
+					dataOperator(w, r)
+					return
+				}
+			default:
+				fmt.Println("Unknow dbo.")
+				return
 			}
 		}
 		if dbo == nil {

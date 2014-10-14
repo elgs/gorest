@@ -1,12 +1,12 @@
 package gorest
 
-var dataOperatorRegistry = make(map[string]DataOperator)
+var dataOperatorRegistry = make(map[string]interface{})
 
-func RegisterDataOperator(id string, dataOperator DataOperator) {
+func RegisterDataOperator(id string, dataOperator interface{}) {
 	dataOperatorRegistry[id] = dataOperator
 }
 
-func GetDataOperator(id string) DataOperator {
+func GetDataOperator(id string) interface{} {
 	return dataOperatorRegistry[id]
 }
 
