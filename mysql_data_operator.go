@@ -23,7 +23,7 @@ func (this *MySqlDataOperator) Load(tableId string, id string, field []string, c
 	ret := make(map[string]string, 0)
 	tableId = normalizeTableId(tableId, this.DbType, this.Ds)
 	context["token_table"] = this.TokenTable
-	db, err := getConn(this.DbType, this.Ds)
+	db, err := this.GetConn(this.DbType, this.Ds)
 	defer db.Close()
 	if err != nil {
 		fmt.Println(err)
@@ -84,7 +84,7 @@ func (this *MySqlDataOperator) ListMap(tableId string, field []string, filter []
 	ret := make([]map[string]string, 0)
 	tableId = normalizeTableId(tableId, this.DbType, this.Ds)
 	context["token_table"] = this.TokenTable
-	db, err := getConn(this.DbType, this.Ds)
+	db, err := this.GetConn(this.DbType, this.Ds)
 	defer db.Close()
 	if err != nil {
 		fmt.Println(err)
@@ -144,7 +144,7 @@ func (this *MySqlDataOperator) ListArray(tableId string, field []string, filter 
 	ret := make([][]string, 0)
 	tableId = normalizeTableId(tableId, this.DbType, this.Ds)
 	context["token_table"] = this.TokenTable
-	db, err := getConn(this.DbType, this.Ds)
+	db, err := this.GetConn(this.DbType, this.Ds)
 	defer db.Close()
 	if err != nil {
 		fmt.Println(err)
@@ -202,7 +202,7 @@ func (this *MySqlDataOperator) ListArray(tableId string, field []string, filter 
 func (this *MySqlDataOperator) Create(tableId string, data map[string]interface{}, context map[string]interface{}) (interface{}, error) {
 	tableId = normalizeTableId(tableId, this.DbType, this.Ds)
 	context["token_table"] = this.TokenTable
-	db, err := getConn(this.DbType, this.Ds)
+	db, err := this.GetConn(this.DbType, this.Ds)
 	defer db.Close()
 	if err != nil {
 		fmt.Println(err)
@@ -264,7 +264,7 @@ func (this *MySqlDataOperator) Create(tableId string, data map[string]interface{
 func (this *MySqlDataOperator) Update(tableId string, data map[string]interface{}, context map[string]interface{}) (int64, error) {
 	tableId = normalizeTableId(tableId, this.DbType, this.Ds)
 	context["token_table"] = this.TokenTable
-	db, err := getConn(this.DbType, this.Ds)
+	db, err := this.GetConn(this.DbType, this.Ds)
 	defer db.Close()
 	if err != nil {
 		fmt.Println(err)
@@ -319,7 +319,7 @@ func (this *MySqlDataOperator) Update(tableId string, data map[string]interface{
 func (this *MySqlDataOperator) Duplicate(tableId string, id string, context map[string]interface{}) (interface{}, error) {
 	tableId = normalizeTableId(tableId, this.DbType, this.Ds)
 	context["token_table"] = this.TokenTable
-	db, err := getConn(this.DbType, this.Ds)
+	db, err := this.GetConn(this.DbType, this.Ds)
 	defer db.Close()
 	if err != nil {
 		fmt.Println(err)
@@ -390,7 +390,7 @@ func (this *MySqlDataOperator) Duplicate(tableId string, id string, context map[
 func (this *MySqlDataOperator) Delete(tableId string, id string, context map[string]interface{}) (int64, error) {
 	tableId = normalizeTableId(tableId, this.DbType, this.Ds)
 	context["token_table"] = this.TokenTable
-	db, err := getConn(this.DbType, this.Ds)
+	db, err := this.GetConn(this.DbType, this.Ds)
 	defer db.Close()
 	if err != nil {
 		fmt.Println(err)
@@ -445,7 +445,7 @@ func isSelect(sqlSelect string) bool {
 	return strings.HasPrefix(strings.ToUpper(sqlSelect), "SELECT ")
 }
 
-func getConn(dbType string, ds string) (*sql.DB, error) {
+func (this *MySqlDataOperator) GetConn(dbType string, ds string) (*sql.DB, error) {
 	if len(strings.TrimSpace(dbType)) == 0 {
 		dbType = "mysql"
 	}
