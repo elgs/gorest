@@ -22,7 +22,7 @@ type DataOperator interface {
 	Update(resourceId string, data map[string]interface{}, context map[string]interface{}) (int64, error)
 	Duplicate(resourceId string, id string, context map[string]interface{}) (interface{}, error)
 	Delete(resourceId string, id string, context map[string]interface{}) (int64, error)
-	GetConn(dbType string, ds string) (*sql.DB, error)
+	GetConn() (*sql.DB, error)
 }
 
 type DefaultDataOperator struct {
@@ -49,6 +49,6 @@ func (this *DefaultDataOperator) Duplicate(resourceId string, id string, context
 func (this *DefaultDataOperator) Delete(resourceId string, id string, context map[string]interface{}) (int64, error) {
 	return 0, nil
 }
-func (this *DefaultDataOperator) GetConn(dbType string, ds string) (*sql.DB, error) {
+func (this *DefaultDataOperator) GetConn() (*sql.DB, error) {
 	return nil, nil
 }
