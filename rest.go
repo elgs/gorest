@@ -35,7 +35,8 @@ func (this *Gorest) Serve() {
 		context["api_token_id"] = r.Header.Get("api_token_id")
 		context["api_token_key"] = r.Header.Get("api_token_key")
 
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Origin", r.Header.Get("Origin"))
+		w.Header().Set("Access-Control-Allow-Credentials", "true")
 		w.Header().Set("Access-Control-Allow-Methods", r.Header.Get("Access-Control-Request-Method"))
 		w.Header().Set("Access-Control-Allow-Headers", r.Header.Get("Access-Control-Request-Headers"))
 		urlPath := r.URL.Path
