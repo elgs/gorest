@@ -17,6 +17,7 @@ type MySqlDataOperator struct {
 	Ds         string
 	DbType     string
 	TokenTable string
+	Db         *sql.DB
 }
 
 func (this *MySqlDataOperator) Load(tableId string, id string, field []string, context map[string]interface{}) (map[string]string, error) {
@@ -446,11 +447,15 @@ func isSelect(sqlSelect string) bool {
 }
 
 func (this *MySqlDataOperator) GetConn() (*sql.DB, error) {
-	if len(strings.TrimSpace(this.DbType)) == 0 {
-		this.DbType = "mysql"
+	if this.Db == nil {
+		if len(strings.TrimSpace(this.DbType)) == 0 {
+			this.DbType = "mysql"
+		}
+		db, err := sql.Open(this.DbType, this.Ds)
+		this.Db = db
+		return this.Db, err
 	}
-	db, err := sql.Open(this.DbType, this.Ds)
-	return db, err
+	return this.Db, nil
 }
 
 func extractDbNameFromDs(dbType string, ds string) string {
