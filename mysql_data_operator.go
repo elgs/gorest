@@ -452,8 +452,10 @@ func (this *MySqlDataOperator) GetConn() (*sql.DB, error) {
 			this.DbType = "mysql"
 		}
 		db, err := sql.Open(this.DbType, this.Ds)
+		if err != nil {
+			return nil, err
+		}
 		this.Db = db
-		return this.Db, err
 	}
 	return this.Db, nil
 }
