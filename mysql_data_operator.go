@@ -25,11 +25,6 @@ func (this *MySqlDataOperator) Load(tableId string, id string, field []string, c
 	tableId = normalizeTableId(tableId, this.DbType, this.Ds)
 	context["token_table"] = this.TokenTable
 	db, err := this.GetConn()
-	defer db.Close()
-	if err != nil {
-		fmt.Println(err)
-		return ret, err
-	}
 
 	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
 		ctn, err := globalDataInterceptor.BeforeLoad(tableId, db, field, context, id)
@@ -86,11 +81,6 @@ func (this *MySqlDataOperator) ListMap(tableId string, field []string, filter []
 	tableId = normalizeTableId(tableId, this.DbType, this.Ds)
 	context["token_table"] = this.TokenTable
 	db, err := this.GetConn()
-	defer db.Close()
-	if err != nil {
-		fmt.Println(err)
-		return ret, -1, err
-	}
 
 	sort = parseSort(sort)
 	where := parseFilters(filter)
@@ -146,11 +136,6 @@ func (this *MySqlDataOperator) ListArray(tableId string, field []string, filter 
 	tableId = normalizeTableId(tableId, this.DbType, this.Ds)
 	context["token_table"] = this.TokenTable
 	db, err := this.GetConn()
-	defer db.Close()
-	if err != nil {
-		fmt.Println(err)
-		return ret, -1, err
-	}
 
 	sort = parseSort(sort)
 	where := parseFilters(filter)
@@ -204,11 +189,6 @@ func (this *MySqlDataOperator) Create(tableId string, data map[string]interface{
 	tableId = normalizeTableId(tableId, this.DbType, this.Ds)
 	context["token_table"] = this.TokenTable
 	db, err := this.GetConn()
-	defer db.Close()
-	if err != nil {
-		fmt.Println(err)
-		return nil, err
-	}
 
 	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
 		ctn, err := globalDataInterceptor.BeforeCreate(tableId, db, context, data)
@@ -266,11 +246,6 @@ func (this *MySqlDataOperator) Update(tableId string, data map[string]interface{
 	tableId = normalizeTableId(tableId, this.DbType, this.Ds)
 	context["token_table"] = this.TokenTable
 	db, err := this.GetConn()
-	defer db.Close()
-	if err != nil {
-		fmt.Println(err)
-		return -1, err
-	}
 
 	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
 		ctn, err := globalDataInterceptor.BeforeUpdate(tableId, db, context, data)
@@ -321,11 +296,6 @@ func (this *MySqlDataOperator) Duplicate(tableId string, id string, context map[
 	tableId = normalizeTableId(tableId, this.DbType, this.Ds)
 	context["token_table"] = this.TokenTable
 	db, err := this.GetConn()
-	defer db.Close()
-	if err != nil {
-		fmt.Println(err)
-		return nil, err
-	}
 
 	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
 		ctn, err := globalDataInterceptor.BeforeDuplicate(tableId, db, context, id)
@@ -392,11 +362,6 @@ func (this *MySqlDataOperator) Delete(tableId string, id string, context map[str
 	tableId = normalizeTableId(tableId, this.DbType, this.Ds)
 	context["token_table"] = this.TokenTable
 	db, err := this.GetConn()
-	defer db.Close()
-	if err != nil {
-		fmt.Println(err)
-		return -1, err
-	}
 
 	load := context["load"].(bool)
 	if load {

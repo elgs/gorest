@@ -25,15 +25,29 @@ type Gorest struct {
 	CertFileHttps string
 	KeyFileHttps  string
 
+	SessionKey   string
 	FileBasePath string
+}
+
+func MakeCookie(key string, m map[string]interface{}) (string, error) {
+	jsonData, err := json.Marshal(m)
+	if err != nil {
+		return "", err
+	}
+	jsonString := string(jsonData)
+	return EncryptStr(key, jsonString)
+}
+
+func ReadCookie(key string, s string) (map[string]interface{}, error) {
+	text, err := DecryptStr(key, s)
+	var m map[string]interface{}
+	err = json.Unmarshal([]byte(text), &m)
+	return m, err
 }
 
 func (this *Gorest) Serve() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	handler := func(w http.ResponseWriter, r *http.Request) {
-		context := make(map[string]interface{})
-		context["api_token_id"] = r.Header.Get("api_token_id")
-		context["api_token_key"] = r.Header.Get("api_token_key")
 
 		w.Header().Set("Access-Control-Allow-Origin", r.Header.Get("Origin"))
 		w.Header().Set("Access-Control-Allow-Credentials", "true")
@@ -68,6 +82,24 @@ func (this *Gorest) Serve() {
 		restUrl := urlPath[len(urlPrefix)+2:]
 		restData := strings.Split(restUrl, "/")
 		tableId := restData[0]
+
+		context := make(map[string]interface{})
+		context["api_token_id"] = r.Header.Get("api_token_id")
+		context["api_token_key"] = r.Header.Get("api_token_key")
+		if len(this.SessionKey) > 0 {
+			cookieUser, err := r.Cookie("user")
+			if cookieUser != nil && err == nil {
+				mapCookies, err := ReadCookie(this.SessionKey, cookieUser.Value)
+				if err != nil {
+					userId := mapCookies["user_id"]
+					tokenKey := mapCookies["token_key"]
+					if userId != nil && tokenKey != nil {
+						context["api_token_id"] = userId
+						context["api_token_key"] = tokenKey
+					}
+				}
+			}
+		}
 		switch r.Method {
 		case "GET":
 			if len(restData) == 1 ||
