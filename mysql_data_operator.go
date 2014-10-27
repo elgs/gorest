@@ -226,11 +226,20 @@ func (this *MySqlDataOperator) Create(tableId string, data map[string]interface{
 	}
 	fields := fieldBuffer.String()
 	qms := qmBuffer.String()
-	_, err = gosqljson.ExecDb(db, fmt.Sprint("INSERT INTO ", tableId, " (", fields, ") VALUES (", qms, ")"), values...)
-
-	if err != nil {
-		fmt.Println(err)
-		return nil, err
+	if tx, ok := context["tx"].(*sql.Tx); ok {
+		_, err = gosqljson.ExecDb(db, fmt.Sprint("INSERT INTO ", tableId, " (", fields, ") VALUES (", qms, ")"), values...)
+		if err != nil {
+			fmt.Println(err)
+			tx.Rollback()
+			delete(context, "tx")
+			return nil, err
+		}
+	} else {
+		_, err = gosqljson.ExecTx(tx, fmt.Sprint("INSERT INTO ", tableId, " (", fields, ") VALUES (", qms, ")"), values...)
+		if err != nil {
+			fmt.Println(err)
+			return nil, err
+		}
 	}
 
 	if dataInterceptor != nil {
@@ -238,6 +247,10 @@ func (this *MySqlDataOperator) Create(tableId string, data map[string]interface{
 	}
 	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
 		globalDataInterceptor.AfterCreate(tableId, db, context, data)
+	}
+
+	if tx, ok := context["tx"].(*sql.Tx); ok {
+		tx.Commit()
 	}
 
 	return data["ID"], err
@@ -277,10 +290,21 @@ func (this *MySqlDataOperator) Update(tableId string, data map[string]interface{
 	values = append(values, id)
 	sets := buffer.String()
 	sets = sets[0 : len(sets)-1]
-	rowsAffected, err := gosqljson.ExecDb(db, fmt.Sprint("UPDATE ", tableId, " SET ", sets, " WHERE ID=?"), values...)
-	if err != nil {
-		fmt.Println(err)
-		return -1, err
+	var rowsAffected int64 = 0
+	if tx, ok := context["tx"].(*sql.Tx); ok {
+		rowsAffected, err = gosqljson.ExecTx(tx, fmt.Sprint("UPDATE ", tableId, " SET ", sets, " WHERE ID=?"), values...)
+		if err != nil {
+			fmt.Println(err)
+			tx.Rollback()
+			delete(context, "tx")
+			return -1, err
+		}
+	} else {
+		rowsAffected, err = gosqljson.ExecDb(db, fmt.Sprint("UPDATE ", tableId, " SET ", sets, " WHERE ID=?"), values...)
+		if err != nil {
+			fmt.Println(err)
+			return -1, err
+		}
 	}
 
 	if dataInterceptor != nil {
@@ -288,6 +312,10 @@ func (this *MySqlDataOperator) Update(tableId string, data map[string]interface{
 	}
 	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
 		globalDataInterceptor.AfterUpdate(tableId, db, context, data)
+	}
+
+	if tx, ok := context["tx"].(*sql.Tx); ok {
+		tx.Commit()
 	}
 
 	return rowsAffected, err
@@ -311,49 +339,92 @@ func (this *MySqlDataOperator) Duplicate(tableId string, id string, context map[
 		}
 	}
 
-	// Duplicate the record
-	data, err := gosqljson.QueryDbToMap(db, "upper",
-		fmt.Sprint("SELECT * FROM ", tableId, " WHERE ID=?"), id)
-	if data == nil || len(data) != 1 {
-		return nil, err
-	}
-	newData := make(map[string]interface{}, len(data[0]))
-	for k, v := range data[0] {
-		newData[k] = v
-	}
 	newId := uuid.New()
-	newData["ID"] = newId
-
-	newDataLen := len(newData)
-	newValues := make([]interface{}, 0, newDataLen)
-	var fieldBuffer bytes.Buffer
-	var qmBuffer bytes.Buffer
-	count := 0
-	for k, v := range newData {
-		count++
-		if count == newDataLen {
-			fieldBuffer.WriteString(k)
-			qmBuffer.WriteString("?")
-		} else {
-			fieldBuffer.WriteString(fmt.Sprint(k, ","))
-			qmBuffer.WriteString("?,")
+	// Duplicate the record
+	if tx, ok := context["tx"].(*sql.Tx); ok {
+		data, err := gosqljson.QueryTxToMap(tx, "upper",
+			fmt.Sprint("SELECT * FROM ", tableId, " WHERE ID=?"), id)
+		if data == nil || len(data) != 1 {
+			tx.Rollback()
+			delete(context, "tx")
+			return nil, err
 		}
-		newValues = append(newValues, v)
-	}
-	fields := fieldBuffer.String()
-	qms := qmBuffer.String()
-	_, err = gosqljson.ExecDb(db, fmt.Sprint("INSERT INTO ", tableId, " (", fields, ") VALUES (", qms, ")"), newValues...)
+		newData := make(map[string]interface{}, len(data[0]))
+		for k, v := range data[0] {
+			newData[k] = v
+		}
+		newData["ID"] = newId
 
-	if err != nil {
-		fmt.Println(err)
-		return -1, err
-	}
+		newDataLen := len(newData)
+		newValues := make([]interface{}, 0, newDataLen)
+		var fieldBuffer bytes.Buffer
+		var qmBuffer bytes.Buffer
+		count := 0
+		for k, v := range newData {
+			count++
+			if count == newDataLen {
+				fieldBuffer.WriteString(k)
+				qmBuffer.WriteString("?")
+			} else {
+				fieldBuffer.WriteString(fmt.Sprint(k, ","))
+				qmBuffer.WriteString("?,")
+			}
+			newValues = append(newValues, v)
+		}
+		fields := fieldBuffer.String()
+		qms := qmBuffer.String()
+		_, err = gosqljson.ExecTx(tx, fmt.Sprint("INSERT INTO ", tableId, " (", fields, ") VALUES (", qms, ")"), newValues...)
+		if err != nil {
+			fmt.Println(err)
+			tx.Rollback()
+			delete(context, "tx")
+			return -1, err
+		}
+	} else {
+		data, err := gosqljson.QueryDbToMap(db, "upper",
+			fmt.Sprint("SELECT * FROM ", tableId, " WHERE ID=?"), id)
+		if data == nil || len(data) != 1 {
+			return nil, err
+		}
+		newData := make(map[string]interface{}, len(data[0]))
+		for k, v := range data[0] {
+			newData[k] = v
+		}
+		newData["ID"] = newId
 
+		newDataLen := len(newData)
+		newValues := make([]interface{}, 0, newDataLen)
+		var fieldBuffer bytes.Buffer
+		var qmBuffer bytes.Buffer
+		count := 0
+		for k, v := range newData {
+			count++
+			if count == newDataLen {
+				fieldBuffer.WriteString(k)
+				qmBuffer.WriteString("?")
+			} else {
+				fieldBuffer.WriteString(fmt.Sprint(k, ","))
+				qmBuffer.WriteString("?,")
+			}
+			newValues = append(newValues, v)
+		}
+		fields := fieldBuffer.String()
+		qms := qmBuffer.String()
+		_, err = gosqljson.ExecDb(db, fmt.Sprint("INSERT INTO ", tableId, " (", fields, ") VALUES (", qms, ")"), newValues...)
+		if err != nil {
+			fmt.Println(err)
+			return -1, err
+		}
+	}
 	if dataInterceptor != nil {
 		dataInterceptor.AfterDuplicate(tableId, db, context, id, newId)
 	}
 	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
 		globalDataInterceptor.AfterDuplicate(tableId, db, context, id, newId)
+	}
+
+	if tx, ok := context["tx"].(*sql.Tx); ok {
+		tx.Commit()
 	}
 
 	return newId, err
@@ -362,20 +433,6 @@ func (this *MySqlDataOperator) Delete(tableId string, id string, context map[str
 	tableId = normalizeTableId(tableId, this.DbType, this.Ds)
 	context["token_table"] = this.TokenTable
 	db, err := this.GetConn()
-
-	load := context["load"].(bool)
-	if load {
-		data, err := gosqljson.QueryDbToMap(db, "upper", "SELECT * FROM "+tableId+" WHERE ID=?", id)
-		if err != nil {
-			fmt.Println(err)
-			return -1, err
-		}
-		if data == nil && len(data) != 1 {
-			return -1, errors.New(id + " not found.")
-		} else {
-			context["data"] = data[0]
-		}
-	}
 
 	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
 		ctn, err := globalDataInterceptor.BeforeDelete(tableId, db, context, id)
@@ -390,11 +447,55 @@ func (this *MySqlDataOperator) Delete(tableId string, id string, context map[str
 			return 0, err
 		}
 	}
-	// Delete the record
-	rowsAffected, err := gosqljson.ExecDb(db, fmt.Sprint("DELETE FROM ", tableId, " WHERE ID=?"), id)
-	if err != nil {
-		fmt.Println(err)
-		return -1, err
+
+	if tx, ok := context["tx"].(*sql.Tx); ok {
+		load := context["load"].(bool)
+		if load {
+			data, err := gosqljson.QueryTxToMap(tx, "upper", "SELECT * FROM "+tableId+" WHERE ID=?", id)
+			if err != nil {
+				fmt.Println(err)
+				tx.Rollback()
+				delete(context, "tx")
+				return -1, err
+			}
+			if data == nil && len(data) != 1 {
+				tx.Rollback()
+				delete(context, "tx")
+				return -1, errors.New(id + " not found.")
+			} else {
+				context["data"] = data[0]
+			}
+		}
+
+		// Delete the record
+		rowsAffected, err := gosqljson.ExecTx(tx, fmt.Sprint("DELETE FROM ", tableId, " WHERE ID=?"), id)
+		if err != nil {
+			fmt.Println(err)
+			tx.Rollback()
+			delete(context, "tx")
+			return -1, err
+		}
+	} else {
+		load := context["load"].(bool)
+		if load {
+			data, err := gosqljson.QueryDbToMap(db, "upper", "SELECT * FROM "+tableId+" WHERE ID=?", id)
+			if err != nil {
+				fmt.Println(err)
+				return -1, err
+			}
+			if data == nil && len(data) != 1 {
+				return -1, errors.New(id + " not found.")
+			} else {
+				context["data"] = data[0]
+			}
+		}
+
+		// Delete the record
+		rowsAffected, err := gosqljson.ExecDb(db, fmt.Sprint("DELETE FROM ", tableId, " WHERE ID=?"), id)
+		if err != nil {
+			fmt.Println(err)
+			return -1, err
+		}
 	}
 
 	if dataInterceptor != nil {
@@ -403,7 +504,9 @@ func (this *MySqlDataOperator) Delete(tableId string, id string, context map[str
 	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
 		globalDataInterceptor.AfterDelete(tableId, db, context, id)
 	}
-
+	if tx, ok := context["tx"].(*sql.Tx); ok {
+		tx.Commit()
+	}
 	return rowsAffected, err
 }
 
