@@ -90,7 +90,7 @@ func (this *Gorest) Serve() {
 			cookieUser, err := r.Cookie("user")
 			if cookieUser != nil && err == nil {
 				mapCookies, err := ReadCookie(this.SessionKey, cookieUser.Value)
-				if err != nil {
+				if err == nil {
 					userId := mapCookies["user_id"]
 					tokenKey := mapCookies["token_key"]
 					if userId != nil && tokenKey != nil {
