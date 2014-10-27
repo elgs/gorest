@@ -448,6 +448,7 @@ func (this *MySqlDataOperator) Delete(tableId string, id string, context map[str
 		}
 	}
 
+	var rowsAffected int64 = 0
 	if tx, ok := context["tx"].(*sql.Tx); ok {
 		load := context["load"].(bool)
 		if load {
@@ -468,7 +469,7 @@ func (this *MySqlDataOperator) Delete(tableId string, id string, context map[str
 		}
 
 		// Delete the record
-		rowsAffected, err := gosqljson.ExecTx(tx, fmt.Sprint("DELETE FROM ", tableId, " WHERE ID=?"), id)
+		rowsAffected, err = gosqljson.ExecTx(tx, fmt.Sprint("DELETE FROM ", tableId, " WHERE ID=?"), id)
 		if err != nil {
 			fmt.Println(err)
 			tx.Rollback()
@@ -491,7 +492,7 @@ func (this *MySqlDataOperator) Delete(tableId string, id string, context map[str
 		}
 
 		// Delete the record
-		rowsAffected, err := gosqljson.ExecDb(db, fmt.Sprint("DELETE FROM ", tableId, " WHERE ID=?"), id)
+		rowsAffected, err = gosqljson.ExecDb(db, fmt.Sprint("DELETE FROM ", tableId, " WHERE ID=?"), id)
 		if err != nil {
 			fmt.Println(err)
 			return -1, err
