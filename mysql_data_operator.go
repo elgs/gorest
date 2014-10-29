@@ -227,7 +227,7 @@ func (this *MySqlDataOperator) Create(tableId string, data map[string]interface{
 	fields := fieldBuffer.String()
 	qms := qmBuffer.String()
 	if tx, ok := context["tx"].(*sql.Tx); ok {
-		_, err = gosqljson.ExecDb(db, fmt.Sprint("INSERT INTO ", tableId, " (", fields, ") VALUES (", qms, ")"), values...)
+		_, err = gosqljson.ExecTx(tx, fmt.Sprint("INSERT INTO ", tableId, " (", fields, ") VALUES (", qms, ")"), values...)
 		if err != nil {
 			fmt.Println(err)
 			tx.Rollback()
@@ -235,7 +235,7 @@ func (this *MySqlDataOperator) Create(tableId string, data map[string]interface{
 			return nil, err
 		}
 	} else {
-		_, err = gosqljson.ExecTx(tx, fmt.Sprint("INSERT INTO ", tableId, " (", fields, ") VALUES (", qms, ")"), values...)
+		_, err = gosqljson.ExecDb(db, fmt.Sprint("INSERT INTO ", tableId, " (", fields, ") VALUES (", qms, ")"), values...)
 		if err != nil {
 			fmt.Println(err)
 			return nil, err
