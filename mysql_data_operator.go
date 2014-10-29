@@ -530,7 +530,6 @@ func (this *MySqlDataOperator) Delete(tableId string, id string, context map[str
 		if err != nil {
 			fmt.Println(err)
 			tx.Rollback()
-			delete(context, "tx")
 			return -1, err
 		}
 	} else {
