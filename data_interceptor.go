@@ -17,9 +17,7 @@ func GetDataInterceptor(id string) DataInterceptor {
 	for k, _ := range dataInterceptorRegistry {
 		fmt.Println(k, []byte(k))
 	}
-	ret := dataInterceptorRegistry[strings.ToUpper(id)]
-	fmt.Println("ret:", ret)
-	return ret
+	return dataInterceptorRegistry[strings.ToUpper(id)]
 }
 
 var GlobalDataInterceptorRegistry = make([]DataInterceptor, 0)

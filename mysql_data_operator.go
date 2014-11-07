@@ -200,11 +200,6 @@ func (this *MySqlDataOperator) Create(tableId string, data map[string]interface{
 		}
 	}
 	dataInterceptor := GetDataInterceptor(tableId)
-
-	fmt.Println("dataInterceptor:", dataInterceptor)
-	fmt.Println("tableId:", tableId)
-	fmt.Println("dataInterceptorRegistry:", dataInterceptorRegistry)
-
 	if dataInterceptor != nil {
 		ctn, err := dataInterceptor.BeforeCreate(tableId, db, context, data)
 		if !ctn {
