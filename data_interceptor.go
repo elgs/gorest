@@ -2,6 +2,7 @@ package gorest
 
 import (
 	"database/sql"
+	"fmt"
 	"strings"
 )
 
@@ -14,6 +15,7 @@ func RegisterDataInterceptor(id string, dataInterceptor DataInterceptor) {
 func GetDataInterceptor(id string) DataInterceptor {
 	for k, v := range dataInterceptorRegistry {
 		if k == strings.ToUpper(id) {
+			fmt.Println("match found: ", v)
 			return v
 		}
 	}
