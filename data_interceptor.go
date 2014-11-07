@@ -15,7 +15,7 @@ func RegisterDataInterceptor(id string, dataInterceptor DataInterceptor) {
 func GetDataInterceptor(id string) DataInterceptor {
 	fmt.Println("upperId:", strings.ToUpper(id), []byte(strings.ToUpper(id)))
 	for k, _ := range dataInterceptorRegistry {
-		fmt.Println(k, []byte(k))
+		fmt.Println(k == strings.ToUpper(id))
 	}
 	return dataInterceptorRegistry[strings.ToUpper(id)]
 }
