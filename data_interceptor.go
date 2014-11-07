@@ -2,6 +2,7 @@ package gorest
 
 import (
 	"database/sql"
+	"fmt"
 	"strings"
 )
 
@@ -12,6 +13,8 @@ func RegisterDataInterceptor(id string, dataInterceptor DataInterceptor) {
 }
 
 func GetDataInterceptor(id string) DataInterceptor {
+	fmt.Println("id:", id)
+	fmt.Println("upperId:", strings.ToUpper(id))
 	return dataInterceptorRegistry[strings.ToUpper(id)]
 }
 
