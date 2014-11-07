@@ -2,7 +2,6 @@ package gorest
 
 import (
 	"database/sql"
-	"fmt"
 	"strings"
 )
 
@@ -18,6 +17,7 @@ func GetDataInterceptor(id string) DataInterceptor {
 			return v
 		}
 	}
+	return nil
 }
 
 var GlobalDataInterceptorRegistry = make([]DataInterceptor, 0)
