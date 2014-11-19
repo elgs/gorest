@@ -2,14 +2,15 @@ package gorest
 
 import (
 	"bytes"
-	"code.google.com/p/go-uuid/uuid"
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/elgs/exparser"
-	"github.com/elgs/gosqljson"
 	"strconv"
 	"strings"
+
+	"code.google.com/p/go-uuid/uuid"
+	"github.com/elgs/exparser"
+	"github.com/elgs/gosqljson"
 )
 
 type MySqlDataOperator struct {
@@ -589,6 +590,7 @@ func (this *MySqlDataOperator) GetConn() (*sql.DB, error) {
 			this.DbType = "mysql"
 		}
 		db, err := sql.Open(this.DbType, this.Ds)
+		//fmt.Println("New db conn created.")
 		if err != nil {
 			return nil, err
 		}
