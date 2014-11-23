@@ -1,7 +1,6 @@
 package gorest
 
 import (
-	"code.google.com/p/go-uuid/uuid"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
@@ -12,6 +11,8 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
+
+	"code.google.com/p/go-uuid/uuid"
 )
 
 type Gorest struct {
@@ -382,13 +383,19 @@ func (this *Gorest) Serve() {
 	if this.EnableHttp {
 		go func() {
 			fmt.Println(fmt.Sprint("Listening on http://", this.HostHttp, ":", this.PortHttp, "/"))
-			http.ListenAndServe(fmt.Sprint(this.HostHttp, ":", this.PortHttp), nil)
+			err := http.ListenAndServe(fmt.Sprint(this.HostHttp, ":", this.PortHttp), nil)
+			if err != nil {
+				fmt.Println(err)
+			}
 		}()
 	}
 	if this.EnableHttps {
 		go func() {
 			fmt.Println(fmt.Sprint("Listening on https://", this.HostHttps, ":", this.PortHttps, "/"))
-			http.ListenAndServeTLS(fmt.Sprint(this.HostHttps, ":", this.PortHttps), this.CertFileHttps, this.KeyFileHttps, nil)
+			err := http.ListenAndServeTLS(fmt.Sprint(this.HostHttps, ":", this.PortHttps), this.CertFileHttps, this.KeyFileHttps, nil)
+			if err != nil {
+				fmt.Println(err)
+			}
 		}()
 	}
 	if this.EnableHttp || this.EnableHttps {
