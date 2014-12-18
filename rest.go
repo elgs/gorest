@@ -24,6 +24,7 @@ type Gorest struct {
 	PortHttps     uint16
 	HostHttps     string
 	CertFileHttps string
+	CertRootHttps string
 	KeyFileHttps  string
 
 	SessionKey   string
