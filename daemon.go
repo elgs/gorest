@@ -1,15 +1,15 @@
+// daemon
 package gorest
 
 import (
 	"fmt"
-
 	"github.com/elgs/cron"
 )
 
 type Job struct {
-	Action  func()
-	Cron    string
-	Handler int
+	MakeAction func(dbo DataOperator) func()
+	Cron       string
+	Handler    int
 }
 
 var Sched *cron.Cron
@@ -23,10 +23,10 @@ func GetJob(id string) *Job {
 	return JobRegistry[id]
 }
 
-func StartDaemons() {
+func StartDaemons(dbo DataOperator) {
 	Sched = cron.New()
 	for _, job := range JobRegistry {
-		h, err := Sched.AddFunc(job.Cron, job.Action)
+		h, err := Sched.AddFunc(job.Cron, job.MakeAction(dbo))
 		if err != nil {
 			fmt.Println(err)
 			continue

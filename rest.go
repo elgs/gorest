@@ -62,7 +62,7 @@ func (this *Gorest) Serve() {
 		for kUrlPrefix, dataOperator := range dataOperatorRegistry {
 			switch dataOperator := dataOperator.(type) {
 			case DataOperator:
-				if strings.HasPrefix(urlPath, fmt.Sprint("/", kUrlPrefix, "/")) {
+				if strings.HasPrefix(urlPath, "/"+kUrlPrefix+"/") {
 					dbo = dataOperator.(DataOperator)
 					urlPrefix = kUrlPrefix
 					break
