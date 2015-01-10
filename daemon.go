@@ -7,7 +7,7 @@ import (
 )
 
 type Job struct {
-	MakeAction func(dbo DataOperator) func()
+	MakeAction func(dbo DataOperator, r *Gorest) func()
 	Cron       string
 	Handler    int
 }
@@ -23,10 +23,10 @@ func GetJob(id string) *Job {
 	return JobRegistry[id]
 }
 
-func StartDaemons(dbo DataOperator) {
+func StartDaemons(dbo DataOperator, r *Gorest) {
 	Sched = cron.New()
 	for _, job := range JobRegistry {
-		h, err := Sched.AddFunc(job.Cron, job.MakeAction(dbo))
+		h, err := Sched.AddFunc(job.Cron, job.MakeAction(dbo, r))
 		if err != nil {
 			fmt.Println(err)
 			continue
