@@ -8,14 +8,14 @@ type EchoDataInterceptor struct {
 	*DefaultDataInterceptor
 }
 
-func (this *EchoDataInterceptor) BeforeCreate(resourceId string, ds interface{}, context map[string]interface{}, data map[string]interface{}) (bool, error) {
+func (this *EchoDataInterceptor) BeforeCreate(resourceId string, ds interface{}, context map[string]interface{}, info map[string]interface{}, data map[string]interface{}) (bool, error) {
 	fmt.Println("Here I'm in BeforeCreate")
 	//if db, ok := ds.(*sql.DB); ok {
 	//	_ = db
 	//}
 	return true, nil
 }
-func (this *EchoDataInterceptor) AfterCreate(resourceId string, ds interface{}, context map[string]interface{}, data map[string]interface{}) error {
+func (this *EchoDataInterceptor) AfterCreate(resourceId string, ds interface{}, context map[string]interface{}, info map[string]interface{}, data map[string]interface{}) error {
 	fmt.Println("Here I'm in AfterCreate")
 	return nil
 }
@@ -27,27 +27,27 @@ func (this *EchoDataInterceptor) AfterLoad(resourceId string, ds interface{}, co
 	fmt.Println("Here I'm in AfterLoad")
 	return nil
 }
-func (this *EchoDataInterceptor) BeforeUpdate(resourceId string, ds interface{}, context map[string]interface{}, data map[string]interface{}) (bool, error) {
+func (this *EchoDataInterceptor) BeforeUpdate(resourceId string, ds interface{}, context map[string]interface{}, info map[string]interface{}, data map[string]interface{}) (bool, error) {
 	fmt.Println("Here I'm in BeforeUpdate")
 	return true, nil
 }
-func (this *EchoDataInterceptor) AfterUpdate(resourceId string, ds interface{}, context map[string]interface{}, data map[string]interface{}) error {
+func (this *EchoDataInterceptor) AfterUpdate(resourceId string, ds interface{}, context map[string]interface{}, info map[string]interface{}, data map[string]interface{}) error {
 	fmt.Println("Here I'm in AfterUpdate")
 	return nil
 }
-func (this *EchoDataInterceptor) BeforeDuplicate(resourceId string, ds interface{}, context map[string]interface{}, id string) (bool, error) {
+func (this *EchoDataInterceptor) BeforeDuplicate(resourceId string, ds interface{}, context map[string]interface{}, info map[string]interface{}, id string) (bool, error) {
 	fmt.Println("Here I'm in BeforeDuplicate")
 	return true, nil
 }
-func (this *EchoDataInterceptor) AfterDuplicate(resourceId string, ds interface{}, context map[string]interface{}, oldId string, newId string) error {
+func (this *EchoDataInterceptor) AfterDuplicate(resourceId string, ds interface{}, context map[string]interface{}, info map[string]interface{}, oldId string, newId string) error {
 	fmt.Println("Here I'm in AfterDuplicate")
 	return nil
 }
-func (this *EchoDataInterceptor) BeforeDelete(resourceId string, ds interface{}, context map[string]interface{}, id string) (bool, error) {
+func (this *EchoDataInterceptor) BeforeDelete(resourceId string, ds interface{}, context map[string]interface{}, info map[string]interface{}, id string) (bool, error) {
 	fmt.Println("Here I'm in BeforeDelete")
 	return true, nil
 }
-func (this *EchoDataInterceptor) AfterDelete(resourceId string, ds interface{}, context map[string]interface{}, id string) error {
+func (this *EchoDataInterceptor) AfterDelete(resourceId string, ds interface{}, context map[string]interface{}, info map[string]interface{}, id string) error {
 	fmt.Println("Here I'm in AfterDelete")
 	return nil
 }
