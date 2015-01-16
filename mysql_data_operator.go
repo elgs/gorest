@@ -186,28 +186,29 @@ func (this *MySqlDataOperator) ListArray(tableId string, field []string, filter 
 
 	return a, int64(cnt), err
 }
-func (this *MySqlDataOperator) Create(tableId string, data map[string]interface{}, context map[string]interface{}) (interface{}, error) {
+func (this *MySqlDataOperator) Create(tableId string, data map[string]interface{}, context map[string]interface{}) (interface{}, map[string]interface{}, error) {
 	tableId = normalizeTableId(tableId, this.DbType, this.Ds)
 	context["token_table"] = this.TokenTable
+	info := make(map[string]interface{})
 	db, err := this.GetConn()
 
 	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
-		ctn, err := globalDataInterceptor.BeforeCreate(tableId, db, context, data)
+		ctn, err := globalDataInterceptor.BeforeCreate(tableId, db, context, info, data)
 		if !ctn {
 			if tx, ok := context["tx"].(*sql.Tx); ok {
 				tx.Rollback()
 			}
-			return nil, err
+			return nil, info, err
 		}
 	}
 	dataInterceptor := GetDataInterceptor(tableId)
 	if dataInterceptor != nil {
-		ctn, err := dataInterceptor.BeforeCreate(tableId, db, context, data)
+		ctn, err := dataInterceptor.BeforeCreate(tableId, db, context, info, data)
 		if !ctn {
 			if tx, ok := context["tx"].(*sql.Tx); ok {
 				tx.Rollback()
 			}
-			return nil, err
+			return nil, info, err
 		}
 	}
 
@@ -238,32 +239,32 @@ func (this *MySqlDataOperator) Create(tableId string, data map[string]interface{
 		if err != nil {
 			fmt.Println(err)
 			tx.Rollback()
-			return nil, err
+			return nil, info, err
 		}
 	} else {
 		_, err = gosqljson.ExecDb(db, fmt.Sprint("INSERT INTO ", tableId, " (", fields, ") VALUES (", qms, ")"), values...)
 		if err != nil {
 			fmt.Println(err)
-			return nil, err
+			return nil, info, err
 		}
 	}
 
 	if dataInterceptor != nil {
-		err := dataInterceptor.AfterCreate(tableId, db, context, data)
+		err := dataInterceptor.AfterCreate(tableId, db, context, info, data)
 		if err != nil {
 			if tx, ok := context["tx"].(*sql.Tx); ok {
 				tx.Rollback()
 			}
-			return nil, err
+			return nil, info, err
 		}
 	}
 	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
-		err := globalDataInterceptor.AfterCreate(tableId, db, context, data)
+		err := globalDataInterceptor.AfterCreate(tableId, db, context, info, data)
 		if err != nil {
 			if tx, ok := context["tx"].(*sql.Tx); ok {
 				tx.Rollback()
 			}
-			return nil, err
+			return nil, info, err
 		}
 	}
 
@@ -271,30 +272,31 @@ func (this *MySqlDataOperator) Create(tableId string, data map[string]interface{
 		tx.Commit()
 	}
 
-	return data["ID"], err
+	return data["ID"], info, err
 }
-func (this *MySqlDataOperator) Update(tableId string, data map[string]interface{}, context map[string]interface{}) (int64, error) {
+func (this *MySqlDataOperator) Update(tableId string, data map[string]interface{}, context map[string]interface{}) (int64, map[string]interface{}, error) {
 	tableId = normalizeTableId(tableId, this.DbType, this.Ds)
 	context["token_table"] = this.TokenTable
+	info := make(map[string]interface{})
 	db, err := this.GetConn()
 
 	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
-		ctn, err := globalDataInterceptor.BeforeUpdate(tableId, db, context, data)
+		ctn, err := globalDataInterceptor.BeforeUpdate(tableId, db, context, info, data)
 		if !ctn {
 			if tx, ok := context["tx"].(*sql.Tx); ok {
 				tx.Rollback()
 			}
-			return 0, err
+			return 0, info, err
 		}
 	}
 	dataInterceptor := GetDataInterceptor(tableId)
 	if dataInterceptor != nil {
-		ctn, err := dataInterceptor.BeforeUpdate(tableId, db, context, data)
+		ctn, err := dataInterceptor.BeforeUpdate(tableId, db, context, info, data)
 		if !ctn {
 			if tx, ok := context["tx"].(*sql.Tx); ok {
 				tx.Rollback()
 			}
-			return 0, err
+			return 0, info, err
 		}
 	}
 	// Update the record
@@ -304,7 +306,7 @@ func (this *MySqlDataOperator) Update(tableId string, data map[string]interface{
 		if tx, ok := context["tx"].(*sql.Tx); ok {
 			tx.Rollback()
 		}
-		return 0, err
+		return 0, info, err
 	}
 	delete(data, "ID")
 	dataLen := len(data)
@@ -323,32 +325,32 @@ func (this *MySqlDataOperator) Update(tableId string, data map[string]interface{
 		if err != nil {
 			fmt.Println(err)
 			tx.Rollback()
-			return -1, err
+			return -1, info, err
 		}
 	} else {
 		rowsAffected, err = gosqljson.ExecDb(db, fmt.Sprint("UPDATE ", tableId, " SET ", sets, " WHERE ID=?"), values...)
 		if err != nil {
 			fmt.Println(err)
-			return -1, err
+			return -1, info, err
 		}
 	}
 
 	if dataInterceptor != nil {
-		err := dataInterceptor.AfterUpdate(tableId, db, context, data)
+		err := dataInterceptor.AfterUpdate(tableId, db, context, info, data)
 		if err != nil {
 			if tx, ok := context["tx"].(*sql.Tx); ok {
 				tx.Rollback()
 			}
-			return -1, err
+			return -1, info, err
 		}
 	}
 	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
-		err := globalDataInterceptor.AfterUpdate(tableId, db, context, data)
+		err := globalDataInterceptor.AfterUpdate(tableId, db, context, info, data)
 		if err != nil {
 			if tx, ok := context["tx"].(*sql.Tx); ok {
 				tx.Rollback()
 			}
-			return -1, err
+			return -1, info, err
 		}
 	}
 
@@ -356,30 +358,31 @@ func (this *MySqlDataOperator) Update(tableId string, data map[string]interface{
 		tx.Commit()
 	}
 
-	return rowsAffected, err
+	return rowsAffected, info, err
 }
-func (this *MySqlDataOperator) Duplicate(tableId string, id string, context map[string]interface{}) (interface{}, error) {
+func (this *MySqlDataOperator) Duplicate(tableId string, id string, context map[string]interface{}) (interface{}, map[string]interface{}, error) {
 	tableId = normalizeTableId(tableId, this.DbType, this.Ds)
 	context["token_table"] = this.TokenTable
+	info := make(map[string]interface{})
 	db, err := this.GetConn()
 
 	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
-		ctn, err := globalDataInterceptor.BeforeDuplicate(tableId, db, context, id)
+		ctn, err := globalDataInterceptor.BeforeDuplicate(tableId, db, context, info, id)
 		if !ctn {
 			if tx, ok := context["tx"].(*sql.Tx); ok {
 				tx.Rollback()
 			}
-			return nil, err
+			return nil, info, err
 		}
 	}
 	dataInterceptor := GetDataInterceptor(tableId)
 	if dataInterceptor != nil {
-		ctn, err := dataInterceptor.BeforeDuplicate(tableId, db, context, id)
+		ctn, err := dataInterceptor.BeforeDuplicate(tableId, db, context, info, id)
 		if !ctn {
 			if tx, ok := context["tx"].(*sql.Tx); ok {
 				tx.Rollback()
 			}
-			return nil, err
+			return nil, info, err
 		}
 	}
 
@@ -390,7 +393,7 @@ func (this *MySqlDataOperator) Duplicate(tableId string, id string, context map[
 			fmt.Sprint("SELECT * FROM ", tableId, " WHERE ID=?"), id)
 		if data == nil || len(data) != 1 {
 			tx.Rollback()
-			return nil, err
+			return nil, info, err
 		}
 		newData := make(map[string]interface{}, len(data[0]))
 		for k, v := range data[0] {
@@ -420,13 +423,13 @@ func (this *MySqlDataOperator) Duplicate(tableId string, id string, context map[
 		if err != nil {
 			fmt.Println(err)
 			tx.Rollback()
-			return nil, err
+			return nil, info, err
 		}
 	} else {
 		data, err := gosqljson.QueryDbToMap(db, "upper",
 			fmt.Sprint("SELECT * FROM ", tableId, " WHERE ID=?"), id)
 		if data == nil || len(data) != 1 {
-			return nil, err
+			return nil, info, err
 		}
 		newData := make(map[string]interface{}, len(data[0]))
 		for k, v := range data[0] {
@@ -455,25 +458,25 @@ func (this *MySqlDataOperator) Duplicate(tableId string, id string, context map[
 		_, err = gosqljson.ExecDb(db, fmt.Sprint("INSERT INTO ", tableId, " (", fields, ") VALUES (", qms, ")"), newValues...)
 		if err != nil {
 			fmt.Println(err)
-			return nil, err
+			return nil, info, err
 		}
 	}
 	if dataInterceptor != nil {
-		err := dataInterceptor.AfterDuplicate(tableId, db, context, id, newId)
+		err := dataInterceptor.AfterDuplicate(tableId, db, context, info, id, newId)
 		if err != nil {
 			if tx, ok := context["tx"].(*sql.Tx); ok {
 				tx.Rollback()
 			}
-			return nil, err
+			return nil, info, err
 		}
 	}
 	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
-		err := globalDataInterceptor.AfterDuplicate(tableId, db, context, id, newId)
+		err := globalDataInterceptor.AfterDuplicate(tableId, db, context, info, id, newId)
 		if err != nil {
 			if tx, ok := context["tx"].(*sql.Tx); ok {
 				tx.Rollback()
 			}
-			return nil, err
+			return nil, info, err
 		}
 	}
 
@@ -481,30 +484,31 @@ func (this *MySqlDataOperator) Duplicate(tableId string, id string, context map[
 		tx.Commit()
 	}
 
-	return newId, err
+	return newId, info, err
 }
-func (this *MySqlDataOperator) Delete(tableId string, id string, context map[string]interface{}) (int64, error) {
+func (this *MySqlDataOperator) Delete(tableId string, id string, context map[string]interface{}) (int64, map[string]interface{}, error) {
 	tableId = normalizeTableId(tableId, this.DbType, this.Ds)
 	context["token_table"] = this.TokenTable
+	info := make(map[string]interface{})
 	db, err := this.GetConn()
 
 	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
-		ctn, err := globalDataInterceptor.BeforeDelete(tableId, db, context, id)
+		ctn, err := globalDataInterceptor.BeforeDelete(tableId, db, context, info, id)
 		if !ctn {
 			if tx, ok := context["tx"].(*sql.Tx); ok {
 				tx.Rollback()
 			}
-			return 0, err
+			return 0, info, err
 		}
 	}
 	dataInterceptor := GetDataInterceptor(tableId)
 	if dataInterceptor != nil {
-		ctn, err := dataInterceptor.BeforeDelete(tableId, db, context, id)
+		ctn, err := dataInterceptor.BeforeDelete(tableId, db, context, info, id)
 		if !ctn {
 			if tx, ok := context["tx"].(*sql.Tx); ok {
 				tx.Rollback()
 			}
-			return 0, err
+			return 0, info, err
 		}
 	}
 
@@ -516,11 +520,11 @@ func (this *MySqlDataOperator) Delete(tableId string, id string, context map[str
 			if err != nil {
 				fmt.Println(err)
 				tx.Rollback()
-				return -1, err
+				return -1, info, err
 			}
 			if data == nil && len(data) != 1 {
 				tx.Rollback()
-				return -1, errors.New(id + " not found.")
+				return -1, info, errors.New(id + " not found.")
 			} else {
 				context["data"] = data[0]
 			}
@@ -531,7 +535,7 @@ func (this *MySqlDataOperator) Delete(tableId string, id string, context map[str
 		if err != nil {
 			fmt.Println(err)
 			tx.Rollback()
-			return -1, err
+			return -1, info, err
 		}
 	} else {
 		load := context["load"].(bool)
@@ -539,10 +543,10 @@ func (this *MySqlDataOperator) Delete(tableId string, id string, context map[str
 			data, err := gosqljson.QueryDbToMap(db, "upper", "SELECT * FROM "+tableId+" WHERE ID=?", id)
 			if err != nil {
 				fmt.Println(err)
-				return -1, err
+				return -1, info, err
 			}
 			if data == nil && len(data) != 1 {
-				return -1, errors.New(id + " not found.")
+				return -1, info, errors.New(id + " not found.")
 			} else {
 				context["data"] = data[0]
 			}
@@ -552,32 +556,32 @@ func (this *MySqlDataOperator) Delete(tableId string, id string, context map[str
 		rowsAffected, err = gosqljson.ExecDb(db, fmt.Sprint("DELETE FROM ", tableId, " WHERE ID=?"), id)
 		if err != nil {
 			fmt.Println(err)
-			return -1, err
+			return -1, info, err
 		}
 	}
 
 	if dataInterceptor != nil {
-		err := dataInterceptor.AfterDelete(tableId, db, context, id)
+		err := dataInterceptor.AfterDelete(tableId, db, context, info, id)
 		if err != nil {
 			if tx, ok := context["tx"].(*sql.Tx); ok {
 				tx.Rollback()
 			}
-			return -1, err
+			return -1, info, err
 		}
 	}
 	for _, globalDataInterceptor := range GlobalDataInterceptorRegistry {
-		err := globalDataInterceptor.AfterDelete(tableId, db, context, id)
+		err := globalDataInterceptor.AfterDelete(tableId, db, context, info, id)
 		if err != nil {
 			if tx, ok := context["tx"].(*sql.Tx); ok {
 				tx.Rollback()
 			}
-			return -1, err
+			return -1, info, err
 		}
 	}
 	if tx, ok := context["tx"].(*sql.Tx); ok {
 		tx.Commit()
 	}
-	return rowsAffected, err
+	return rowsAffected, info, err
 }
 
 func isSelect(sqlSelect string) bool {

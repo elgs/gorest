@@ -28,6 +28,7 @@ type Gorest struct {
 
 	SessionKey   string
 	FileBasePath string
+	Mode         string
 }
 
 func MakeCookie(key string, m map[string]interface{}) (string, error) {
@@ -255,9 +256,10 @@ func (this *Gorest) Serve() {
 				m["CHECKSUM"] = mdStr
 				m["ID"] = id
 
-				data, err := dbo.Create(tableId, m, context)
+				data, info, err := dbo.Create(tableId, m, context)
 				m = map[string]interface{}{
 					"data": data,
+					"info": info,
 				}
 				if err != nil {
 					m["err"] = err.Error()
@@ -282,9 +284,10 @@ func (this *Gorest) Serve() {
 				for k, v := range m {
 					mUpper[strings.ToUpper(k)] = v
 				}
-				data, err := dbo.Create(tableId, mUpper, context)
+				data, info, err := dbo.Create(tableId, mUpper, context)
 				m = map[string]interface{}{
 					"data": data,
+					"info": info,
 				}
 				if err != nil {
 					m["err"] = err.Error()
@@ -297,10 +300,11 @@ func (this *Gorest) Serve() {
 		case "COPY":
 			// Duplicate a new record.
 			dataId := restData[1]
-			data, err := dbo.Duplicate(tableId, dataId, context)
+			data, info, err := dbo.Duplicate(tableId, dataId, context)
 
 			m := map[string]interface{}{
 				"data": data,
+				"info": info,
 			}
 			if err != nil {
 				m["err"] = err.Error()
@@ -331,9 +335,10 @@ func (this *Gorest) Serve() {
 			for k, v := range m {
 				mUpper[strings.ToUpper(k)] = v
 			}
-			data, err := dbo.Update(tableId, mUpper, context)
+			data, info, err := dbo.Update(tableId, mUpper, context)
 			m = map[string]interface{}{
 				"data": data,
+				"info": info,
 			}
 			if err != nil {
 				m["err"] = err.Error()
@@ -362,10 +367,11 @@ func (this *Gorest) Serve() {
 
 			context["file_base_path"] = this.FileBasePath
 
-			data, err := dbo.Delete(tableId, dataId, context)
+			data, info, err := dbo.Delete(tableId, dataId, context)
 
 			m := map[string]interface{}{
 				"data": data,
+				"info": info,
 			}
 			if err != nil {
 				m["err"] = err.Error()
