@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"code.google.com/p/go-uuid/uuid"
 	"github.com/elgs/exparser"
@@ -215,6 +216,9 @@ func (this *MySqlDataOperator) Create(tableId string, data map[string]interface{
 	// Create the record
 	if data["ID"] == nil {
 		data["ID"] = uuid.New()
+	}
+	if data["SEQ"] == nil {
+		data["SEQ"] = time.Now().Unix()
 	}
 	dataLen := len(data)
 	values := make([]interface{}, 0, dataLen)
