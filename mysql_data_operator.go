@@ -218,7 +218,7 @@ func (this *MySqlDataOperator) Create(tableId string, data map[string]interface{
 		data["ID"] = uuid.New()
 	}
 	if data["SEQ"] == nil {
-		data["SEQ"] = time.Now().Unix()
+		//data["SEQ"] = time.Now().Unix()
 	}
 	dataLen := len(data)
 	values := make([]interface{}, 0, dataLen)
