@@ -102,6 +102,18 @@ func (this *Gorest) Serve() {
 			}
 		}
 		switch r.Method {
+		case "META":
+			m, err := dbo.MetaData(tableId)
+			if err != nil {
+				fmt.Println(err)
+			}
+			jsonData, err := json.Marshal(m)
+			if err != nil {
+				fmt.Println(err)
+			}
+			jsonString := string(jsonData)
+			w.Header().Set("Content-Type", "application/json; charset=utf-8")
+			fmt.Fprint(w, jsonString)
 		case "GET":
 			if len(restData) == 1 ||
 				strings.HasPrefix(restData[1], "?") ||

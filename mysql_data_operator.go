@@ -588,8 +588,20 @@ func (this *MySqlDataOperator) Delete(tableId string, id string, context map[str
 	return rowsAffected, info, err
 }
 
-func isSelect(sqlSelect string) bool {
-	return strings.HasPrefix(strings.ToUpper(sqlSelect), "SELECT ")
+//func isSelect(sqlSelect string) bool {
+//	return strings.HasPrefix(strings.ToUpper(sqlSelect), "SELECT ")
+//}
+
+func (this *MySqlDataOperator) MetaData(resourceId string) ([]map[string]string, error) {
+	db, err := this.GetConn()
+	if err != nil {
+		return nil, err
+	}
+	m, err := gosqljson.QueryDbToMap(db, "upper", "DESCRIBE "+resourceId)
+	if err != nil {
+		return nil, err
+	}
+	return m, nil
 }
 
 func (this *MySqlDataOperator) GetConn() (*sql.DB, error) {

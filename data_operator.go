@@ -22,6 +22,7 @@ type DataOperator interface {
 	Update(resourceId string, data map[string]interface{}, context map[string]interface{}) (int64, map[string]interface{}, error)
 	Duplicate(resourceId string, id string, context map[string]interface{}) (interface{}, map[string]interface{}, error)
 	Delete(resourceId string, id string, context map[string]interface{}) (int64, map[string]interface{}, error)
+	MetaData(resourceId string) ([]map[string]string, error)
 	GetConn() (*sql.DB, error)
 }
 
@@ -48,6 +49,9 @@ func (this *DefaultDataOperator) Duplicate(resourceId string, id string, context
 }
 func (this *DefaultDataOperator) Delete(resourceId string, id string, context map[string]interface{}) (int64, map[string]interface{}, error) {
 	return 0, nil, nil
+}
+func (this *DefaultDataOperator) MetaData(resourceId string) ([]map[string]string, error) {
+	return nil, nil
 }
 func (this *DefaultDataOperator) GetConn() (*sql.DB, error) {
 	return nil, nil
