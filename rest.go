@@ -1,14 +1,9 @@
 package gorest
 
 import (
-	//	"crypto/sha256"
-	//	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	//	"io"
 	"net/http"
-	//	"os"
-	//	"code.google.com/p/go-uuid/uuid"
 	"runtime"
 	"strconv"
 	"strings"
@@ -179,27 +174,8 @@ func (this *Gorest) Serve() {
 
 				field := r.Form["field"]
 
-				//				bin := false
-				//				b := r.FormValue("bin")
-				//				if b == "1" {
-				//					bin = true
-				//				}
-				//				context["bin"] = bin
-
 				data, err := dbo.Load(tableId, dataId, field, context)
 
-				//				if bin && err == nil {
-				//					filePath := context["file_path"].(string)
-				//					fileName := context["file_name"].(string)
-				//					filesize := context["file_size"].(int64)
-				//					file, _ := os.Open(this.FileBasePath + filePath + dataId)
-				//					defer file.Close()
-				//					file.Seek(0, os.SEEK_SET)
-				//					n, _ := io.CopyN(w, file, filesize)
-				//					w.Header().Set("Content-Length", strconv.FormatInt(n, 10))
-				//					w.Header().Set("Content-Type", "application/octet-stream")
-				//					w.Header().Set("Content-disposition", "attachment; filename='"+fileName+"'")
-				//				} else {
 				m := map[string]interface{}{
 					"data": data,
 				}
@@ -210,7 +186,6 @@ func (this *Gorest) Serve() {
 				jsonString := string(jsonData)
 				w.Header().Set("Content-Type", "application/json; charset=utf-8")
 				fmt.Fprint(w, jsonString)
-				//				}
 			}
 		case "POST":
 			// Create the record.
@@ -221,66 +196,6 @@ func (this *Gorest) Serve() {
 			}
 			context["meta"] = meta
 
-			//			bin := false
-			//			b := r.FormValue("bin")
-			//			if b == "1" {
-			//				bin = true
-			//			}
-
-			//			if bin {
-			//				context["meta"] = true
-			//				m := make(map[string]interface{})
-
-			//				file, header, err := r.FormFile("file")
-			//				defer file.Close()
-
-			//				if err != nil {
-			//					fmt.Println(err)
-			//					m["err"] = err.Error()
-			//				}
-
-			//				id := uuid.New()
-			//				filePath := fmt.Sprint(this.FileBasePath, string(os.PathSeparator), id[0:2], string(os.PathSeparator), id)
-			//				os.MkdirAll(fmt.Sprint(this.FileBasePath, string(os.PathSeparator), id[0:2]), os.FileMode(0755))
-			//				out, err := os.Create(filePath)
-			//				if err != nil {
-			//					fmt.Println(err)
-			//					m["err"] = err.Error()
-			//				}
-			//				defer out.Close()
-
-			//				// write the content from POST to the file
-			//				written, err := io.Copy(out, file)
-			//				if err != nil {
-			//					m["err"] = err.Error()
-			//				}
-
-			//				buf := make([]byte, written)
-			//				hash := sha256.New()
-			//				hash.Write(buf)
-			//				md := hash.Sum(nil)
-			//				mdStr := hex.EncodeToString(md)
-
-			//				m["NAME"] = header.Filename
-			//				m["PATH"] = "/" + id[0:2] + "/"
-			//				m["SIZE"] = written
-			//				m["CHECKSUM"] = mdStr
-			//				m["ID"] = id
-
-			//				data, info, err := dbo.Create(tableId, m, context)
-			//				m = map[string]interface{}{
-			//					"data": data,
-			//					"info": info,
-			//				}
-			//				if err != nil {
-			//					m["err"] = err.Error()
-			//				}
-
-			//				jsonData, err := json.Marshal(m)
-			//				jsonString := string(jsonData)
-			//				w.Header().Set("Content-Type", "application/json; charset=utf-8")
-			//				fmt.Fprint(w, jsonString)
-			//			} else {
 			decoder := json.NewDecoder(r.Body)
 			m := make(map[string]interface{})
 			err := decoder.Decode(&m)
@@ -307,7 +222,6 @@ func (this *Gorest) Serve() {
 			jsonString := string(jsonData)
 			w.Header().Set("Content-Type", "application/json; charset=utf-8")
 			fmt.Fprint(w, jsonString)
-			//			}
 		case "COPY":
 			// Duplicate a new record.
 			dataId := restData[1]
@@ -362,21 +276,12 @@ func (this *Gorest) Serve() {
 			// Remove the record.
 			dataId := restData[1]
 
-			//			bin := false
-			//			b := r.FormValue("bin")
-			//			if b == "1" {
-			//				bin = true
-			//			}
-			//			context["bin"] = bin
-
 			load := false
 			l := r.FormValue("load")
 			if l == "1" {
 				load = true
 			}
 			context["load"] = load
-
-			//			context["file_base_path"] = this.FileBasePath
 
 			data, info, err := dbo.Delete(tableId, dataId, context)
 
