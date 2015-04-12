@@ -53,16 +53,51 @@ func (this *Gorest) Serve() {
 		//fmt.Println(urlPath)
 		var dbo DataOperator = nil
 		var urlPrefix string
+		context := make(map[string]interface{})
 		for kUrlPrefix, dataOperator := range dataOperatorRegistry {
 			switch dataOperator := dataOperator.(type) {
 			case DataOperator:
 				if strings.HasPrefix(urlPath, "/"+kUrlPrefix+"/") {
+
+					context["api_token_id"] = r.Header.Get("api_token_id")
+					context["api_token_key"] = r.Header.Get("api_token_key")
+					if len(this.SessionKey) > 0 {
+						cookieUser, err := r.Cookie("user")
+						if cookieUser != nil && err == nil {
+							mapCookies, err := ReadCookie(this.SessionKey, cookieUser.Value)
+							if err == nil {
+								userId := mapCookies["user_id"]
+								tokenKey := mapCookies["token_key"]
+								if userId != nil && tokenKey != nil {
+									context["api_token_id"] = userId
+									context["api_token_key"] = tokenKey
+								}
+							}
+						}
+					}
+
 					dbo = dataOperator.(DataOperator)
 					urlPrefix = kUrlPrefix
 					break
 				}
 			case func(w http.ResponseWriter, r *http.Request):
 				if urlPath == kUrlPrefix {
+
+					if len(this.SessionKey) > 0 {
+						cookieUser, err := r.Cookie("user")
+						if cookieUser != nil && err == nil {
+							mapCookies, err := ReadCookie(this.SessionKey, cookieUser.Value)
+							if err == nil {
+								userId := mapCookies["user_id"]
+								tokenKey := mapCookies["token_key"]
+								if userId != nil && tokenKey != nil {
+									r.Header.Set("api_token_id", userId.(string))
+									r.Header.Set("api_token_key", tokenKey.(string))
+								}
+							}
+						}
+					}
+
 					dataOperator(w, r)
 					return
 				}
@@ -79,23 +114,6 @@ func (this *Gorest) Serve() {
 		restData := strings.Split(restUrl, "/")
 		tableId := restData[0]
 
-		context := make(map[string]interface{})
-		context["api_token_id"] = r.Header.Get("api_token_id")
-		context["api_token_key"] = r.Header.Get("api_token_key")
-		if len(this.SessionKey) > 0 {
-			cookieUser, err := r.Cookie("user")
-			if cookieUser != nil && err == nil {
-				mapCookies, err := ReadCookie(this.SessionKey, cookieUser.Value)
-				if err == nil {
-					userId := mapCookies["user_id"]
-					tokenKey := mapCookies["token_key"]
-					if userId != nil && tokenKey != nil {
-						context["api_token_id"] = userId
-						context["api_token_key"] = tokenKey
-					}
-				}
-			}
-		}
 		switch r.Method {
 		case "META":
 			m, err := dbo.MetaData(tableId)
