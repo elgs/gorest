@@ -214,7 +214,7 @@ func (this *MySqlDataOperator) Create(tableId string, data map[string]interface{
 	}
 
 	// Create the record
-	if data["ID"] == nil {
+	if data["ID"] == nil || data["ID"].(string) == "" {
 		data["ID"] = uuid.New()
 	}
 	if data["SEQ"] == nil {
