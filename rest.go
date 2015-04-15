@@ -141,9 +141,6 @@ func (this *Gorest) Serve() {
 				s := r.FormValue("start")
 				l := r.FormValue("limit")
 				c := r.FormValue("case")
-				if c != "upper" && c != "camel" {
-					c = "lower"
-				}
 				context["case"] = c
 				includeTotal := false
 				array := false
@@ -185,9 +182,6 @@ func (this *Gorest) Serve() {
 				// Load record by id.
 				dataId := restData[1]
 				c := r.FormValue("case")
-				if c != "upper" && c != "camel" {
-					c = "lower"
-				}
 				context["case"] = c
 
 				field := r.Form["field"]
