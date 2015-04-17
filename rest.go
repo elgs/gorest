@@ -163,7 +163,13 @@ func (this *Gorest) Serve() {
 				var data interface{}
 				var total int64 = -1
 				if array {
-					data, total, err = dbo.ListArray(tableId, field, filter, sort, group, start, limit, includeTotal, context)
+					var headers []string
+					var dataArray [][]string
+					headers, dataArray, total, err = dbo.ListArray(tableId, field, filter, sort, group, start, limit, includeTotal, context)
+					data = map[string]interface{}{
+						"headers": headers,
+						"data":    dataArray,
+					}
 				} else {
 					data, total, err = dbo.ListMap(tableId, field, filter, sort, group, start, limit, includeTotal, context)
 				}

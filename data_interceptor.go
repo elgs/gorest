@@ -35,7 +35,7 @@ type DataInterceptor interface {
 	BeforeListMap(resourceId string, db *sql.DB, field []string, context map[string]interface{}, filter *string, sort *string, group *string, start int64, limit int64, includeTotal bool) (bool, error)
 	AfterListMap(resourceId string, db *sql.DB, field []string, context map[string]interface{}, data []map[string]string, total int64) error
 	BeforeListArray(resourceId string, db *sql.DB, field []string, context map[string]interface{}, filter *string, sort *string, group *string, start int64, limit int64, includeTotal bool) (bool, error)
-	AfterListArray(resourceId string, db *sql.DB, field []string, context map[string]interface{}, data [][]string, total int64) error
+	AfterListArray(resourceId string, db *sql.DB, field []string, context map[string]interface{}, headers []string, data [][]string, total int64) error
 }
 
 type DefaultDataInterceptor struct{}
@@ -79,6 +79,6 @@ func (this *DefaultDataInterceptor) AfterListMap(resourceId string, db *sql.DB, 
 func (this *DefaultDataInterceptor) BeforeListArray(resourceId string, db *sql.DB, field []string, context map[string]interface{}, filter *string, sort *string, group *string, start int64, limit int64, includeTotal bool) (bool, error) {
 	return true, nil
 }
-func (this *DefaultDataInterceptor) AfterListArray(resourceId string, db *sql.DB, field []string, context map[string]interface{}, data [][]string, total int64) error {
+func (this *DefaultDataInterceptor) AfterListArray(resourceId string, db *sql.DB, field []string, context map[string]interface{}, headers []string, data [][]string, total int64) error {
 	return nil
 }
