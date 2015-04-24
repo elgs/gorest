@@ -264,6 +264,10 @@ func (this *Gorest) Serve() {
 				meta = true
 			}
 			context["meta"] = meta
+			dataId := ""
+			if len(restData) >= 2 {
+				dataId = restData[1]
+			}
 			decoder := json.NewDecoder(r.Body)
 			m := make(map[string]interface{})
 			err := decoder.Decode(&m)
@@ -277,6 +281,9 @@ func (this *Gorest) Serve() {
 			mUpper := make(map[string]interface{})
 			for k, v := range m {
 				mUpper[strings.ToUpper(k)] = v
+			}
+			if dataId != "" {
+				mUpper["ID"] = dataId
 			}
 			data, info, err := dbo.Update(tableId, mUpper, context)
 			m = map[string]interface{}{
