@@ -321,6 +321,7 @@ func (this *Gorest) Serve() {
 			jsonString := string(jsonData)
 			w.Header().Set("Content-Type", "application/json; charset=utf-8")
 			fmt.Fprint(w, jsonString)
+		case "OPTIONS":
 		default:
 			// Give an error message.
 		}
