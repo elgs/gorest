@@ -81,6 +81,9 @@ func (this *Gorest) Serve() {
 					break
 				}
 			case func(w http.ResponseWriter, r *http.Request):
+				if r.Method == "OPTIONS" {
+					continue
+				}
 				if urlPath == kUrlPrefix {
 
 					if len(this.SessionKey) > 0 {
