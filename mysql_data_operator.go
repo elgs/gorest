@@ -9,8 +9,8 @@ import (
 	"strings"
 	//"time"
 
-	"code.google.com/p/go-uuid/uuid"
 	"github.com/elgs/exparser"
+	"github.com/elgs/go-uuid/uuid"
 	"github.com/elgs/gosqljson"
 )
 
