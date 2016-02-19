@@ -58,9 +58,16 @@ func (this *Gorest) Serve() {
 			switch dataOperator := dataOperator.(type) {
 			case DataOperator:
 				if strings.HasPrefix(urlPath, "/"+kUrlPrefix+"/") {
-
-					context["api_token_id"] = r.Header.Get("api_token_id")
-					context["api_token_key"] = r.Header.Get("api_token_key")
+					apiTokenId := r.Header.Get("api_token_id")
+					if apiTokenId == "" {
+						apiTokenId = r.Header.Get("Api_token_id")
+					}
+					context["api_token_id"] = apiTokenId
+					apiTokenKey := r.Header.Get("api_token_key")
+					if apiTokenKey == "" {
+						apiTokenKey = r.Header.Get("Api_token_key")
+					}
+					context["api_token_key"] = apiTokenKey
 					if len(this.SessionKey) > 0 {
 						cookieUser, err := r.Cookie("user")
 						if cookieUser != nil && err == nil {
